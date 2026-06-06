@@ -378,11 +378,25 @@ const DRUM_TO_MINECRAFT = {35:2,36:2,38:3,40:3,41:4,43:4,45:4,47:4,48:4,42:4,44:
 const INSTRUMENT_SOUND_MAP = {0:"harp",1:"bass",2:"bd",3:"snare",4:"hat",5:"guitar",6:"flute",7:"bell",8:"chime",9:"xylophone",10:"iron_xylophone",11:"cow_bell",12:"didgeridoo",13:"bit",14:"banjo",15:"pling"};
 const PERCUSSION_INSTRUMENTS = [2,3,4];
 function getSoundFileName(instrumentId, harpOnly) { return (harpOnly && !PERCUSSION_INSTRUMENTS.includes(instrumentId)) ? "harp" : (INSTRUMENT_SOUND_MAP[instrumentId] || "harp"); }
-
 // 预览播放器
 let previewContext = null, previewNotes = [], previewSongLength = 0, previewInterval = null, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 0.25, previewSpeed = 1.0, activeSources = [], isPlaying = false;
-const INSTRUMENT_WAVE_TYPE = { "harp":"sine","bass":"sawtooth","guitar":"triangle","flute":"sine","bell":"sine","chime":"sine","xylophone":"triangle","iron_xylophone":"triangle","bit":"square","banjo":"triangle","pling":"sine","bd":"sine","snare":"triangle","cow_bell":"square","didgeridoo":"sawtooth" };
-
+const INSTRUMENT_WAVE_TYPE = { 
+    "harp":"sine", 
+    "bass":"sawtooth", 
+    "guitar":"triangle", 
+    "flute":"sine", 
+    "bell":"sine", 
+    "chime":"sine", 
+    "xylophone":"triangle", 
+    "iron_xylophone":"triangle", 
+    "bit":"square", 
+    "pling":"sine",
+    "bd":"sine", 
+    "snare":"triangle", 
+    "cow_bell":"square", 
+    "didgeridoo":"sawtooth",
+    "banjo":"triangle"
+};
 function playHatSound(volume, duration=0.25) {
     const hatVolume = volume * 0.15;
     const bufferSize = previewContext.sampleRate * duration;
@@ -398,12 +412,62 @@ function playHatSound(volume, duration=0.25) {
     setTimeout(()=>{const idx=activeSources.indexOf(source); if(idx>-1) activeSources.splice(idx,1);}, duration*1000+100);
 }
 function playBdSound(volume) {
-    const now=previewContext.currentTime, osc=previewContext.createOscillator(), gain=previewContext.createGain();
-    osc.type="sine"; osc.frequency.value=80; osc.frequency.exponentialRampToValueAtTime(40, now+0.2);
-    gain.gain.setValueAtTime(volume*0.6, now); gain.gain.exponentialRampToValueAtTime(0.001, now+0.4);
-    osc.connect(gain); gain.connect(previewContext.destination); osc.start(); osc.stop(now+0.4);
-    activeSources.push(osc);
-    setTimeout(()=>{const idx=activeSources.indexOf(osc); if(idx>-1) activeSources.splice(idx,1);}, 500);
+    const now = previewContext.currentTime;
+    const duration = 0.4;
+    const noiseDuration = 0.08;
+    const noiseBufferSize = previewContext.sampleRate * noiseDuration;
+    const noiseBuffer = previewContext.createBuffer(1, noiseBufferSize, previewContext.sampleRate);
+    const noiseData = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < noiseBufferSize; i++) {
+        const envelope = Math.exp(-i / (previewContext.sampleRate * 0.01));
+        noiseData[i] = (Math.random() * 2 - 1) * envelope;
+    }  
+    const noiseSource = previewContext.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+    const bandpass = previewContext.createBiquadFilter();
+    bandpass.type = "bandpass";
+    bandpass.frequency.value = 1200;
+    bandpass.Q.value = 1.5;
+    const noiseGain = previewContext.createGain();
+    noiseGain.gain.value = volume * 0.35;
+    noiseSource.connect(bandpass);
+    bandpass.connect(noiseGain);
+    noiseGain.connect(previewContext.destination);
+    noiseSource.start();
+    noiseSource.stop(now + noiseDuration);
+    const osc = previewContext.createOscillator();
+    const gain = previewContext.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(100, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + duration);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(volume * 0.7, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    
+    osc.connect(gain);
+    gain.connect(previewContext.destination);
+    osc.start();
+    osc.stop(now + duration);
+    const clickOsc = previewContext.createOscillator();
+    const clickGain = previewContext.createGain();
+    clickOsc.type = "triangle";
+    clickOsc.frequency.setValueAtTime(800, now);
+    clickOsc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+    clickGain.gain.setValueAtTime(volume * 0.15, now);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    clickOsc.connect(clickGain);
+    clickGain.connect(previewContext.destination);
+    clickOsc.start();
+    clickOsc.stop(now + 0.08);
+    activeSources.push(noiseSource, osc, clickOsc);
+    setTimeout(() => {
+        const idx1 = activeSources.indexOf(noiseSource);
+        const idx2 = activeSources.indexOf(osc);
+        const idx3 = activeSources.indexOf(clickOsc);
+        if (idx1 > -1) activeSources.splice(idx1, 1);
+        if (idx2 > -1) activeSources.splice(idx2, 1);
+        if (idx3 > -1) activeSources.splice(idx3, 1);
+    }, duration * 1000 + 100);
 }
 function playSnareSound(volume) {
     const now=previewContext.currentTime;
@@ -419,6 +483,82 @@ function playSnareSound(volume) {
     activeSources.push(noiseSource, osc);
     setTimeout(()=>{activeSources=activeSources.filter(s=>s!==noiseSource&&s!==osc);},300);
 }
+function applyInstrumentFilter(osc, gain, soundName, freq, volume, now) {
+    switch(soundName) {
+        case "banjo":
+            const bandpass = previewContext.createBiquadFilter();
+            bandpass.type = "bandpass";
+            bandpass.frequency.value = 2200;
+            bandpass.Q.value = 2.5;
+            osc.connect(bandpass);
+            bandpass.connect(gain);
+            const harmonicOsc = previewContext.createOscillator();
+            harmonicOsc.type = "triangle";
+            harmonicOsc.frequency.value = freq * 2;
+            const harmonicGain = previewContext.createGain();
+            harmonicGain.gain.setValueAtTime(0, now);
+            harmonicGain.gain.linearRampToValueAtTime(volume * 0.25, now + 0.01);
+            harmonicGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+            harmonicOsc.connect(harmonicGain);
+            harmonicGain.connect(gain);
+            harmonicOsc.start();
+            harmonicOsc.stop(now + 0.5);
+            activeSources.push(harmonicOsc);
+            const clickBuffer = previewContext.createBuffer(1, previewContext.sampleRate * 0.02, previewContext.sampleRate);
+            const clickData = clickBuffer.getChannelData(0);
+            for (let i = 0; i < clickBuffer.length; i++) {
+                clickData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (previewContext.sampleRate * 0.005));
+            }
+            const clickSource = previewContext.createBufferSource();
+            clickSource.buffer = clickBuffer;
+            const clickFilter = previewContext.createBiquadFilter();
+            clickFilter.type = "bandpass";
+            clickFilter.frequency.value = 3000;
+            const clickGain = previewContext.createGain();
+            clickGain.gain.value = volume * 0.2;
+            clickSource.connect(clickFilter);
+            clickFilter.connect(clickGain);
+            clickGain.connect(previewContext.destination);
+            clickSource.start();
+            clickSource.stop(now + 0.02);
+            activeSources.push(clickSource);
+            return { osc, gain };
+            
+        case "pling":
+            const lowpass = previewContext.createBiquadFilter();
+            lowpass.type = "lowpass";
+            lowpass.frequency.value = 3000;
+            lowpass.Q.value = 1.5;
+            
+            osc.connect(lowpass);
+            lowpass.connect(gain);
+            const lfo = previewContext.createOscillator();
+            lfo.type = "sine";
+            lfo.frequency.value = 6;
+            const lfoGain = previewContext.createGain();
+            lfoGain.gain.value = 5;
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start();
+            lfo.stop(now + 0.8);
+            activeSources.push(lfo);
+            const brightOsc = previewContext.createOscillator();
+            brightOsc.type = "sine";
+            brightOsc.frequency.value = freq * 2;
+            const brightGain = previewContext.createGain();
+            brightGain.gain.setValueAtTime(0, now);
+            brightGain.gain.linearRampToValueAtTime(volume * 0.3, now + 0.02);
+            brightGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+            brightOsc.connect(brightGain);
+            brightGain.connect(gain);
+            brightOsc.start();
+            brightOsc.stop(now + 0.6);
+            activeSources.push(brightOsc);
+            return { osc, gain };
+        default:
+            return { osc, gain };
+    }
+}
 function playNoteSynthesizer(note) {
     const soundName = getSoundFileName(note.instrument, previewHarpOnly);
     const shiftedKey = note.key + 12;
@@ -426,16 +566,108 @@ function playNoteSynthesizer(note) {
     const velocity = Math.min(1, Math.max(0.3, note.velocity/100));
     const volume = previewVolume * velocity;
     if(soundName==="hat"){ playHatSound(volume,0.25); return; }
-    if(soundName==="bd"){ playBdSound(volume); return; }
+    if(soundName==="bd"){ playBdSound(volume * 5.00); return; }
     if(soundName==="snare"){ playSnareSound(volume); return; }
-    if(freq<20 || freq>8000) return;
-    const osc=previewContext.createOscillator(), gain=previewContext.createGain();
-    osc.type=INSTRUMENT_WAVE_TYPE[soundName]||"sine"; osc.frequency.value=freq;
-    const now=previewContext.currentTime;
-    gain.gain.setValueAtTime(0,now); gain.gain.linearRampToValueAtTime(volume*0.6,now+0.01); gain.gain.exponentialRampToValueAtTime(0.0001,now+0.6);
-    osc.connect(gain); gain.connect(previewContext.destination); osc.start(); osc.stop(now+0.6);
+    if(freq<20 || freq>16000) return;
+    const osc = previewContext.createOscillator();
+    const gain = previewContext.createGain();
+    const now = previewContext.currentTime;
+    osc.type = INSTRUMENT_WAVE_TYPE[soundName] || "sine";
+    osc.frequency.value = freq;
+    let output = gain;
+    let isBanjo = false;
+    let isPling = false;
+    if (soundName === "banjo") {
+        isBanjo = true;
+        osc.type = "triangle";
+        const bandpass = previewContext.createBiquadFilter();
+        bandpass.type = "bandpass";
+        bandpass.frequency.value = 2200;
+        bandpass.Q.value = 2.5;
+        osc.connect(bandpass);
+        bandpass.connect(gain);
+        const harmonicOsc = previewContext.createOscillator();
+        harmonicOsc.type = "triangle";
+        harmonicOsc.frequency.value = freq * 2;
+        const harmonicGain = previewContext.createGain();
+        harmonicGain.gain.setValueAtTime(0, now);
+        harmonicGain.gain.linearRampToValueAtTime(volume * 0.5, now + 0.01);
+        harmonicGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        harmonicOsc.connect(harmonicGain);
+        harmonicGain.connect(gain);
+        harmonicOsc.start();
+        harmonicOsc.stop(now + 0.5);
+        activeSources.push(harmonicOsc);
+        const clickBuffer = previewContext.createBuffer(1, previewContext.sampleRate * 0.02, previewContext.sampleRate);
+        const clickData = clickBuffer.getChannelData(0);
+        for (let i = 0; i < clickBuffer.length; i++) {
+            clickData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (previewContext.sampleRate * 0.005));
+        }
+        const clickSource = previewContext.createBufferSource();
+        clickSource.buffer = clickBuffer;
+        const clickFilter = previewContext.createBiquadFilter();
+        clickFilter.type = "bandpass";
+        clickFilter.frequency.value = 3000;
+        const clickGain = previewContext.createGain();
+        clickGain.gain.value = volume * 0.4;
+        clickSource.connect(clickFilter);
+        clickFilter.connect(clickGain);
+        clickGain.connect(previewContext.destination);
+        clickSource.start();
+        clickSource.stop(now + 0.02);
+        activeSources.push(clickSource);
+        output = gain; 
+    } else if (soundName === "pling") {
+        isPling = true;
+        osc.type = "sine";
+        const lowpass = previewContext.createBiquadFilter();
+        lowpass.type = "lowpass";
+        lowpass.frequency.value = 3000;
+        lowpass.Q.value = 1.5;
+        osc.connect(lowpass);
+        lowpass.connect(gain);
+        const lfo = previewContext.createOscillator();
+        lfo.type = "sine";
+        lfo.frequency.value = 6;
+        const lfoGain = previewContext.createGain();
+        lfoGain.gain.value = 5;
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+        lfo.start();
+        lfo.stop(now + 0.8);
+        activeSources.push(lfo);
+        const brightOsc = previewContext.createOscillator();
+        brightOsc.type = "sine";
+        brightOsc.frequency.value = freq * 2;
+        const brightGain = previewContext.createGain();
+        brightGain.gain.setValueAtTime(0, now);
+        brightGain.gain.linearRampToValueAtTime(volume * 0.35, now + 0.02);
+        brightGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        brightOsc.connect(brightGain);
+        brightGain.connect(gain);
+        brightOsc.start();
+        brightOsc.stop(now + 0.6);
+        activeSources.push(brightOsc);
+        output = gain; 
+    } else {
+        osc.connect(gain);
+        output = gain;
+    }
+    let volumeMultiplier = 0.6;
+    if (soundName === "banjo") volumeMultiplier = 4.00;
+    if (soundName === "pling") volumeMultiplier = 1.20;
+    const finalVolume = volume * volumeMultiplier;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(finalVolume, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+    output.connect(previewContext.destination);
+    osc.start();
+    osc.stop(now + 0.6);
     activeSources.push(osc);
-    setTimeout(()=>{const idx=activeSources.indexOf(osc); if(idx>-1) activeSources.splice(idx,1);},700);
+    setTimeout(() => {
+        const idx = activeSources.indexOf(osc);
+        if (idx > -1) activeSources.splice(idx, 1);
+    }, 700);
 }
 function playNoteAtTick(tick){
     previewNotes.filter(n=>n.tick===tick).forEach(n=>playNoteSynthesizer(n));
