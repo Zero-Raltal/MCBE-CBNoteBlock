@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Minecraft BE1.19+音乐命令方块生成器</title>
+    <style>
+        body{background:#1a2a32;font-family:monospace;padding:20px;color:#eee}
+        .box{background:#1e2f38;padding:15px;margin-bottom:20px;border:0}
+        button{background:#3e8e62;color:white;border:none;padding:8px 16px;margin:5px;cursor:pointer;border:0}
+        button:disabled{opacity:0.5;cursor:not-allowed}
+        pre{background:#021016;padding:10px;overflow-x:auto;font-size:12px;white-space:pre-wrap;word-break:break-all}
+        .cmd-block{background:#021016;border-left:4px solid #57b984;margin:8px 0;padding:8px;font-size:12px;transition: border-left-color 0.2s ease}
+        .cmd-block.copied{border-left-color: #666666}
+        .cmd-block.playing{background:#1a3a2a;border-left-color: #ffaa44}
+        input{background:#2a3d3f;border:1px solid #5f8b78;color:white;padding:6px}
+        .stats{background:#071016;padding:8px;margin-top:10px;font-size:12px}
+        .note-grid{max-height:400px;overflow-y:auto}
+        .error{color:#ff6655}
+        .success{color:#57b984}
+        .mode-control{background:#0a151a;padding:10px;border:0;margin-bottom:15px}
+        .mode-control label{margin-right:20px}
+        .seq-num{display:inline-block;background:#2e5f4b;padding:2px 8px;margin-right:10px;font-size:11px}
+        .copy-btn{background:#2d5f55;border:none;padding:4px 12px;cursor:pointer;transition: background 0.2s ease}
+        .copy-btn.copied{background:#555555}
+        .cmd-header{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+        .preview-controls{background:#0a151a;padding:10px;border:0;margin-bottom:15px;display:flex;align-items:center;flex-wrap:wrap;gap:15px}
+        .preview-controls button{background:#3e5f6b}
+        .preview-controls button.running{background:#8a4f3c}
+        .progress-bar{flex:1;min-width:200px;height:8px;background:#2a3d3f;overflow:hidden}
+        .progress-fill{width:0%;height:100%;background:#57b984;transition:width 0.05s linear}
+        .tick-display{font-size:12px;color:#8abf9a;min-width:100px}
+        .speed-slider{width:150px}
+        .speed-value{font-size:12px;min-width:45px}
+    </style>
+</head>
+<body>
+<div style="max-width:1400px;margin:0 auto">
+    <h2>Minecraft BE1.19+音乐命令方块生成器</h2>
+    
+    <div class="box">
+        <input type="file" id="fileInput" accept=".nbs,.mid">
+        
+        <div class="preview-controls">
+            <span>预览播放:</span>
+            <button id="playBtn" disabled>▶ 播放</button>
+            <button id="stopBtn" disabled>⏹ 停止</button>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span class="tick-display" id="tickDisplay">Tick: 0 / 0</span>
+            <span>速度:</span>
+            <input type="range" id="previewSpeed" min="0.1" max="5.00" step="0.1" value="1.00" class="speed-slider">
+            <span class="speed-value" id="speedValue">1.00x</span>
+        </div>
+        
+        <div class="mode-control">
+            <label>音色模式:</label>
+            <label><input type="radio" name="soundMode" value="multi" checked> 乐器映射 </label>
+            <label><input type="radio" name="soundMode" value="harp"> Harp Only </label>
+        </div>
+        
+        <div class="shift-control">
+            <label>八度移调 (仅影响指令生成): </label>
+            <select id="octaveShift">
+                <option value="0" selected>+0 八度 </option>
+                <option value="1">+1 八度</option>
+                <option value="2">+2 八度</option>
+                <option value="3">+3 八度</option>
+                <option value="4">+4 八度</option>
+            </select>
+        </div>
+        
+        <div class="stats" id="stats">等待上传文件...</div>
+    </div>
+    <div class="box">
+        <h4>1.聊天栏输入</h4>
+		<pre>/scoreboard objectives add t dummy</pre>
+		
+        <h4>2.循环命令方块</h4>
+        <div id="cycleCmd"><pre>execute as @a[scores={t=-1..}] run scoreboard players add @s t 1</pre></div>
+		
+        <h4>3.脉冲命令方块(重置播放进度)</h4>
+        <pre>scoreboard players set @a t 0</pre>
+		
+        <h4>4.连锁命令方块</h4>
+        <div id="chainList" class="note-grid"><pre>尚未解析</pre></div>
+        
+        <button id="copyCycle">复制循环指令</button>
+        <button id="copyAll">复制全部连锁指令</button>
+        <button id="download">导出为文件</button>
+    </div>
+</div>
+
+<script>
+// MIDI解析器
+class UltimateMIDIParser {
+    static parse(buffer) {
+        const u8 = new Uint8Array(buffer);
+        const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+        if (u8[0]!==0x4D||u8[1]!==0x54||u8[2]!==0x68||u8[3]!==0x64) throw new Error('Missing MThd');
+        const headerLen = dv.getUint32(4, false);
+        const format = dv.getUint16(8, false);
+        const trackCount = dv.getUint16(10, false);
+        const timeDivision = dv.getUint16(12, false);
+        let tracks = [];
+        let tempoEvents = [];
+        let offset = 14;
+        for (let t=0; t<trackCount; t++) {
+            if (u8[offset]!==0x4D||u8[offset+1]!==0x54||u8[offset+2]!==0x72||u8[offset+3]!==0x6B) 
+                throw new Error(`MTrk missing at track ${t}`);
+            const trackLen = dv.getUint32(offset+4, false);
+            const start = offset+8;
+            const end = start+trackLen;
+            let ptr = start;
+            let events = [];
+            let absTick = 0;
+            let runningStatus = null;
+            while (ptr < end) {
+                let delta=0, shift=0, b;
+                do { b = u8[ptr++]; delta = (delta<<7) | (b&0x7F); shift+=7; } while (b&0x80);
+                absTick += delta;
+                if (ptr>=end) break;
+                let status = u8[ptr];
+                if (status < 0x80) {
+                    if (runningStatus===null) throw new Error('Running status without previous');
+                    status = runningStatus;
+                } else { ptr++; runningStatus = status; }
+                if (status === 0xFF) {
+                    const metaType = u8[ptr++];
+                    const len = this._readVarInt(u8, ptr);
+                    ptr += len.len;
+                    ptr += len.value;
+                    if (metaType === 0x51) {
+                        const dataPtr = ptr - len.value;
+                        let tempo = 0;
+                        for (let i=0; i<3; i++) tempo = (tempo<<8) | u8[dataPtr+i];
+                        tempoEvents.push({ tick: absTick, tempo });
+                    }
+                    continue;
+                }
+                if (status === 0xF0 || status === 0xF7) {
+                    const len = this._readVarInt(u8, ptr);
+                    ptr += len.len + len.value;
+                    continue;
+                }
+                if (status >= 0x80 && status < 0xF0) {
+                    const type = status>>4;
+                    const channel = status&0x0F;
+                    if (type===0x8||type===0x9) {
+                        const note = u8[ptr++];
+                        const vel = u8[ptr++];
+                        if (type===0x9 && vel>0) events.push({ tick: absTick, type: 'noteOn', noteNumber: note, velocity: vel, channel });
+                        else events.push({ tick: absTick, type: 'noteOff', noteNumber: note, velocity: vel, channel });
+                    } else if (type===0xA) ptr+=2;
+                    else if (type===0xB) ptr+=2;
+                    else if (type===0xC) { ptr+=1; }
+                    else if (type===0xD) ptr+=1;
+                    else if (type===0xE) ptr+=2;
+                } else ptr++;
+            }
+            tracks.push(events);
+            offset = end;
+        }
+        return { format, trackCount, timeDivision, tracks, tempoEvents };
+    }
+    
+    static _readVarInt(u8, offset) {
+        let val=0, len=0, b;
+        do { b = u8[offset+len]; val = (val<<7) | (b&0x7F); len++; } while (b&0x80);
+        return { value: val, len };
+    }
+}
+
+function midiTickToSeconds(tick, division, tempoEvents) {
+    let currentTempo = 500000;
+    let lastTempoTick = 0;
+    for (const te of tempoEvents) {
+        if (te.tick <= tick) {
+            currentTempo = te.tempo;
+            lastTempoTick = te.tick;
+        } else break;
+    }
+    const ticksSinceTempo = tick - lastTempoTick;
+    const secondsPerTick = currentTempo / 1000000 / division;
+    let totalSeconds = 0;
+    let prevTick = 0;
+    let prevTempo = 500000;
+    for (const te of tempoEvents) {
+        if (te.tick > tick) break;
+        const ticksInSegment = te.tick - prevTick;
+        totalSeconds += ticksInSegment * (prevTempo / 1000000 / division);
+        prevTick = te.tick;
+        prevTempo = te.tempo;
+    }
+    totalSeconds += ticksSinceTempo * secondsPerTick;
+    return totalSeconds;
+}
+
+function parseMIDI(arrayBuffer) {
+    const parsed = UltimateMIDIParser.parse(arrayBuffer);
+    const timeDivision = parsed.timeDivision;
+    const tempoEvents = parsed.tempoEvents;
+    const tracks = parsed.tracks;
+    
+    const allNotes = [];
+    let currentInstrument = 0;
+    let allEvents = [];
+    for (const track of tracks) allEvents.push(...track);
+    allEvents.sort((a, b) => a.tick - b.tick);
+    
+    const activeNotes = new Map();
+    
+    for (const event of allEvents) {
+        if (event.type === 'noteOn') {
+            const key = `${event.channel}_${event.noteNumber}`;
+            activeNotes.set(key, { tick: event.tick, velocity: event.velocity, channel: event.channel, instrument: currentInstrument });
+        } else if (event.type === 'noteOff') {
+            const key = `${event.channel}_${event.noteNumber}`;
+            const noteOn = activeNotes.get(key);
+            if (noteOn) {
+                const startSec = midiTickToSeconds(noteOn.tick, timeDivision, tempoEvents);
+                const nbsTick = Math.round(startSec * 20);
+                let instrument;
+                if (noteOn.channel === 9) instrument = DRUM_TO_MINECRAFT[event.noteNumber] || 4;
+                else instrument = GM_TO_MINECRAFT[noteOn.instrument] || 0;
+                allNotes.push({
+                    tick: nbsTick,
+                    key: event.noteNumber - 12,
+                    velocity: noteOn.velocity,
+                    instrument: instrument
+                });
+                activeNotes.delete(key);
+            }
+        }
+    }
+    
+    allNotes.sort((a, b) => a.tick - b.tick);
+    const maxTick = allNotes.length > 0 ? allNotes[allNotes.length - 1].tick + 20 : 0;
+    return { notes: allNotes, songLength: maxTick, songName: "MIDI导入" };
+}
+
+// NBS解析器
+function parseNBS(arrayBuffer) {
+    const view = new DataView(arrayBuffer);
+    let offset = 0;
+    const notes = [];
+    let version = 0;
+    let songLength = 0;
+    let songLayers = 0;
+    let tempo = 10.0;
+    let songName = "";
+    
+    function readByte() { const v = view.getInt8(offset); offset += 1; return v; }
+    function readUByte() { const v = view.getUint8(offset); offset += 1; return v; }
+    function readShort() { const v = view.getInt16(offset, true); offset += 2; return v; }
+    function readUShort() { const v = view.getUint16(offset, true); offset += 2; return v; }
+    function readInt() { const v = view.getInt32(offset, true); offset += 4; return v; }
+    function readString() {
+        const len = readInt();
+        if (len <= 0 || len > 10000) return '';
+        let str = '';
+        for (let i = 0; i < len; i++) str += String.fromCharCode(readUByte());
+        return str;
+    }
+    
+    function* jump() {
+        let value = -1;
+        while (true) {
+            const jumpVal = readShort();
+            if (jumpVal === 0) break;
+            value += jumpVal;
+            yield value;
+        }
+    }
+    
+    try {
+        const initialSongLength = readShort();
+        if (initialSongLength === 0) version = readByte();
+        else version = 0;
+        const defaultInstruments = version > 0 ? readByte() : 10;
+        songLength = version >= 3 ? readShort() : initialSongLength;
+        songLayers = readShort();
+        songName = readString();
+        const songAuthor = readString();
+        const originalAuthor = readString();
+        const description = readString();
+        tempo = readShort() / 100.0;
+        readByte(); readByte(); readByte();
+        readInt(); readInt(); readInt(); readInt();
+        readInt();
+        readString();
+        if (version >= 4) { readByte(); readByte(); readShort(); }
+        
+        for (const currentTick of jump()) {
+            for (const currentLayer of jump()) {
+                const instrument = readByte();
+                const key = readByte();
+                const velocity = version >= 4 ? readByte() : 100;
+                const panningRaw = version >= 4 ? readByte() : 100;
+                const panning = panningRaw - 100;
+                const pitch = version >= 4 ? readShort() : 0;
+                if (key >= 0 && key <= 87) {
+                    notes.push({ tick: currentTick, layer: currentLayer, instrument: instrument, key: key, velocity: velocity, panning: panning, pitch: pitch });
+                }
+            }
+        }
+        return { notes, songLength, tempo, songName, songAuthor, version };
+    } catch (e) {
+        console.error("解析出错:", e);
+        return { notes: [], songLength: 0, tempo: 0 };
+    }
+}
+
+// 乐器映射
+const GM_TO_MINECRAFT = {
+    0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:9,9:7,10:7,11:8,12:7,13:9,14:8,15:7,
+    16:0,17:0,18:0,19:0,20:0,24:5,25:5,26:5,27:5,28:5,29:5,30:5,31:5,
+    32:1,33:1,34:1,35:1,36:1,37:1,38:1,39:1,40:0,41:0,42:0,43:0,44:0,
+    48:0,49:0,50:0,51:0,52:0,53:0,54:0,55:0,56:0,57:0,58:0,59:0,60:0,61:0,62:0,63:0,
+    64:6,65:6,66:6,67:6,68:6,69:6,70:6,71:6,72:6,73:6,74:6,75:6,
+    80:13,81:13,82:13,83:13,84:13,85:13,86:13,87:13,88:13,89:13,90:13,91:13,92:13,93:13,94:13,95:13,
+    96:15,97:15,98:15,99:15,100:15,101:15,102:15,103:15,
+};
+const DRUM_TO_MINECRAFT = {35:2,36:2,38:3,40:3,41:4,43:4,45:4,47:4,48:4,42:4,44:4,46:4,49:4,51:4,52:4,53:4,54:4,55:4,56:4,57:4};
+
+const INSTRUMENT_SOUND_MAP = {0:"harp",1:"bass",2:"bd",3:"snare",4:"hat",5:"guitar",6:"flute",7:"bell",8:"chime",9:"xylophone",10:"iron_xylophone",11:"cow_bell",12:"didgeridoo",13:"bit",14:"banjo",15:"pling"};
+const PERCUSSION_INSTRUMENTS = [2,3,4];
+function getSoundFileName(instrumentId, harpOnly) { return (harpOnly && !PERCUSSION_INSTRUMENTS.includes(instrumentId)) ? "harp" : (INSTRUMENT_SOUND_MAP[instrumentId] || "harp"); }
+
+// 预览播放器
+let previewContext = null, previewNotes = [], previewSongLength = 0, previewInterval = null, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 0.25, previewSpeed = 1.0, activeSources = [], isPlaying = false;
+const INSTRUMENT_WAVE_TYPE = { "harp":"sine","bass":"sawtooth","guitar":"triangle","flute":"sine","bell":"sine","chime":"sine","xylophone":"triangle","iron_xylophone":"triangle","bit":"square","banjo":"triangle","pling":"sine","bd":"sine","snare":"triangle","cow_bell":"square","didgeridoo":"sawtooth" };
+
+function playHatSound(volume, duration=0.25) {
+    const hatVolume = volume * 0.15;
+    const bufferSize = previewContext.sampleRate * duration;
+    const buffer = previewContext.createBuffer(1, bufferSize, previewContext.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i=0; i<bufferSize; i++) data[i] = (Math.random()*2-1)*Math.exp(-i/(previewContext.sampleRate*0.05));
+    const source = previewContext.createBufferSource(); source.buffer = buffer;
+    const highpass = previewContext.createBiquadFilter(); highpass.type="highpass"; highpass.frequency.value=4000; highpass.Q.value=5;
+    const gainNode = previewContext.createGain(); gainNode.gain.value = hatVolume * 0.4;
+    source.connect(highpass); highpass.connect(gainNode); gainNode.connect(previewContext.destination);
+    source.start(); source.stop(previewContext.currentTime+duration);
+    activeSources.push(source);
+    setTimeout(()=>{const idx=activeSources.indexOf(source); if(idx>-1) activeSources.splice(idx,1);}, duration*1000+100);
+}
+function playBdSound(volume) {
+    const now=previewContext.currentTime, osc=previewContext.createOscillator(), gain=previewContext.createGain();
+    osc.type="sine"; osc.frequency.value=80; osc.frequency.exponentialRampToValueAtTime(40, now+0.2);
+    gain.gain.setValueAtTime(volume*0.6, now); gain.gain.exponentialRampToValueAtTime(0.001, now+0.4);
+    osc.connect(gain); gain.connect(previewContext.destination); osc.start(); osc.stop(now+0.4);
+    activeSources.push(osc);
+    setTimeout(()=>{const idx=activeSources.indexOf(osc); if(idx>-1) activeSources.splice(idx,1);}, 500);
+}
+function playSnareSound(volume) {
+    const now=previewContext.currentTime;
+    const noiseBuffer=previewContext.createBuffer(1, previewContext.sampleRate*0.2, previewContext.sampleRate);
+    const noiseData=noiseBuffer.getChannelData(0);
+    for(let i=0;i<noiseBuffer.length;i++) noiseData[i]=(Math.random()*2-1)*Math.exp(-i/(previewContext.sampleRate*0.03));
+    const noiseSource=previewContext.createBufferSource(); noiseSource.buffer=noiseBuffer;
+    const noiseGain=previewContext.createGain(); noiseGain.gain.value=volume*0.4;
+    noiseSource.connect(noiseGain); noiseGain.connect(previewContext.destination); noiseSource.start(); noiseSource.stop(now+0.2);
+    const osc=previewContext.createOscillator(); osc.type="triangle"; osc.frequency.value=180;
+    const oscGain=previewContext.createGain(); oscGain.gain.setValueAtTime(volume*0.3, now); oscGain.gain.exponentialRampToValueAtTime(0.001, now+0.2);
+    osc.connect(oscGain); oscGain.connect(previewContext.destination); osc.start(); osc.stop(now+0.2);
+    activeSources.push(noiseSource, osc);
+    setTimeout(()=>{activeSources=activeSources.filter(s=>s!==noiseSource&&s!==osc);},300);
+}
+function playNoteSynthesizer(note) {
+    const soundName = getSoundFileName(note.instrument, previewHarpOnly);
+    const shiftedKey = note.key + 12;
+    const freq = 440 * Math.pow(2, (shiftedKey - 57) / 12);
+    const velocity = Math.min(1, Math.max(0.3, note.velocity/100));
+    const volume = previewVolume * velocity;
+    if(soundName==="hat"){ playHatSound(volume,0.25); return; }
+    if(soundName==="bd"){ playBdSound(volume); return; }
+    if(soundName==="snare"){ playSnareSound(volume); return; }
+    if(freq<20 || freq>8000) return;
+    const osc=previewContext.createOscillator(), gain=previewContext.createGain();
+    osc.type=INSTRUMENT_WAVE_TYPE[soundName]||"sine"; osc.frequency.value=freq;
+    const now=previewContext.currentTime;
+    gain.gain.setValueAtTime(0,now); gain.gain.linearRampToValueAtTime(volume*0.6,now+0.01); gain.gain.exponentialRampToValueAtTime(0.0001,now+0.6);
+    osc.connect(gain); gain.connect(previewContext.destination); osc.start(); osc.stop(now+0.6);
+    activeSources.push(osc);
+    setTimeout(()=>{const idx=activeSources.indexOf(osc); if(idx>-1) activeSources.splice(idx,1);},700);
+}
+function playNoteAtTick(tick){
+    previewNotes.filter(n=>n.tick===tick).forEach(n=>playNoteSynthesizer(n));
+    highlightPlayingCommand(tick);
+}
+function highlightPlayingCommand(tick){
+    document.querySelectorAll('.cmd-block').forEach(b=>b.classList.remove('playing'));
+    if(window.lastChainCmds){
+        for(let i=0;i<window.lastChainCmds.length;i++){
+            if(window.lastChainCmds[i].ticks.includes(tick)){
+                const block=document.getElementById(`cmd-block-${i}`);
+                if(block) block.classList.add('playing');
+                break;
+            }
+        }
+    }
+}
+function startPreview(){
+    if(previewInterval) clearInterval(previewInterval);
+    stopPreviewClean();
+    if(!previewContext) previewContext=new (window.AudioContext||window.webkitAudioContext)();
+    if(previewContext.state==='suspended') previewContext.resume();
+    isPlaying=true; previewCurrentTick=0;
+    activeSources.forEach(s=>{try{s.stop();}catch(e){}}); activeSources=[];
+    playNoteAtTick(0);
+    previewInterval=setInterval(()=>{
+        if(!isPlaying) return;
+        previewCurrentTick++;
+        const progress=(previewCurrentTick/previewSongLength)*100;
+        document.getElementById('progressFill').style.width=`${Math.min(100,progress)}%`;
+        document.getElementById('tickDisplay').innerText=`Tick: ${previewCurrentTick} / ${previewSongLength}`;
+        if(previewCurrentTick>=previewSongLength){ stopPreview(); document.getElementById('progressFill').style.width='0%';}
+        else playNoteAtTick(previewCurrentTick);
+    },50/previewSpeed);
+    document.getElementById('playBtn').textContent='⏸ 播放中'; document.getElementById('playBtn').classList.add('running'); document.getElementById('stopBtn').disabled=false;
+}
+function stopPreviewClean(){ activeSources.forEach(s=>{try{s.stop();}catch(e){}}); activeSources=[]; isPlaying=false; if(previewInterval){clearInterval(previewInterval); previewInterval=null;} }
+function stopPreview(){
+    stopPreviewClean();
+    previewCurrentTick=0;
+    document.getElementById('progressFill').style.width='0%';
+    document.getElementById('tickDisplay').innerText=`Tick: 0 / ${previewSongLength}`;
+    document.getElementById('playBtn').textContent='▶ 播放'; document.getElementById('playBtn').classList.remove('running'); document.getElementById('stopBtn').disabled=true;
+    document.querySelectorAll('.cmd-block').forEach(b=>b.classList.remove('playing'));
+}
+function updateSpeed(){
+    previewSpeed=parseFloat(document.getElementById('previewSpeed').value);
+    document.getElementById('speedValue').innerText=previewSpeed.toFixed(2)+'x';
+    if(isPlaying && previewInterval){
+        clearInterval(previewInterval);
+        previewInterval=setInterval(()=>{
+            if(!isPlaying) return;
+            previewCurrentTick++;
+            const progress=(previewCurrentTick/previewSongLength)*100;
+            document.getElementById('progressFill').style.width=`${Math.min(100,progress)}%`;
+            document.getElementById('tickDisplay').innerText=`Tick: ${previewCurrentTick} / ${previewSongLength}`;
+            if(previewCurrentTick>=previewSongLength){ stopPreview(); document.getElementById('progressFill').style.width='0%';}
+            else playNoteAtTick(previewCurrentTick);
+        },50/previewSpeed);
+    }
+}
+
+// 工具函数
+function keyToPitch(key, octaveShift){ let shiftedKey=key+(octaveShift*12); return Math.pow(2,(shiftedKey-54)/12).toFixed(6); }
+function getNoteName(key){ const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']; return names[key%12]+Math.floor(key/12); }
+function getShiftedNoteName(key, octaveShift){ return getNoteName(key+octaveShift*12); }
+function groupNotesByInstrumentAndPitch(notes){
+    const map=new Map();
+    for(const note of notes){ const key=`${note.instrument}_${note.key}`; if(!map.has(key)) map.set(key,{instrument:note.instrument,key:note.key,ticks:[]}); map.get(key).ticks.push(note.tick); }
+    const result=[];
+    for(const data of map.values()){ const uniqueTicks=[...new Set(data.ticks)].sort((a,b)=>a-b); result.push({...data,ticks:uniqueTicks,noteName:getNoteName(data.key),tickCount:uniqueTicks.length}); }
+    return result.sort((a,b)=>a.instrument-b.instrument||a.key-b.key);
+}
+function escapeHtml(str){ return str.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function copyToClipboard(text,btn,block){
+    navigator.clipboard.writeText(text).then(()=>{
+        if(btn && !btn.classList.contains('copied')){ btn.classList.add('copied'); btn.textContent='✓已复制'; }
+        if(block && !block.classList.contains('copied')) block.classList.add('copied');
+    }).catch(()=>alert('复制失败'));
+}
+function generateCommands(groups, octaveShift, harpOnly){
+    const cycleCmd=`execute as @a[scores={t=-1..}] run scoreboard players add @s t 1`;
+    const chainCmds=[];
+    for(let idx=0;idx<groups.length;idx++){
+        const g=groups[idx];
+        const excludeEntries=g.ticks.map(t=>`t=!${t}`).join(',');
+        const pitch=keyToPitch(g.key,octaveShift);
+        const shiftedNoteName=getShiftedNoteName(g.key,octaveShift);
+        const sound=harpOnly?"note.harp":`note.${INSTRUMENT_SOUND_MAP[g.instrument]||"harp"}`;
+        const cmd=`execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound ${sound} @s ~ ~ ~ 1 ${pitch}`;
+        chainCmds.push({seq:idx+1,noteName:g.noteName,shiftedNoteName,instrument:g.instrument,instrumentName:INSTRUMENT_SOUND_MAP[g.instrument]||"harp",key:g.key,pitch,sound,ticks:g.ticks,tickCount:g.tickCount,cmd});
+    }
+    return {cycleCmd,chainCmds};
+}
+
+// 渲染
+let lastChainCmds=[];
+function renderResults(notes, songLength, songName, octaveShift, harpOnly){
+    if(!notes||notes.length===0) return false;
+    const groups=groupNotesByInstrumentAndPitch(notes);
+    const {cycleCmd,chainCmds}=generateCommands(groups,octaveShift,harpOnly);
+    document.getElementById('cycleCmd').innerHTML=`<pre>${escapeHtml(cycleCmd)}</pre>`;
+    lastChainCmds=chainCmds; window.lastChainCmds=chainCmds;
+    if(chainCmds.length===0) document.getElementById('chainList').innerHTML='<div class="cmd-block">无音符数据</div>';
+    else{
+        let html='';
+        for(let i=0;i<chainCmds.length;i++){
+            const c=chainCmds[i];
+            const timePreview=c.ticks.slice(0,20).join(', ')+(c.ticks.length>20?` ... 共${c.tickCount}个`:'');
+            html+=`<div class="cmd-block" id="cmd-block-${i}">
+                        <div class="cmd-header">
+                            <span class="seq-num">#${c.seq}</span>
+                            <span><b>🎵 ${c.noteName} → ${c.shiftedNoteName}</b></span>
+                            <span style="color:#8abf9a">| ${c.instrumentName} (ID=${c.instrument}) | pitch=${c.pitch} | ${c.tickCount}次</span>
+                            <button class="copy-btn" data-idx="${i}">📋 复制</button>
+                        </div>
+                        <pre>${escapeHtml(c.cmd)}</pre>
+                        <div style="font-size:11px;color:#8abf9a">时间点: ${timePreview}</div>
+                     </div>`;
+        }
+        document.getElementById('chainList').innerHTML=html;
+        document.querySelectorAll('.copy-btn').forEach(btn=>{
+            btn.addEventListener('click',()=>{
+                const idx=parseInt(btn.dataset.idx);
+                const block=document.getElementById(`cmd-block-${idx}`);
+                copyToClipboard(lastChainCmds[idx].cmd,btn,block);
+            });
+        });
+    }
+    previewNotes=notes; previewSongLength=songLength; previewHarpOnly=harpOnly;
+    document.getElementById('playBtn').disabled=false; document.getElementById('stopBtn').disabled=true;
+    document.getElementById('tickDisplay').innerText=`Tick: 0 / ${songLength}`; document.getElementById('progressFill').style.width='0%';
+    const durationSec=(songLength/20).toFixed(1);
+    const uniqueInstruments=[...new Set(notes.map(n=>n.instrument))];
+    const instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
+    document.getElementById('stats').innerHTML=`<span class="success">✅ 解析成功 | ${songName||''} | 音符:${notes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:+${octaveShift}</span>`;
+    return true;
+}
+
+// 文件处理
+let currentNotes=[];
+function handleFile(arrayBuffer, fileType){
+    if(isPlaying) stopPreview();
+    let result;
+    if(fileType==='nbs') result=parseNBS(arrayBuffer);
+    else result=parseMIDI(arrayBuffer);
+    if(!result.notes||result.notes.length===0){ document.getElementById('stats').innerHTML='<span class="error">❌ 解析失败: 未提取到任何音符</span>'; return; }
+    currentNotes=result.notes;
+    const octaveShift=parseInt(document.getElementById('octaveShift').value);
+    const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
+    renderResults(result.notes, result.songLength, result.songName||(fileType==='midi'?'MIDI导入':''), octaveShift, harpOnly);
+}
+
+// 自动解析
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+    const file=e.target.files[0];
+    if(!file) return;
+    const fileType=file.name.endsWith('.nbs')?'nbs':(file.name.endsWith('.mid')?'midi':null);
+    if(!fileType){ alert('请选择 .nbs 或 .mid 文件'); return; }
+    document.getElementById('stats').innerHTML='正在解析...';
+    const reader=new FileReader();
+    reader.onload=(e)=>handleFile(e.target.result, fileType);
+    reader.onerror=()=>document.getElementById('stats').innerHTML='<span class="error">❌ 文件读取失败</span>';
+    reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('clearBtn')?.addEventListener('click', ()=>{
+    stopPreview();
+    document.getElementById('fileInput').value='';
+    document.getElementById('cycleCmd').innerHTML='<pre>尚未解析</pre>';
+    document.getElementById('chainList').innerHTML='';
+    document.getElementById('stats').innerHTML='已清空';
+    document.getElementById('playBtn').disabled=true; document.getElementById('stopBtn').disabled=true;
+    document.getElementById('tickDisplay').innerText='Tick: 0 / 0';
+    lastChainCmds=[]; currentNotes=[]; previewNotes=[];
+});
+
+document.getElementById('playBtn').addEventListener('click',()=>{ if(previewNotes.length) startPreview(); else alert('请先选择文件'); });
+document.getElementById('stopBtn').addEventListener('click',stopPreview);
+document.getElementById('previewSpeed').addEventListener('input',updateSpeed);
+document.getElementById('octaveShift').addEventListener('change',()=>{
+    if(currentNotes.length){
+        stopPreview();
+        const octaveShift=parseInt(document.getElementById('octaveShift').value);
+        const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
+        renderResults(currentNotes, previewSongLength, '', octaveShift, harpOnly);
+    }
+});
+document.querySelectorAll('input[name="soundMode"]').forEach(radio=>{
+    radio.addEventListener('change',()=>{
+        if(currentNotes.length){
+            stopPreview();
+            const octaveShift=parseInt(document.getElementById('octaveShift').value);
+            const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
+            renderResults(currentNotes, previewSongLength, '', octaveShift, harpOnly);
+        }
+    });
+});
+document.getElementById('copyCycle').addEventListener('click',()=>{
+    const pre=document.querySelector('#cycleCmd pre');
+    if(pre){ copyToClipboard(pre.innerText, null, null); alert('循环指令已复制'); }
+});
+document.getElementById('copyAll').addEventListener('click',()=>{
+    if(!lastChainCmds.length){ alert('没有可复制的指令'); return; }
+    copyToClipboard(lastChainCmds.map(c=>c.cmd).join('\n\n'), null, null);
+    alert(`已复制 ${lastChainCmds.length} 条指令`);
+});
+document.getElementById('download').addEventListener('click',()=>{
+    if(!lastChainCmds.length){ alert('没有可导出的内容'); return; }
+    const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
+    let content=`--+++ 命令导出 +++--\n\n导出时间: ${new Date().toLocaleString()}\n\n模式: ${harpOnly?'Harp Only':'乐器映射'}\n\n【聊天栏】/scoreboard objectives add t dummy\n\n【循环命令方块】execute as @a[scores={t=-1..}] run scoreboard players add @s t 1\n\n【连锁命令方块】\n`;
+    for(let i=0;i<lastChainCmds.length;i++){
+        const c=lastChainCmds[i];
+        content+=`${c.cmd}\n\n`;
+    }
+    const blob=new Blob([content],{type:'text/plain'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`commandblock_export_${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>
