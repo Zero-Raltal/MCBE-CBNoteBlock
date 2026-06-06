@@ -923,7 +923,8 @@ function handleFile(arrayBuffer, fileType){
 document.getElementById('fileInput').addEventListener('change', (e)=>{
     const file=e.target.files[0];
     if(!file) return;
-    const fileType = file.name.endsWith('.nbs') ? 'nbs' : (file.name.endsWith('.mid') || file.name.endsWith('.midi') ? 'midi' : null);
+	const fileName = file.name.toLowerCase();
+	const fileType = fileName.endsWith('.nbs') ? 'nbs' : (fileName.endsWith('.mid') || fileName.endsWith('.midi') ? 'midi' : null);
     if(!fileType){ alert('请选择 .nbs 或 .mid 文件'); return; }
     document.getElementById('stats').innerHTML='正在解析...';
     const reader=new FileReader();
