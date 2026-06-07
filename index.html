@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft BE1.19+音乐命令方块生成器</title>
+    <title>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</title>
     <style>
         body{background:#1a2a32;font-family:monospace;padding:20px;color:#eee}
         .box{background:#1e2f38;padding:15px;margin-bottom:20px;border:0}
@@ -12,7 +12,6 @@
         .cmd-block{background:#021016;border-left:4px solid #57b984;margin:8px 0;padding:8px;font-size:12px;transition: border-left-color 0.2s ease}
         .cmd-block.copied{border-left-color: #666666}
         .cmd-block.playing{background:#1a3a2a;border-left-color: #ffaa44}
-        input{background:#2a3d3f;border:1px solid #5f8b78;color:white;padding:6px}
         .stats{background:#071016;padding:8px;margin-top:10px;font-size:12px}
         .note-grid{max-height:400px;overflow-y:auto}
         .error{color:#ff6655}
@@ -32,19 +31,30 @@
         .tick-display{font-size:12px;color:#8abf9a;min-width:100px}
         .speed-slider{width:150px}
         .speed-value{font-size:12px;min-width:45px}
+		input[type="range"]{border:1px;padding:0px}
+		input[type="file"]{background:#2a3d3f;border:1px solid #5f8b78;color:#eee;padding:8px 36px;cursor:pointer;font-family:monospace;font-size:12px}
+		input[type="file"]::file-selector-button{background:#3e8e62;border:none;color:white;padding:8px 18px;margin-right:12px;cursor:pointer;font-family:monospace;font-size:12px}
+		input[type="file"]::file-selector-button:hover{background:#4fa573}
+		.speed-slider{width:150px;height:4px;-webkit-appearance:none;background:#2a3d3f;outline:none}
+		.speed-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#57b984;cursor:pointer;border:none}
+		.speed-slider::-webkit-slider-thumb:hover{background:#7ecca2;transform:scale(1.2)}
+		select{background:#2a3d3f;border:1px solid #5f8b78;color:#eee;padding:8px 12px;cursor:pointer;font-family:monospace;font-size:12px}
+		select:hover{border-color:#57b984}
+		select:focus{outline:none;border-color:#57b984;box-shadow:0 0 0 1px rgba(87,185,132,0.3)}
+		select option{background:#1a2a32;color:#eee}
+		.mode-control input[type="radio"]{-webkit-appearance:none;width:16px;height:16px;border:1px solid #5f8b78;border-radius:50%;background:#2a3d3f;margin-right:4px;vertical-align:middle;cursor:pointer;position:relative;top:-1px}
+		.mode-control input[type="radio"]:checked{background:#57b984;border-color:#57b984;box-shadow:inset 0 0 0 2px #1a2a32}
+		.mode-control input[type="radio"]:hover{border-color:#57b984}
+		input[type="file"]:focus,select:focus{outline:none;border-color:#57b984;box-shadow:0 0 0 1px rgba(87,185,132,0.3)}
     </style>
 </head>
 <body>
 <div style="max-width:1400px;margin:0 auto">
     <h2>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</h2>
 	<h4 style="color:red">未经允许，严禁转载/二改，违者必究!</h4>
-    
     <div class="box">
-			
 		<label>上传(.nbs/.mid/.midi)文件: </label>
-		
         <input type="file" id="fileInput" accept=".nbs,.mid,.midi">
-		
         <div class="preview-controls">
             <span>预览播放:</span>
             <button id="playBtn" disabled>▶ 播放</button>
@@ -57,16 +67,18 @@
             <input type="range" id="previewSpeed" min="0.10" max="5.00" step="0.05" value="1.00" class="speed-slider">
             <span class="speed-value" id="speedValue">1.00x</span>
         </div>
-        
         <div class="mode-control">
             <label>音色模式:</label>
             <label><input type="radio" name="soundMode" value="multi" checked> 乐器映射 </label>
             <label><input type="radio" name="soundMode" value="harp"> Harp Only </label>
         </div>
-        
         <div class="shift-control">
             <label>八度移调 (仅影响指令生成): </label>
             <select id="octaveShift">
+                <option value="-4">-4 八度</option>
+                <option value="-3">-3 八度</option>
+                <option value="-2">-2 八度</option>
+                <option value="-1">-1 八度</option>
                 <option value="0" selected>+0 八度 </option>
                 <option value="1">+1 八度</option>
                 <option value="2">+2 八度</option>
@@ -74,29 +86,24 @@
                 <option value="4">+4 八度</option>
             </select>
         </div>
-        
         <div class="stats" id="stats">等待上传文件...</div>
     </div>
     <div class="box">
         <h4>1.聊天栏输入</h4>
 		<pre>/scoreboard objectives add t dummy</pre>
 		<pre>/scoreboard players set @a t 0</pre>
-		
 		<h4>2.脉冲命令方块(初始复位/重置播放进度)</h4>
         <pre>scoreboard players set @a t 0</pre>
-		
         <h4>3.循环命令方块</h4>
-        <div id="cycleCmd"><pre>execute as @a[scores={t=-1..}] run scoreboard players add @s t 1</pre></div>
-		
+        <div id="cycleCmd"><pre>scoreboard players add @a t 1</pre></div>
         <h4>4.连锁命令方块</h4>
         <div id="chainList" class="note-grid"><pre>尚未解析</pre></div>
-        
         <button id="copyCycle">复制循环指令</button>
         <button id="copyAll">复制全部连锁指令</button>
         <button id="download">导出为文件</button>
     </div>
 </div>
-
+</body>
 <script>
 // MIDI解析器
 class midiParser {
@@ -257,17 +264,17 @@ function parseMIDI(arrayBuffer) {
                 const startSec = midiTickToSeconds(noteOn.tick, timeDivision, tempoEvents);
                 const nbsTick = Math.round(startSec * 20);
                 let instrument;
-                if (noteOn.channel === 9) {
-                    instrument = DRUM_TO_MINECRAFT[event.noteNumber] || 4;
-                } else {
-                    instrument = GM_TO_MINECRAFT[noteOn.instrument] || 0;
-                }
-                allNotes.push({
-                    tick: nbsTick,
-                    key: event.noteNumber - 12,
-                    velocity: noteOn.velocity,
-                    instrument: instrument
-                });
+				if (noteOn.channel === 9) {
+					instrument = DRUM_TO_MINECRAFT[event.noteNumber] || 4;
+				} else {
+					instrument = GM_TO_MINECRAFT[noteOn.instrument] || 0;
+				}
+				allNotes.push({
+					tick: nbsTick,
+					key: event.noteNumber - 12,
+					velocity: noteOn.velocity,
+					instrument: instrument
+				});
                 activeNotes.delete(key);
             }
         }
@@ -544,24 +551,21 @@ function applyInstrumentFilter(osc, gain, soundName, freq, volume, now) {
 }
 function playNoteSynthesizer(note) {
     const soundName = getSoundFileName(note.instrument, previewHarpOnly);
-    const shiftedKey = note.key + 12;
+    const octaveShiftPreview = parseInt(document.getElementById('octaveShift').value) || 0;
+    let shiftedKey = note.key + 12 + (octaveShiftPreview * 12);
     const freq = 440 * Math.pow(2, (shiftedKey - 57) / 12);
     const velocity = Math.min(1, Math.max(0.3, note.velocity/100));
     const volume = previewVolume * velocity;
     if(soundName==="hat"){ playHatSound(volume,0.25); return; }
     if(soundName==="bd"){ playBdSound(volume * 5.00); return; }
     if(soundName==="snare"){ playSnareSound(volume); return; }
-    if(freq<20 || freq>16000) return;
     const osc = previewContext.createOscillator();
     const gain = previewContext.createGain();
     const now = previewContext.currentTime;
     osc.type = INSTRUMENT_WAVE_TYPE[soundName] || "sine";
     osc.frequency.value = freq;
     let output = gain;
-    let isBanjo = false;
-    let isPling = false;
     if (soundName === "banjo") {
-        isBanjo = true;
         osc.type = "triangle";
         const bandpass = previewContext.createBiquadFilter();
         bandpass.type = "bandpass";
@@ -601,7 +605,6 @@ function playNoteSynthesizer(note) {
         activeSources.push(clickSource);
         output = gain; 
     } else if (soundName === "pling") {
-        isPling = true;
         osc.type = "sine";
         const lowpass = previewContext.createBiquadFilter();
         lowpass.type = "lowpass";
@@ -785,8 +788,15 @@ function updateSpeed(){
 }
 // 工具函数
 function keyToPitch(key, octaveShift){ let shiftedKey=key+(octaveShift*12); return Math.pow(2,(shiftedKey-54)/12).toFixed(6); }
-function getNoteName(key){ const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']; return names[key%12]+Math.floor(key/12); }
-function getShiftedNoteName(key, octaveShift){ return getNoteName(key+octaveShift*12); }
+function getNoteName(key){
+    const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    if (key < 0) {
+        const noteIndex = ((key % 12) + 12) % 12;
+        return names[noteIndex];
+    }
+    return names[key % 12] + Math.floor(key / 12);
+}
+function getShiftedNoteName(key, octaveShift){ return getNoteName(key + octaveShift * 12); }
 function groupNotesByInstrumentAndPitch(notes){
     const map=new Map();
     for(const note of notes){ const key=`${note.instrument}_${note.key}`; if(!map.has(key)) map.set(key,{instrument:note.instrument,key:note.key,ticks:[]}); map.get(key).ticks.push(note.tick); }
@@ -802,7 +812,7 @@ function copyToClipboard(text,btn,block){
     }).catch(()=>alert('复制失败'));
 }
 function generateCommands(groups, octaveShift, harpOnly){
-    const cycleCmd=`execute as @a[scores={t=-1..}] run scoreboard players add @s t 1`;
+    const cycleCmd=`scoreboard players add @a t 1`;
     let chainCmds = [];
     if (harpOnly) {
         const pitchMap = new Map();
@@ -841,7 +851,7 @@ function generateCommands(groups, octaveShift, harpOnly){
     } else {
         for(let idx=0; idx<groups.length; idx++){
             const g=groups[idx];
-            const excludeEntries=g.ticks.map(t=>`t=!${t}`).join(',');
+            const excludeEntries=g.ticks.map(t=>`t=!${t + 1}`).join(',');
             const pitch=keyToPitch(g.key,octaveShift);
             const shiftedNoteName=getShiftedNoteName(g.key,octaveShift);
             const sound=`note.${INSTRUMENT_SOUND_MAP[g.instrument]||"harp"}`;
@@ -975,7 +985,7 @@ document.getElementById('copyAll').addEventListener('click',()=>{
 document.getElementById('download').addEventListener('click',()=>{
     if(!lastChainCmds.length){ alert('没有可导出的内容'); return; }
     const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
-    let content=`--+++ 命令导出 +++--\n\n导出时间: ${new Date().toLocaleString()}\n\n模式: ${harpOnly?'Harp Only':'乐器映射'}\n\n工具作者: ZeroRaltal\n\n【聊天栏】\n/scoreboard objectives add t dummy\n/scoreboard players set @a t 0\n\n【循环命令方块】\nexecute as @a[scores={t=-1..}] run scoreboard players add @s t 1\n\n【连锁命令方块】\n`;
+    let content=`--+++ 命令导出 +++--\n\n导出时间: ${new Date().toLocaleString()}\n\n模式: ${harpOnly?'Harp Only':'乐器映射'}\n\n工具作者: ZeroRaltal\n\n【聊天栏】\n/scoreboard objectives add t dummy\n/scoreboard players set @a t 0\n\n【循环命令方块】\nscoreboard players add @s t 1\n\n【连锁命令方块】\n`;
     for(let i=0;i<lastChainCmds.length;i++){
         const c=lastChainCmds[i];
         content+=`${c.cmd}\n\n`;
@@ -988,5 +998,4 @@ document.getElementById('download').addEventListener('click',()=>{
     URL.revokeObjectURL(a.href);
 });
 </script>
-</body>
 </html>
