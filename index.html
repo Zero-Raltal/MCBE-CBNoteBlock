@@ -813,56 +813,70 @@ function copyToClipboard(text,btn,block){
     }).catch(()=>alert('复制失败'));
 }
 function generateCommands(groups, octaveShift, harpOnly){
-    const cycleCmd=`scoreboard players add @a t 1`;
+    const cycleCmd = `scoreboard players add @a t 1`;
     let chainCmds = [];
     if (harpOnly) {
         const pitchMap = new Map();
-        
         for (const group of groups) {
-            if (!pitchMap.has(group.key)) {
-                pitchMap.set(group.key, {
+            const isPercussion = PERCUSSION_INSTRUMENTS.includes(group.instrument);
+            const effectiveInstrument = isPercussion ? group.instrument : 0;
+            const mapKey = `${effectiveInstrument}_${group.key}`;
+            if (!pitchMap.has(mapKey)) {
+                pitchMap.set(mapKey, {
+                    instrument: effectiveInstrument,
                     key: group.key,
                     ticks: [],
                     noteName: group.noteName,
                     shiftedNoteName: getShiftedNoteName(group.key, octaveShift)
                 });
             }
-            pitchMap.get(group.key).ticks.push(...group.ticks);
+            pitchMap.get(mapKey).ticks.push(...group.ticks);
         }
-        for (const [key, data] of pitchMap) {
+        for (const [mapKey, data] of pitchMap) {
             const uniqueTicks = [...new Set(data.ticks)].sort((a,b) => a-b);
-            const excludeEntries = uniqueTicks.map(t=>`t=!${t + 1}`).join(',');
-            const pitch = keyToPitch(key, octaveShift);
-            const cmd = `execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound note.harp @s ~ ~ ~ 1 ${pitch}`;
+            const excludeEntries = uniqueTicks.map(t => `t=!${t + 1}`).join(',');
+            const pitch = keyToPitch(data.key, octaveShift);
+            const instrumentName = INSTRUMENT_SOUND_MAP[data.instrument] || "harp";
+            const sound = `note.${instrumentName}`;
+            const cmd = `execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound ${sound} @s ~ ~ ~ 1 ${pitch}`;
             chainCmds.push({
                 seq: chainCmds.length + 1,
-                noteName: getNoteName(key),
+                noteName: getNoteName(data.key),
                 shiftedNoteName: data.shiftedNoteName,
-                instrument: 0,
-                instrumentName: "harp",
-                key: key,
+                instrument: data.instrument,
+                instrumentName: instrumentName,
+                key: data.key,
                 pitch: pitch,
-                sound: "note.harp",
+                sound: sound,
                 ticks: uniqueTicks,
                 tickCount: uniqueTicks.length,
                 cmd: cmd
             });
         }
-        chainCmds.sort((a,b) => a.key - b.key);
+        chainCmds.sort((a, b) => {
+            if (a.instrument === b.instrument) return a.key - b.key;
+            const aIsPerc = PERCUSSION_INSTRUMENTS.includes(a.instrument);
+            const bIsPerc = PERCUSSION_INSTRUMENTS.includes(b.instrument);
+            if (aIsPerc && !bIsPerc) return 1;
+            if (!aIsPerc && bIsPerc) return -1;
+            return a.instrument - b.instrument;
+        });
+        chainCmds.forEach((cmd, index) => cmd.seq = index + 1);
+        
     } else {
-        for(let idx=0; idx<groups.length; idx++){
-            const g=groups[idx];
-            const excludeEntries=g.ticks.map(t=>`t=!${t + 1}`).join(',');
-            const pitch=keyToPitch(g.key,octaveShift);
-            const shiftedNoteName=getShiftedNoteName(g.key,octaveShift);
-            const sound=`note.${INSTRUMENT_SOUND_MAP[g.instrument]||"harp"}`;
-            const cmd=`execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound ${sound} @s ~ ~ ~ 1 ${pitch}`;
+        for (let idx = 0; idx < groups.length; idx++) {
+            const g = groups[idx];
+            const excludeEntries = g.ticks.map(t => `t=!${t + 1}`).join(',');
+            const pitch = keyToPitch(g.key, octaveShift);
+            const shiftedNoteName = getShiftedNoteName(g.key, octaveShift);
+            const sound = `note.${INSTRUMENT_SOUND_MAP[g.instrument] || "harp"}`;
+            const cmd = `execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound ${sound} @s ~ ~ ~ 1 ${pitch}`;
             chainCmds.push({
-                seq: idx+1,
+                seq: idx + 1,
                 noteName: g.noteName,
                 shiftedNoteName: shiftedNoteName,
                 instrument: g.instrument,
-                instrumentName: INSTRUMENT_SOUND_MAP[g.instrument]||"harp",
+                instrumentName: INSTRUMENT_SOUND_MAP[g.instrument] || "harp",
                 key: g.key,
                 pitch: pitch,
                 sound: sound,
@@ -872,7 +886,7 @@ function generateCommands(groups, octaveShift, harpOnly){
             });
         }
     }
-    return {cycleCmd, chainCmds};
+    return { cycleCmd, chainCmds };
 }
 // 渲染
 let lastChainCmds=[];
@@ -942,16 +956,6 @@ document.getElementById('fileInput').addEventListener('change', (e)=>{
     reader.onload=(e)=>handleFile(e.target.result, fileType);
     reader.onerror=()=>document.getElementById('stats').innerHTML='<span class="error">❌ 文件读取失败</span>';
     reader.readAsArrayBuffer(file);
-});
-document.getElementById('clearBtn')?.addEventListener('click', ()=>{
-    stopPreview();
-    document.getElementById('fileInput').value='';
-    document.getElementById('cycleCmd').innerHTML='<pre>尚未解析</pre>';
-    document.getElementById('chainList').innerHTML='';
-    document.getElementById('stats').innerHTML='已清空';
-    document.getElementById('playBtn').disabled=true; document.getElementById('stopBtn').disabled=true;
-    document.getElementById('tickDisplay').innerText='Tick: 0 / 0';
-    lastChainCmds=[]; currentNotes=[]; previewNotes=[];
 });
 document.getElementById('playBtn').addEventListener('click',()=>{ if(previewNotes.length) startPreview(); else alert('请先选择文件'); });
 document.getElementById('stopBtn').addEventListener('click',stopPreview);
