@@ -986,7 +986,7 @@ document.getElementById('copyAll').addEventListener('click',()=>{
 document.getElementById('download').addEventListener('click',()=>{
     if(!lastChainCmds.length){ alert('没有可导出的内容'); return; }
     const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
-    let content=`--+++ 命令导出 +++--\n\n导出时间: ${new Date().toLocaleString()}\n\n模式: ${harpOnly?'Harp Only':'乐器映射'}\n\n工具作者: ZeroRaltal\n\n【聊天栏】\n/scoreboard objectives add t dummy\n/scoreboard players set @a t 0\n\n【循环命令方块】\nscoreboard players add @s t 1\n\n【连锁命令方块】\n`;
+    let content=`--+++ 命令导出 +++--\n\n导出时间: ${new Date().toLocaleString()}\n\n模式: ${harpOnly?'Harp Only':'乐器映射'}\n\n工具作者: ZeroRaltal\n\n【聊天栏】\n/scoreboard objectives add t dummy\n/scoreboard players set @a t 0\n\n【循环命令方块】\nscoreboard players add @a t 1\n\n【连锁命令方块】\n`;
     for(let i=0;i<lastChainCmds.length;i++){
         const c=lastChainCmds[i];
         content+=`${c.cmd}\n\n`;
