@@ -831,7 +831,7 @@ function generateCommands(groups, octaveShift, harpOnly){
         }
         for (const [key, data] of pitchMap) {
             const uniqueTicks = [...new Set(data.ticks)].sort((a,b) => a-b);
-            const excludeEntries = uniqueTicks.map(t=>`t=!${t}`).join(',');
+            const excludeEntries = uniqueTicks.map(t=>`t=!${t + 1}`).join(',');
             const pitch = keyToPitch(key, octaveShift);
             const cmd = `execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound note.harp @s ~ ~ ~ 1 ${pitch}`;
             chainCmds.push({
