@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 	<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABUklEQVR42n2TT0vDQBDF8z1EibFgkqZaaQIWShWVCnopBalYoTc/gRdvoh68Cnryw475jZ3tZvvnMLxMdt/svLezUdZK5KRIG1EdtzXKo7yRh3GYxBLx8XJ3Ke/TC/mYDBSJ53F/Jew/CIfiWuDzcSTj3r68TfsOZ6epfM+vZD4o5PfpVpF8VrU0h6MFep1cXidDGWV78vMwlOt8dy2y/nV/7pBuyyL774C2/NPtVHJD7ao+Xbuou0MG3Ig2KKCndWLdAEI8y3Zcbkgh/sNpeGAafc0NTxbabR2OdoAO9IQaQ0+2ekA1vzqn+V7YjYC2z92CeWDawJtusqIZpBvzpuEBjob3vmkuDOFoAXQwB+u0bpsHOBs9CO/fR5vG5S3UD8bmAO0QDdEK2hyYF+YBXPeY/EdDdSL8RrflcLSD9CBWLURVB2+DsG9bKxd5t73cg4l/FJHaEezZJsMAAAAASUVORK5CYII=">
     <title>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</title>
     <style>
-        body{background:#1a2a32;font-family:monospace;padding:20px;color:#eee}
+        body{background:#1a2a32;font-family:monospace;padding:20px;color:#ffffff}
         .box{background:#1e2f38;padding:15px;margin-bottom:20px;border:0}
-        button{background:#3e8e62;color:white;border:none;padding:8px 16px;margin:5px;cursor:pointer;border:0}
+        button{background:#3e8e62;color:#ffffff;border:none;padding:8px 16px;margin:5px;cursor:pointer;border:0}
         button:disabled{opacity:0.5;cursor:not-allowed}
         pre{background:#021016;padding:10px;overflow-x:auto;font-size:12px;white-space:pre-wrap;word-break:break-all}
         .cmd-block{background:#021016;border-left:4px solid #57b984;margin:8px 0;padding:8px;font-size:12px;transition: border-left-color 0.2s ease}
@@ -33,39 +33,67 @@
         .speed-slider{width:150px}
         .speed-value{font-size:12px;min-width:45px}
 		input[type="range"]{border:1px;padding:0px}
-		input[type="file"]{background:#2a3d3f;border:1px solid #5f8b78;color:#eee;padding:8px 36px;cursor:pointer;font-family:monospace;font-size:12px}
-		input[type="file"]::file-selector-button{background:#3e8e62;border:none;color:white;padding:8px 18px;margin-right:12px;cursor:pointer;font-family:monospace;font-size:12px}
+		input[type="file"]{width:100%;max-width:100%;box-sizing:border-box;display:block;background:#2a3d3f;border:1px solid #5f8b78;color:#ffffff;padding:8px 36px;cursor:pointer;font-family:monospace;font-size:12px}
+		input[type="file"]::file-selector-button{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#3e8e62;border:none;color:#ffffff;padding:8px 18px;margin-right:12px;cursor:pointer;font-family:monospace;font-size:12px}
 		input[type="file"]::file-selector-button:hover{background:#4fa573}
 		.speed-slider{width:150px;height:4px;-webkit-appearance:none;background:#2a3d3f;outline:none}
 		.speed-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#57b984;cursor:pointer;border:none}
 		.speed-slider::-webkit-slider-thumb:hover{background:#7ecca2;transform:scale(1.2)}
-		select{background:#2a3d3f;border:1px solid #5f8b78;color:#eee;padding:8px 12px;cursor:pointer;font-family:monospace;font-size:12px}
+		select{background:#2a3d3f;border:1px solid #5f8b78;color:#ffffff;padding:8px 12px;cursor:pointer;font-family:monospace;font-size:12px}
 		select:hover{border-color:#57b984}
-		select:focus{outline:none;border-color:#57b984;box-shadow:0 0 0 1px rgba(87,185,132,0.3)}
-		select option{background:#1a2a32;color:#eee}
+		select:focus{outline:none;border-color:#57b984;box-shadow:0 0 0 1px #57b9844d}
+		select option{background:#1a2a32;color:#ffffff}
 		.mode-control input[type="radio"]{-webkit-appearance:none;width:16px;height:16px;border:1px solid #5f8b78;border-radius:50%;background:#2a3d3f;margin-right:4px;vertical-align:middle;cursor:pointer;position:relative;top:-1px}
 		.mode-control input[type="radio"]:checked{background:#57b984;border-color:#57b984;box-shadow:inset 0 0 0 2px #1a2a32}
 		.mode-control input[type="radio"]:hover{border-color:#57b984}
-		input[type="file"]:focus,select:focus{outline:none;border-color:#57b984;box-shadow:0 0 0 1px rgba(87,185,132,0.3)}
+		input[type="file"]:focus,select:focus{outline:none;border-color:#57b984;box-shadow:0 0 0 1px #57b9844d}
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0a151a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #3e8e62; border-radius: 4px; border: 1px solid #1a2a32; }
+        ::-webkit-scrollbar-thumb:hover { background: #57b984; }
+        ::-webkit-scrollbar-corner { background: #0a151a; }
+        * { scrollbar-width: thin; scrollbar-color: #3e8e62 #0a151a; }
+        .modal-overlay {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: #000000b3;z-index: 9999;display: flex;align-items: center;justify-content: center;}
+        .modal-overlay.hidden {display: none;}
+        .modal-box {background: #1e2f38;padding: 25px 30px;max-width: 700px;width: 90%;max-height: 80vh;overflow-y: auto;border-radius: 0;box-shadow: 0 10px 40px #00000099;color: #ffffff;position: relative;text-align: center;}
+        .modal-box h1 {margin-top: 0;color:#ff3030;}
+        .modal-box h3 {text-align: left;}
+        .modal-close-btn {background: #3e8e62;color: #ffffff;border: none;padding: 10px 30px;font-size: 16px;border-radius: 0;cursor: pointer;margin-top: 15px;transition: background 0.2s;}
+        .modal-close-btn:hover {background: #57b984;}
     </style>
 </head>
 <body>
+<div id="updateModal" class="modal-overlay">
+    <div class="modal-box">
+        <h1>邪恶的ZeroRaltal准备来一场屎尸级大更新</h1>
+        <h1>最近这段时间可能会出现一些BUG，见谅！</h1>
+        <br>
+        <h3>2026.8.10更新日志:</h3>
+        <h3>1.修复了在Linux系统用Firefox浏览器打开时,无法预览MIDI/NBS的BUG</h3>
+        <h3>2.修复了上传某些体积巨大的MIDI导致解析失败的BUG</h3>
+        <h3>3.解决了老版本NBS无法解析的问题</h3>
+        <h3>4.解决了一些提交BUG的用户</h3>
+        <br>
+        <h3>2026.8.11更新日志:</h3>
+        <h3>1.优化了预览音色，尽量还原游戏内的效果</h3>
+        <h3>2.优化了浏览器滚动条的样式，提升观感</h3>
+        <h3>3.修复了某些浏览器无法正常复制指令的BUG</h3>
+        <h3>4.解决了页面的一些文本提示表达不当/含糊不清的问题</h3>
+        <h3>5.解决了作者家里零食过多的问题</h3>
+        <h3>6.解决了作者和对象逛街时钱包余额不足的问题</h3>
+        <br>
+        <button class="modal-close-btn" id="modalCloseBtn">确定</button>
+    </div>
+</div>
 <div style="max-width:1400px;margin:0 auto">
     <h1>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</h1>
-	<h3 style="color:red">未经允许，严禁转载/二改，违者必究!</h3>
-	<div class="box">
-		<h2 style="color:yellow">邪恶的ZeroRaltal准备来一场屎尸级大更新</h2>
-		<h2 style="color:orange">有时这个工具可能出现一些BUG，见谅！</h2>
-		<h3>2026.8.10更新日志</h3>
-		<h3>1.修复了在Linux系统用Firefox浏览器打开时,无法预览MIDI/NBS的BUG</h3>
-		<h3>2.修复了上传某些体积巨大的MIDI导致解析失败的BUG</h3>
-		<h3>3.解决了老版本NBS无法解析的问题</h3>
-		<h3>4.解决了一些提交BUG的用户</h3>
-		<h3>5.解决了作者和对象逛街时钱包余额不足的问题</h3>
-	</div>
+	<h3 style="color:#ff3030">未经允许，严禁转载/二改，违者必究!</h3>
     <div class="box">
 		<label>上传(.nbs/.mid/.midi)文件: </label>
+        <br>
+        <br>
         <input type="file" id="fileInput" accept=".nbs,.mid,.midi">
+        <br>
         <div class="preview-controls">
             <span>预览播放:</span>
             <button id="playBtn" disabled>▶ 播放</button>
@@ -84,7 +112,7 @@
             <label><input type="radio" name="soundMode" value="harp"> Harp Only </label>
         </div>
         <div class="shift-control">
-            <label>八度移调 (仅影响指令生成): </label>
+            <label>八度移调: </label>
             <select id="octaveShift">
                 <option value="-4">-4 八度</option>
                 <option value="-3">-3 八度</option>
@@ -103,7 +131,7 @@
         <h4>1.聊天栏输入</h4>
 		<pre>/scoreboard objectives add t dummy</pre>
 		<pre>/scoreboard players set @a t 0</pre>
-		<h4>2.脉冲命令方块(初始复位/重置播放进度)</h4>
+		<h4>2.脉冲命令方块(初始复位与重置播放进度)</h4>
         <pre>scoreboard players set @a t 0</pre>
         <h4>3.循环命令方块</h4>
         <div id="cycleCmd"><pre>scoreboard players add @a t 1</pre></div>
@@ -400,6 +428,60 @@ const INSTRUMENT_WAVE_TYPE = {
     "didgeridoo":"sawtooth",
     "banjo":"triangle"
 };
+// 各音色的谐波幅度
+function getHarmonicsForSound(soundName) {
+    switch (soundName) {
+        case 'harp':
+            return [1.0, 0.75, 0.55, 0.40, 0.28, 0.20, 0.14, 0.10, 0.07, 0.05, 0.03, 0.02];
+        case 'flute':
+            return [1.0, 0.15, 0.60, 0.10, 0.40, 0.08, 0.25, 0.05, 0.15, 0.03, 0.10];
+        case 'bell':
+            return [1.0, 0.30, 0.80, 0.35, 0.65, 0.30, 0.50, 0.22, 0.40, 0.18, 0.30, 0.12, 0.20];
+        case 'chime':
+            return [1.0, 0.25, 0.75, 0.30, 0.55, 0.25, 0.45, 0.18, 0.35, 0.14, 0.25, 0.10];
+        case 'guitar':
+            return [1.0, 0.55, 0.35, 0.25, 0.18, 0.13, 0.10, 0.07, 0.05, 0.04];
+        case 'xylophone':
+        case 'iron_xylophone':
+            return [1.0, 0.65, 0.45, 0.35, 0.28, 0.22, 0.18, 0.14, 0.11, 0.09, 0.07, 0.05];
+        case 'banjo':
+            return [1.0, 0.60, 0.45, 0.32, 0.22, 0.16, 0.11, 0.08, 0.06, 0.04];
+        case 'pling':
+            return [1.0, 0.35, 0.70, 0.30, 0.50, 0.22, 0.38, 0.16, 0.28, 0.12];
+        case 'cow_bell':
+            return [1.0, 0.0, 0.33, 0.0, 0.20, 0.0, 0.14, 0.0, 0.11, 0.0, 0.09, 0.0, 0.07];
+        case 'didgeridoo':
+            return [1.0, 0.85, 0.70, 0.55, 0.40, 0.28, 0.20, 0.14, 0.10];
+        case 'bit':
+            return [1.0, 0.0, 0.33, 0.0, 0.20, 0.0, 0.14, 0.0, 0.11, 0.0, 0.09];
+        case 'bass':
+            return [1.0, 0.80, 0.65, 0.50, 0.38, 0.28, 0.20, 0.14, 0.10, 0.07];
+        default:
+            return [1.0, 0.60, 0.40, 0.28, 0.18, 0.12, 0.08, 0.06, 0.04];
+    }
+}
+// 缓存并生成 PeriodicWave 对象
+const periodicWaveCache = new Map();
+function getRichPeriodicWave(ctx, soundName) {
+    const cacheKey = soundName;
+    if (periodicWaveCache.has(cacheKey)) {
+        return periodicWaveCache.get(cacheKey);
+    }
+    const harmonics = getHarmonicsForSound(soundName);
+    const real = new Float32Array(256);
+    const imag = new Float32Array(256);
+    for (let i = 0; i < harmonics.length && i < 255; i++) {
+        real[i + 1] = harmonics[i];
+    }
+    try {
+        const wave = ctx.createPeriodicWave(real, imag);
+        periodicWaveCache.set(cacheKey, wave);
+        return wave;
+    } catch (e) {
+        console.warn('PeriodicWave 创建失败，使用降级方案', e);
+        return null;
+    }
+}
 function playHatSound(volume, duration=0.25) {
     const hatVolume = volume * 0.15;
     const bufferSize = previewContext.sampleRate * duration;
@@ -563,108 +645,222 @@ function applyInstrumentFilter(osc, gain, soundName, freq, volume, now) {
 function playNoteSynthesizer(note) {
     const soundName = getSoundFileName(note.instrument, previewHarpOnly);
     const octaveShiftPreview = parseInt(document.getElementById('octaveShift').value) || 0;
-    let shiftedKey = note.key + 12 + (octaveShiftPreview * 12);
+    let shiftedKey = note.key + (octaveShiftPreview * 12);
     const freq = 440 * Math.pow(2, (shiftedKey - 57) / 12);
     const velocity = Math.min(1, Math.max(0.3, note.velocity/100));
     const volume = previewVolume * velocity;
-    if(soundName==="hat"){ playHatSound(volume,0.25); return; }
-    if(soundName==="bd"){ playBdSound(volume * 5.00); return; }
-    if(soundName==="snare"){ playSnareSound(volume); return; }
-    const osc = previewContext.createOscillator();
-    const gain = previewContext.createGain();
-    const now = previewContext.currentTime;
-    osc.type = INSTRUMENT_WAVE_TYPE[soundName] || "sine";
-    osc.frequency.value = freq;
-    let output = gain;
+    if (soundName === "hat") { playHatSound(volume, 0.25); return; }
+    if (soundName === "bd") { playBdSound(volume * 5.00); return; }
+    if (soundName === "snare") { playSnareSound(volume); return; }
+    const ctx = previewContext;
+    const now = ctx.currentTime;
     if (soundName === "banjo") {
-        osc.type = "triangle";
-        const bandpass = previewContext.createBiquadFilter();
+        const wave = getRichPeriodicWave(ctx, 'banjo');
+        const osc = ctx.createOscillator();
+        if (wave) osc.setPeriodicWave(wave);
+        else osc.type = "triangle";
+        osc.frequency.value = freq;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(volume * 4.0, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        const bandpass = ctx.createBiquadFilter();
         bandpass.type = "bandpass";
         bandpass.frequency.value = 2200;
         bandpass.Q.value = 2.5;
         osc.connect(bandpass);
         bandpass.connect(gain);
-        const harmonicOsc = previewContext.createOscillator();
-        harmonicOsc.type = "triangle";
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(now + 0.5);
+        activeSources.push(osc);
+        const harmonicOsc = ctx.createOscillator();
+        const hWave = getRichPeriodicWave(ctx, 'banjo');
+        if (hWave) harmonicOsc.setPeriodicWave(hWave);
+        else harmonicOsc.type = "triangle";
         harmonicOsc.frequency.value = freq * 2;
-        const harmonicGain = previewContext.createGain();
+        const harmonicGain = ctx.createGain();
         harmonicGain.gain.setValueAtTime(0, now);
         harmonicGain.gain.linearRampToValueAtTime(volume * 0.5, now + 0.01);
-        harmonicGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        harmonicGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
         harmonicOsc.connect(harmonicGain);
         harmonicGain.connect(gain);
         harmonicOsc.start();
-        harmonicOsc.stop(now + 0.5);
+        harmonicOsc.stop(now + 0.4);
         activeSources.push(harmonicOsc);
-        const clickBuffer = previewContext.createBuffer(1, previewContext.sampleRate * 0.02, previewContext.sampleRate);
+        const clickBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.02, ctx.sampleRate);
         const clickData = clickBuffer.getChannelData(0);
         for (let i = 0; i < clickBuffer.length; i++) {
-            clickData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (previewContext.sampleRate * 0.005));
+            clickData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.005));
         }
-        const clickSource = previewContext.createBufferSource();
+        const clickSource = ctx.createBufferSource();
         clickSource.buffer = clickBuffer;
-        const clickFilter = previewContext.createBiquadFilter();
+        const clickFilter = ctx.createBiquadFilter();
         clickFilter.type = "bandpass";
         clickFilter.frequency.value = 3000;
-        const clickGain = previewContext.createGain();
+        const clickGain = ctx.createGain();
         clickGain.gain.value = volume * 0.4;
         clickSource.connect(clickFilter);
         clickFilter.connect(clickGain);
-        clickGain.connect(previewContext.destination);
+        clickGain.connect(ctx.destination);
         clickSource.start();
         clickSource.stop(now + 0.02);
         activeSources.push(clickSource);
-        output = gain; 
-    } else if (soundName === "pling") {
-        osc.type = "sine";
-        const lowpass = previewContext.createBiquadFilter();
+        setTimeout(() => {
+            const idx = activeSources.indexOf(osc);
+            if (idx > -1) activeSources.splice(idx, 1);
+        }, 600);
+        return;
+    }
+    if (soundName === "pling") {
+        const wave = getRichPeriodicWave(ctx, 'pling');
+        const osc = ctx.createOscillator();
+        if (wave) osc.setPeriodicWave(wave);
+        else osc.type = "sine";
+        osc.frequency.value = freq;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(volume * 1.2, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        const lowpass = ctx.createBiquadFilter();
         lowpass.type = "lowpass";
         lowpass.frequency.value = 3000;
         lowpass.Q.value = 1.5;
         osc.connect(lowpass);
         lowpass.connect(gain);
-        const lfo = previewContext.createOscillator();
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(now + 0.6);
+        activeSources.push(osc);
+        // LFO
+        const lfo = ctx.createOscillator();
         lfo.type = "sine";
         lfo.frequency.value = 6;
-        const lfoGain = previewContext.createGain();
+        const lfoGain = ctx.createGain();
         lfoGain.gain.value = 5;
         lfo.connect(lfoGain);
         lfoGain.connect(osc.frequency);
         lfo.start();
         lfo.stop(now + 0.8);
         activeSources.push(lfo);
-        const brightOsc = previewContext.createOscillator();
-        brightOsc.type = "sine";
+        const brightOsc = ctx.createOscillator();
+        const bWave = getRichPeriodicWave(ctx, 'pling');
+        if (bWave) brightOsc.setPeriodicWave(bWave);
+        else brightOsc.type = "sine";
         brightOsc.frequency.value = freq * 2;
-        const brightGain = previewContext.createGain();
+        const brightGain = ctx.createGain();
         brightGain.gain.setValueAtTime(0, now);
         brightGain.gain.linearRampToValueAtTime(volume * 0.35, now + 0.02);
-        brightGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        brightGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
         brightOsc.connect(brightGain);
         brightGain.connect(gain);
         brightOsc.start();
-        brightOsc.stop(now + 0.6);
+        brightOsc.stop(now + 0.5);
         activeSources.push(brightOsc);
-        output = gain; 
+        setTimeout(() => {
+            const idx = activeSources.indexOf(osc);
+            if (idx > -1) activeSources.splice(idx, 1);
+        }, 700);
+        return;
+    }
+    const osc = ctx.createOscillator();
+    const wave = getRichPeriodicWave(ctx, soundName);
+    if (wave) {
+        osc.setPeriodicWave(wave);
+    } else {
+        osc.type = "sawtooth";
+    }
+    osc.frequency.value = freq;
+    const gain = ctx.createGain();
+    let volMul = 0.7;
+    if (soundName === 'bass') volMul = 0.8;
+    else if (soundName === 'guitar') volMul = 0.9;
+    else if (soundName === 'flute') volMul = 0.8;
+    else if (soundName === 'bell' || soundName === 'chime') volMul = 2;
+    else if (soundName === 'xylophone' || soundName === 'iron_xylophone') volMul = 0.8;
+    else if (soundName === 'cow_bell') volMul = 0.7;
+    else if (soundName === 'didgeridoo') volMul = 1.3;
+    else if (soundName === 'bit') volMul = 1.5;
+    const finalVol = volume * volMul;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(finalVol, now + 0.01);
+    let decayTime = 0.55;
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + decayTime);
+    if (soundName === 'xylophone' || soundName === 'iron_xylophone') {
+        const wave = getRichPeriodicWave(ctx, soundName);
+        const osc = ctx.createOscillator();
+        if (wave) osc.setPeriodicWave(wave);
+        else osc.type = "sawtooth";
+        osc.frequency.value = freq;
+        const clickBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.03, ctx.sampleRate);
+        const clickData = clickBuffer.getChannelData(0);
+        for (let i = 0; i < clickBuffer.length; i++) {
+            clickData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.008));
+        }
+        const clickSource = ctx.createBufferSource();
+        clickSource.buffer = clickBuffer;
+        const clickFilter = ctx.createBiquadFilter();
+        clickFilter.type = "bandpass";
+        clickFilter.frequency.value = 3000;
+        clickFilter.Q.value = 2.0;
+        const clickGain = ctx.createGain();
+        clickGain.gain.value = volume * 0.25;
+        clickSource.connect(clickFilter);
+        clickFilter.connect(clickGain);
+        clickGain.connect(ctx.destination);
+        clickSource.start();
+        clickSource.stop(now + 0.03);
+        activeSources.push(clickSource);
+
+        // 3. 低通滤波，保留温暖音色
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 4000;
+        lp.Q.value = 1.0;
+        osc.connect(lp);
+        lp.connect(gain);
+
+        // 4. 包络：快速起音，适度衰减
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(volume * 0.7, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(now + 0.5);
+        activeSources.push(osc);
+    } else if (soundName === 'flute') {
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 4000;
+        lp.Q.value = 1.0;
+        osc.connect(lp);
+        lp.connect(gain);
+    } else if (soundName === 'bell' || soundName === 'chime') {
+        const bp = ctx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.value = 3000;
+        bp.Q.value = 1.2;
+        osc.connect(bp);
+        bp.connect(gain);
+    } else if (soundName === 'bass') {
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 600;
+        lp.Q.value = 0.8;
+        osc.connect(lp);
+        lp.connect(gain);
     } else {
         osc.connect(gain);
-        output = gain;
     }
-    let volumeMultiplier = 0.6;
-    if (soundName === "banjo") volumeMultiplier = 4.00;
-    if (soundName === "pling") volumeMultiplier = 1.20;
-    const finalVolume = volume * volumeMultiplier;
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(finalVolume, now + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
-    output.connect(previewContext.destination);
+    gain.connect(ctx.destination);
     osc.start();
-    osc.stop(now + 0.6);
+    osc.stop(now + decayTime + 0.05);
     activeSources.push(osc);
     setTimeout(() => {
         const idx = activeSources.indexOf(osc);
         if (idx > -1) activeSources.splice(idx, 1);
-    }, 700);
+    }, (decayTime + 0.1) * 1000);
 }
 function playNoteAtTick(tick){
     previewNotes.filter(n=>n.tick===tick).forEach(n=>playNoteSynthesizer(n));
@@ -744,6 +940,15 @@ function initProgressBar() {
     });
     window.addEventListener('mouseup', () => {
         isDragging = false;
+    });
+    progressBar.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = progressBar.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const percent = Math.min(1, Math.max(0, x / rect.width));
+        const newTick = Math.floor(percent * previewSongLength);
+        seekToTick(newTick);
     });
 }
 function startPreview(){
@@ -1011,6 +1216,19 @@ document.getElementById('download').addEventListener('click',()=>{
     a.download=`commandblock_export_${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(a.href);
+});
+window.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('updateModal');
+    var closeBtn = document.getElementById('modalCloseBtn');
+    modal.classList.remove('hidden');
+    closeBtn.addEventListener('click', function() {
+        modal.classList.add('hidden');
+    });
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
 });
 </script>
 </html>
