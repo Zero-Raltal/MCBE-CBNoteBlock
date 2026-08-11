@@ -56,7 +56,7 @@
         .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000b3;z-index:9999;display:flex;align-items:center;justify-content:center;}
         .modal-overlay.hidden{display:none;}
         .modal-box{background:#1e2f38;padding:25px 30px;max-width:700px;width:90%;max-height:80vh;overflow-y:auto;border-radius:0;box-shadow:0 10px 40px #00000099;color:#ffffff;position:relative;text-align:center;}
-        .modal-box h1{margin-top: 0;color:#ff3030;}
+        .modal-box h1{margin-top: 0;color:#ffff30;}
         .modal-box h3{text-align: left;}
         .modal-close-btn{background:#3e8e62;color:#ffffff;border:none;padding:10px 30px;font-size:16px;border-radius:0;cursor:pointer;margin-top:15px;transition:background 0.2s;}
         .modal-close-btn:hover{background:#57b984;}
@@ -68,10 +68,10 @@
         <h1>邪恶的ZeroRaltal</h1>
         <h1>准备来一场屎尸级大更新</h1>
         <h1>最近这段时间可能会</h1>
-        <h1>出现一些BUG，见谅！</h1>
-        <h2>对于NBS播放速度的解析，我遇到了一些问题</h2>
-        <h2>请优先使用MIDI！！！</h2>
         <button class="modal-close-btn" id="modalCloseBtn">确定</button>
+        <br>
+        <h3>2026.8.11 18:00更新日志:</h3>
+        <h2>1.修复了nbs解析器的7个BUG</h2>
         <br>
         <h3>2026.8.11 14:00更新日志:</h3>
         <h3>1.再次优化了预览音色，提升听感</h3>
@@ -153,6 +153,7 @@
 </body>
 <script>
 // MIDI解析器
+let previewTimePerTick = 50;
 class midiParser {
     static parse(buffer) {
         const u8 = new Uint8Array(buffer);
@@ -338,68 +339,355 @@ function parseMIDI(arrayBuffer) {
 }
 // NBS解析器
 function parseNBS(arrayBuffer) {
-    const view = new DataView(arrayBuffer);
-    let offset = 0;
-    const notes = [];
-    let version = 0;
-    let songLength = 0;
-    let songLayers = 0;
-    let tempo = 10.0;
-    let songName = "";
-    function readByte() { const v = view.getInt8(offset); offset += 1; return v; }
-    function readUByte() { const v = view.getUint8(offset); offset += 1; return v; }
-    function readShort() { const v = view.getInt16(offset, true); offset += 2; return v; }
-    function readUShort() { const v = view.getUint16(offset, true); offset += 2; return v; }
-    function readInt() { const v = view.getInt32(offset, true); offset += 4; return v; }
-    function readString() {
-        const len = readInt();
-        if (len <= 0 || len > 10000) return '';
-        let str = '';
-        for (let i = 0; i < len; i++) str += String.fromCharCode(readUByte());
-        return str;
-    }
-    function* jump() {
-        let value = -1;
-        while (true) {
-            const jumpVal = readShort();
-            if (jumpVal === 0) break;
-            value += jumpVal;
-            yield value;
+    class BufferWrapper {
+        buffer; viewer; nextByte = 0;
+        constructor(e) {
+            this.buffer = e;
+            this.viewer = new DataView(e);
+        }
+        resize(e) {
+            let t = this.nextByte;
+            this.nextByte += e;
+            this.buffer.resize(this.nextByte);
+            return t;
         }
     }
-    try {
-        const initialSongLength = readShort();
-        if (initialSongLength === 0) version = readByte();
-        else version = 0;
-        const defaultInstruments = version > 0 ? readByte() : 10;
-        songLength = version >= 3 ? readShort() : initialSongLength;
-        songLayers = readShort();
-        songName = readString();
-        const songAuthor = readString();
-        const originalAuthor = readString();
-        const description = readString();
-        tempo = readShort() / 100.0;
-        readByte(); readByte(); readByte();
-        readInt(); readInt(); readInt(); readInt();
-        readInt();
-        readString();
-        if (version >= 4) { readByte(); readByte(); readShort(); }
-        for (const currentTick of jump()) {
-            for (const currentLayer of jump()) {
-                const instrument = readByte();
-                const key = readByte();
-                const velocity = version >= 4 ? readByte() : 100;
-                const panningRaw = version >= 4 ? readByte() : 100;
-                const panning = panningRaw - 100;
-                const pitch = version >= 4 ? readShort() : 0;
-                if (key >= 0 && key <= 87) {
-                    notes.push({ tick: currentTick, layer: currentLayer, instrument: instrument, key: key, velocity: velocity, panning: panning, pitch: pitch });
+    class BufferReader extends BufferWrapper {
+        readByte() {
+            let e = this.viewer.getInt8(this.nextByte);
+            this.nextByte += 1;
+            return e;
+        }
+        readUnsignedByte() {
+            let e = this.viewer.getUint8(this.nextByte);
+            this.nextByte += 1;
+            return e;
+        }
+        readShort() {
+            let e = this.viewer.getInt16(this.nextByte, true);
+            this.nextByte += 2;
+            return e;
+        }
+        readInt() {
+            let e = this.viewer.getInt32(this.nextByte, true);
+            this.nextByte += 4;
+            return e;
+        }
+        readString() {
+            let e = this.readInt();
+            let t = "";
+            for (let r = 0; r < e; r++) {
+                let u = this.readUnsignedByte();
+                t += String.fromCodePoint(u);
+            }
+            return t;
+        }
+    }
+    class BufferWriter extends BufferWrapper {
+        constructor() {
+            super(new ArrayBuffer(0, { maxByteLength: 4294967295 }));
+        }
+        writeByte(e = 0) {
+            this.viewer.setInt8(this.resize(1), Math.floor(e));
+        }
+        writeUnsignedByte(e = 0) {
+            this.viewer.setUint8(this.resize(1), e);
+        }
+        writeShort(e = 0) {
+            this.viewer.setInt16(this.resize(2), e, true);
+        }
+        writeInt(e = 0) {
+            this.viewer.setInt32(this.resize(4), e, true);
+        }
+        writeString(e = "") {
+            this.writeInt(e.length);
+            for (let t of e) this.writeUnsignedByte(t.charCodeAt(0));
+        }
+    }
+    const builtInBuilder = {
+        0: { name: "Harp", soundFile: "harp.ogg" },
+        1: { name: "Double Bass", soundFile: "dbass.ogg" },
+        2: { name: "Bass Drum", soundFile: "bdrum.ogg" },
+        3: { name: "Snare Drum", soundFile: "sdrum.ogg" },
+        4: { name: "Click", soundFile: "click.ogg" },
+        5: { name: "Guitar", soundFile: "guitar.ogg" },
+        6: { name: "Flute", soundFile: "flute.ogg" },
+        7: { name: "Bell", soundFile: "bell.ogg" },
+        8: { name: "Chime", soundFile: "icechime.ogg" },
+        9: { name: "Xylophone", soundFile: "xylobone.ogg" },
+        10: { name: "Iron Xylophone", soundFile: "iron_xylophone.ogg" },
+        11: { name: "Cow Bell", soundFile: "cow_bell.ogg" },
+        12: { name: "Didgeridoo", soundFile: "didgeridoo.ogg" },
+        13: { name: "Bit", soundFile: "bit.ogg" },
+        14: { name: "Banjo", soundFile: "banjo.ogg" },
+        15: { name: "Pling", soundFile: "pling.ogg" },
+        16: { name: "Trumpet", soundFile: "trumpet.ogg" },
+        17: { name: "Exposed Trumpet", soundFile: "exposed_trumpet.ogg" },
+        18: { name: "Weathered Trumpet", soundFile: "weathered_trumpet.ogg" },
+        19: { name: "Oxidized Trumpet", soundFile: "oxidized_trumpet.ogg" }
+    };
+    const defaultInstrumentOptions = { name: "", soundFile: "", key: 45, pressKey: false };
+    class Instrument {
+        isBuiltIn = false;
+        name; soundFile; key; pressKey;
+        constructor(e = defaultInstrumentOptions) {
+            let t = { ...defaultInstrumentOptions, ...e };
+            this.name = t.name ?? "";
+            this.soundFile = t.soundFile ?? "";
+            this.pressKey = t.pressKey ?? false;
+            this.key = t.key ?? 45;
+        }
+    }
+    const builtInInstruments = Object.fromEntries(
+        Object.entries(builtInBuilder).map(([e, t]) => {
+            let r = new Instrument(t);
+            if (t.name === "Harp") r.pressKey = true;
+            r.isBuiltIn = true;
+            return [e, r];
+        })
+    );
+    class SongInstruments {
+        all = { ...builtInInstruments };
+        firstCustomIndex = +(Object.keys(builtInInstruments).at(-1) ?? 0) + 1;
+        getTotal() { return Object.keys(this.all).length; }
+        set(e, t) { this.all[e] = t; return t; }
+        add(e) { return this.set(this.getTotal(), e); }
+        create(e) { return this.add(new Instrument(e)); }
+        delete(e) { delete this.all[e]; }
+        *[Symbol.iterator]() {
+            for (let [e, t] of Object.entries(this.all)) yield [+e, t];
+        }
+    }
+    const defaultNoteOptions = { key: 45, velocity: 100, panning: 0, pitch: 0 };
+    class Note {
+        instrument = 0;
+        key; velocity; panning; pitch;
+        constructor(e, t = defaultNoteOptions) {
+            let r = { ...defaultNoteOptions, ...t };
+            this.instrument = e;
+            this.key = r.key;
+            this.velocity = r.velocity;
+            this.panning = r.panning;
+            this.pitch = r.pitch;
+        }
+    }
+    class LayerNotes {
+        all = {};
+        getTotal() { return Object.keys(this.all).length; }
+        getTicks() { return Object.keys(this.all).map(e => +e); }
+        set(e, t) { this.all[e] = t; return t; }
+        add(e, t) { return this.set(e, t); }
+        create(e, t, r = defaultNoteOptions) { return this.add(e, new Note(t, r)); }
+        delete(e) { delete this.all[e]; }
+        *[Symbol.iterator]() {
+            for (let [e, t] of Object.entries(this.all)) yield [+e, t];
+        }
+    }
+    const defaultLayerOptions = { name: undefined, isLocked: false, isSolo: false, volume: 100, stereo: 0 };
+    class Layer {
+        notes = new LayerNotes();
+        name; isLocked; isSolo; volume; stereo;
+        constructor(e = defaultLayerOptions) {
+            let t = { ...defaultLayerOptions, ...e };
+            this.name = t.name;
+            this.isLocked = t.isLocked;
+            this.isSolo = t.isSolo;
+            this.volume = t.volume;
+            this.stereo = t.stereo;
+        }
+    }
+    class SongLayers {
+        all = [];
+        getTotal() { return this.all.length; }
+        create() { let e = new Layer(); this.all[this.all.length] = e; return e; }
+        add(e) { this.all[this.all.length] = e; }
+        delete(e) { this.all.splice(e, 1); }
+        *[Symbol.iterator]() { for (let e of this.all) yield e; }
+    }
+    const defaultLoop = { enabled: false, startTick: 0, totalLoops: 0 };
+    const defaultAutoSave = { enabled: false, interval: 10 };
+    class Song {
+        #tempo = 10;
+        #timePerTick = 100;
+        getLength() {
+            let e = 0;
+            for (let t of this.layers.all) {
+                let r = +(Object.keys(t.notes.all).at(-1) ?? 0);
+                if (r > e) e = r;
+            }
+            return e;
+        }
+        version = 6;
+        name; author; originalAuthor; description; importName;
+        loop = { ...defaultLoop };
+        autoSave = { ...defaultAutoSave };
+        minutesSpent = 0;
+        leftClicks = 0;
+        rightClicks = 0;
+        blocksAdded = 0;
+        blocksRemoved = 0;
+        getDuration() { return this.getLength() * this.#timePerTick; }
+        getLastMeasure() { return Math.ceil(this.getLength() / this.timeSignature) * this.timeSignature; }
+        timeSignature = 4;
+        getTempo() { return this.#tempo; }
+        setTempo(e) { this.#tempo = e; this.#timePerTick = 20 / e * 50; }
+        getTimePerTick() { return this.#timePerTick; }
+        setTimePerTick(e) { this.#timePerTick = e; this.#tempo = 50 / e * 20; }
+        hasSolo() {
+            for (let t of this.layers.all) if (t.isSolo) return true;
+            return false;
+        }
+        instruments = new SongInstruments();
+        layers = new SongLayers();
+    }
+    function omitEmptyLayers(song, preservePrototype = true) {
+        let result = song;
+        if (preservePrototype) {
+            result = Object.assign({}, song);
+            Object.setPrototypeOf(result, Song.prototype);
+        }
+        for (let i = result.layers.all.length - 1; i > 0; i--) {
+            if (result.layers.all[i].notes.getTotal() === 0) {
+                result.layers.delete(i);
+            }
+        }
+        return result;
+    }
+    function fromArrayBuffer(arrayBuffer, options = { ignoreEmptyLayers: false }) {
+        const song = new Song();
+        const reader = new BufferReader(arrayBuffer);
+        let initialLength = reader.readShort();
+        if (initialLength === 0) {
+            song.version = reader.readByte();
+            reader.readByte();
+            if (song.version >= 3) initialLength = reader.readShort();
+        } else {
+            song.version = 0;
+        }
+        if (song.version > 6) throw new Error("This library does not support Note Block Songs created with versions greater than 6.");
+        const layerCount = reader.readShort();
+        song.name = reader.readString() || undefined;
+        song.author = reader.readString() || undefined;
+        song.originalAuthor = reader.readString() || undefined;
+        song.description = reader.readString() || undefined;
+        song.setTempo(reader.readShort() / 100);
+        song.autoSave.enabled = !!reader.readByte();
+        song.autoSave.interval = reader.readByte();
+        song.timeSignature = reader.readByte();
+        song.minutesSpent = reader.readInt();
+        song.leftClicks = reader.readInt();
+        song.rightClicks = reader.readInt();
+        song.blocksAdded = reader.readInt();
+        song.blocksRemoved = reader.readInt();
+        song.importName = reader.readString() || undefined;
+        if (song.version >= 4) {
+            song.loop.enabled = !!reader.readByte();
+            song.loop.totalLoops = reader.readByte();
+            song.loop.startTick = reader.readShort();
+        }
+        const rawNotes = [];
+        let tick = -1;
+        for (;;) {
+            const jump = reader.readShort();
+            if (jump === 0) break;
+            tick += jump;
+            let layer = -1;
+            for (;;) {
+                const layerJump = reader.readShort();
+                if (layerJump === 0) break;
+                layer += layerJump;
+                const instrument = reader.readByte();
+                const key = reader.readByte();
+                let velocity = 100, panning = 0, pitch = 0;
+                if (song.version >= 4) {
+                    velocity = reader.readByte();
+                    panning = reader.readUnsignedByte() - 100;
+                    pitch = reader.readShort();
+                }
+                rawNotes.push({ instrument, key, velocity, panning, pitch, layer, tick });
+            }
+        }
+        if (song.version > 0) {
+            for (let i = 0; i < layerCount; i++) {
+                const layer = song.layers.create();
+                const name = reader.readString();
+                layer.name = name || undefined;
+                if (song.version >= 4) {
+                    const flags = reader.readByte();
+                    if (flags === 1) layer.isLocked = true;
+                    if (flags === 2) layer.isSolo = true;
+                }
+                layer.volume = reader.readByte();
+                if (song.version >= 2) {
+                    layer.stereo = reader.readUnsignedByte() - 100;
                 }
             }
         }
-        return { notes, songLength, tempo, songName, songAuthor, version };
+        const customInstrumentCount = reader.readByte();
+        for (let i = 0; i < customInstrumentCount; i++) {
+            const name = reader.readString();
+            const soundFile = reader.readString();
+            const key = reader.readByte();
+            const pressKey = !!reader.readByte();
+            song.instruments.set(song.instruments.firstCustomIndex + i, new Instrument({ name: name || undefined, soundFile, key, pressKey }));
+        }
+        for (const noteData of rawNotes) {
+            let layer = song.layers.all[noteData.layer];
+            if (!layer) {
+                while (song.layers.all.length <= noteData.layer) {
+                    song.layers.create();
+                }
+                layer = song.layers.all[noteData.layer];
+            }
+            layer.notes.create(noteData.tick, noteData.instrument, {
+                key: noteData.key,
+                velocity: noteData.velocity,
+                panning: noteData.panning,
+                pitch: noteData.pitch
+            });
+        }
+        if (options.ignoreEmptyLayers) {
+            return omitEmptyLayers(song, false);
+        }
+        return song;
+    }
+    try {
+        const song = fromArrayBuffer(arrayBuffer);
+        const notes = [];
+        for (const layer of song.layers) {
+            for (const [tick, note] of layer.notes) {
+                if (note.key >= 0 && note.key <= 87) {
+                    notes.push({
+                        tick: tick,
+                        layer: 0,
+                        instrument: note.instrument,
+                        key: note.key,
+                        velocity: note.velocity,
+                        panning: note.panning || 0,
+                        pitch: note.pitch || 0
+                    });
+                }
+            }
+        }
+        let songLength = 0;
+        for (const layer of song.layers) {
+            const maxTick = Math.max(...layer.notes.getTicks(), 0);
+            if (maxTick > songLength) songLength = maxTick;
+        }
+        if (notes.length === 0) {
+            return { notes: [], songLength: 0, tempo: 10, songName: "", songAuthor: "", version: 0 };
+        }
+        return {
+            notes,
+            songLength: songLength + 1,
+            tempo: song.getTempo(),
+            timePerTick: 20 / song.getTempo() * 50,
+            songName: song.name || "",
+            songAuthor: song.author || "",
+            version: song.version
+        };
     } catch (e) {
-        console.error("解析出错:", e);
+        console.error("NBS 解析出错:", e);
         return { notes: [], songLength: 0, tempo: 0 };
     }
 }
@@ -1319,7 +1607,7 @@ function seekToTick(newTick) {
             } else {
                 playNoteAtTick(previewCurrentTick);
             }
-        }, 50 / previewSpeed);
+        }, previewTimePerTick / previewSpeed);
     }
 }
 function initProgressBar() {
@@ -1386,7 +1674,7 @@ function startPreview(){
         document.getElementById('tickDisplay').innerText=`Tick: ${previewCurrentTick} / ${previewSongLength}`;
         if(previewCurrentTick>=previewSongLength){ stopPreview(); document.getElementById('progressFill').style.width='0%';}
         else playNoteAtTick(previewCurrentTick);
-    },50/previewSpeed);
+    },previewTimePerTick/previewSpeed);
     document.getElementById('playBtn').textContent='⏸ 播放中'; document.getElementById('playBtn').classList.add('running'); document.getElementById('stopBtn').disabled=false;
 }
 function stopPreviewClean(){ activeSources.forEach(s=>{try{s.stop();}catch(e){}}); activeSources=[]; isPlaying=false; if(previewInterval){clearInterval(previewInterval); previewInterval=null;} }
@@ -1517,7 +1805,7 @@ function generateCommands(groups, octaveShift, harpOnly){
 }
 // 渲染
 let lastChainCmds=[];
-function renderResults(notes, songLength, songName, octaveShift, harpOnly){
+function renderResults(notes, songLength, songName, octaveShift, harpOnly, timePerTick) {
     if(!notes||notes.length===0) return false;
     const groups=groupNotesByInstrumentAndPitch(notes);
     const {cycleCmd,chainCmds}=generateCommands(groups,octaveShift,harpOnly);
@@ -1549,7 +1837,7 @@ function renderResults(notes, songLength, songName, octaveShift, harpOnly){
             });
         });
     }
-    previewNotes=notes; previewSongLength=songLength; previewHarpOnly=harpOnly;
+    previewNotes=notes; previewSongLength=songLength; previewHarpOnly=harpOnly; previewTimePerTick=timePerTick||50;
     document.getElementById('playBtn').disabled=false; document.getElementById('stopBtn').disabled=true;
     document.getElementById('tickDisplay').innerText=`Tick: 0 / ${songLength}`; document.getElementById('progressFill').style.width='0%';
     const durationSec=(songLength/20).toFixed(1);
@@ -1569,7 +1857,7 @@ function handleFile(arrayBuffer, fileType){
     currentNotes=result.notes;
     const octaveShift=parseInt(document.getElementById('octaveShift').value);
     const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
-    renderResults(result.notes, result.songLength, result.songName||(fileType==='midi'?'MIDI导入':''), octaveShift, harpOnly);
+    renderResults(result.notes, result.songLength, result.songName || (fileType === 'midi' ? 'MIDI导入' : ''), octaveShift, harpOnly, result.timePerTick);
 }
 // 自动解析
 document.getElementById('fileInput').addEventListener('change', (e)=>{
