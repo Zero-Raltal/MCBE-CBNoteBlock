@@ -65,8 +65,12 @@
 <body>
 <div id="updateModal" class="modal-overlay">
     <div class="modal-box">
-        <h1>邪恶的ZeroRaltal准备来一场屎尸级大更新</h1>
-        <h1>最近这段时间可能会出现一些BUG，见谅！</h1>
+        <h1>邪恶的ZeroRaltal</h1>
+        <h1>准备来一场屎尸级大更新</h1>
+        <h1>最近这段时间可能会</h1>
+        <h1>出现一些BUG，见谅！</h1>
+        <h2>对于NBS播放速度的解析，我遇到了一些问题</h2>
+        <h2>请优先使用MIDI！！！</h2>
         <button class="modal-close-btn" id="modalCloseBtn">确定</button>
         <br>
         <h3>2026.8.11 14:00更新日志:</h3>
@@ -93,7 +97,7 @@
     <h1>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</h1>
 	<h3 style="color:#ff3030">未经允许，严禁转载/二改，违者必究!</h3>
     <div class="box">
-		<label>上传(.nbs/.mid/.midi)文件: </label>
+		<label>上传(.mid/.midi/.nbs)文件: </label>
         <br>
         <br>
         <input type="file" id="fileInput" accept=".nbs,.mid,.midi">
@@ -453,8 +457,6 @@ function getHarmonicsForSound(soundName) {
             return [1.0, 0.0, 0.33, 0.0, 0.20, 0.0, 0.14, 0.0, 0.11, 0.0, 0.09, 0.0, 0.07];
         case 'didgeridoo':
             return [1.0, 0.85, 0.70, 0.55, 0.40, 0.28, 0.20, 0.14, 0.10];
-        case 'bass':
-            return [1.0, 0.80, 0.65, 0.50, 0.38, 0.28, 0.20, 0.14, 0.10, 0.07];
         default:
             return [1.0, 0.60, 0.40, 0.28, 0.18, 0.12, 0.08, 0.06, 0.04];
     }
@@ -481,49 +483,74 @@ function getRichPeriodicWave(ctx, soundName) {
         return null;
     }
 }
-function playHatSound(volume, duration = 0.15) {
-    const hatVolume = volume * 0.5;
+function playHatSound(volume, duration = 0.12) {
     const ctx = previewContext;
     const now = ctx.currentTime;
-    const noiseDuration = duration;
-    const bufferSize = ctx.sampleRate * noiseDuration;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.015));
+    const vol = volume * 0.5;
+    const bufSize = ctx.sampleRate * duration;
+    const buf1 = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const d1 = buf1.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) {
+        const env = Math.exp(-i / (ctx.sampleRate * 0.025));
+        d1[i] = (Math.random() * 2 - 1) * env;
     }
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = buffer;
-    const bandpass = ctx.createBiquadFilter();
-    bandpass.type = "bandpass";
-    bandpass.frequency.value = 5500;
-    bandpass.Q.value = 2.0;
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.value = hatVolume * 0.9;
-    noiseSource.connect(bandpass);
-    bandpass.connect(noiseGain);
-    noiseGain.connect(ctx.destination);
-    noiseSource.start(now);
-    noiseSource.stop(now + noiseDuration);
-    activeSources.push(noiseSource);
-    const osc = ctx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.value = 7000 + Math.random() * 1500;
-    const oscGain = ctx.createGain();
-    oscGain.gain.setValueAtTime(0, now);
-    oscGain.gain.linearRampToValueAtTime(hatVolume * 0.6, now + 0.002);
-    oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
-    osc.connect(oscGain);
-    oscGain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.06);
-    activeSources.push(osc);
-    setTimeout(() => {
-        const idx1 = activeSources.indexOf(noiseSource);
-        const idx2 = activeSources.indexOf(osc);
-        if (idx1 > -1) activeSources.splice(idx1, 1);
-        if (idx2 > -1) activeSources.splice(idx2, 1);
-    }, (noiseDuration + 0.1) * 1000);
+    const src1 = ctx.createBufferSource();
+    src1.buffer = buf1;
+    const filter1 = ctx.createBiquadFilter();
+    filter1.type = "bandpass";
+    filter1.frequency.value = 6000;
+    filter1.Q.value = 1.8;
+    const gain1 = ctx.createGain();
+    gain1.gain.value = vol * 0.7;
+    src1.connect(filter1);
+    filter1.connect(gain1);
+    gain1.connect(ctx.destination);
+    src1.start(now);
+    src1.stop(now + duration);
+    activeSources.push(src1);
+    const buf2 = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const d2 = buf2.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) {
+        const env = Math.exp(-i / (ctx.sampleRate * 0.01));
+        d2[i] = (Math.random() * 2 - 1) * env;
+    }
+    const src2 = ctx.createBufferSource();
+    src2.buffer = buf2;
+    const filter2 = ctx.createBiquadFilter();
+    filter2.type = "bandpass";
+    filter2.frequency.value = 10000;
+    filter2.Q.value = 2.2;
+    const gain2 = ctx.createGain();
+    gain2.gain.value = vol * 0.35;
+    src2.connect(filter2);
+    filter2.connect(gain2);
+    gain2.connect(ctx.destination);
+    src2.start(now);
+    src2.stop(now + duration);
+    activeSources.push(src2);
+    const osc1 = ctx.createOscillator();
+    osc1.type = "sine";
+    osc1.frequency.value = 7000 + Math.random() * 800;
+    const osc2 = ctx.createOscillator();
+    osc2.type = "sine";
+    osc2.frequency.value = 8500 + Math.random() * 800;
+    const gOsc1 = ctx.createGain();
+    const gOsc2 = ctx.createGain();
+    gOsc1.gain.setValueAtTime(0, now);
+    gOsc1.gain.linearRampToValueAtTime(vol * 0.2, now + 0.001);
+    gOsc1.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+    gOsc2.gain.setValueAtTime(0, now);
+    gOsc2.gain.linearRampToValueAtTime(vol * 0.15, now + 0.001);
+    gOsc2.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+    osc1.connect(gOsc1);
+    gOsc1.connect(ctx.destination);
+    osc2.connect(gOsc2);
+    gOsc2.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.05);
+    osc2.start(now);
+    osc2.stop(now + 0.05);
+    activeSources.push(osc1, osc2);
 }
 function playBdSound(volume) {
     const now = previewContext.currentTime;
@@ -683,62 +710,105 @@ function playNoteSynthesizer(note) {
     if (soundName === "snare") { playSnareSound(volume); return; }
     const ctx = previewContext;
     const now = ctx.currentTime;
-if (soundName === 'guitar') {
-    const ctx = previewContext;
-    const now = ctx.currentTime;
-
-    const sampleRate = ctx.sampleRate;
-    const delayTime = 1 / freq;
-    const delaySamples = Math.round(sampleRate * delayTime);
-    const bufferSize = 256;
-    const delayBuffer = new Float32Array(delaySamples);
-
-    // ★ 预填充噪声幅度提升到 0.25
-    for (let i = 0; i < delaySamples; i++) {
-        delayBuffer[i] = (Math.random() * 2 - 1) * 0.25;
-    }
-    let delayIndex = 0;
-
-    const processor = ctx.createScriptProcessor(bufferSize, 0, 1);
-
-    const filterCoeff = 0.5; 
-    const damping = 0.985; // 略微提高，保持延音丰富
-
-    processor.onaudioprocess = (event) => {
-        const output = event.outputBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            const current = delayBuffer[delayIndex];
-            const prevIndex = (delayIndex - 1 + delaySamples) % delaySamples;
-            const prev = delayBuffer[prevIndex];
-            const filtered = (current + prev) * filterCoeff;
-            const mixed = damping * filtered;
-            delayBuffer[delayIndex] = mixed;
-            output[i] = mixed;
-            delayIndex = (delayIndex + 1) % delaySamples;
+    if (soundName === 'bass') {
+        const ctx = previewContext;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.value = freq;
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 800;
+        lp.Q.value = 0.8;
+        osc.connect(lp);
+        const gain = ctx.createGain();
+        lp.connect(gain);
+        const noiseDuration = 0.03;
+        const bufSize = ctx.sampleRate * noiseDuration;
+        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.008));
         }
-    };
-
-    // ★ 包络峰值提升到 0.6，延音电平提升到 0.3
-    const envelope = ctx.createGain();
-    envelope.gain.setValueAtTime(0.6, now);
-    envelope.gain.exponentialRampToValueAtTime(0.3, now + 0.25);
-    envelope.gain.setValueAtTime(0.3, now + 0.7);
-    envelope.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
-
-    processor.connect(envelope);
-    envelope.connect(ctx.destination);
-
-    const stopTime = now + 0.9;
-    setTimeout(() => {
-        processor.disconnect();
-        envelope.disconnect();
-        const idx = activeSources.indexOf(processor);
-        if (idx > -1) activeSources.splice(idx, 1);
-    }, (stopTime - now) * 1000);
-
-    activeSources.push(processor);
-    return;
-}
+        const noiseSource = ctx.createBufferSource();
+        noiseSource.buffer = buf;
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = "bandpass";
+        noiseFilter.frequency.value = 1500;
+        noiseFilter.Q.value = 1.5;
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.value = volume * 0.2;
+        noiseSource.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        noiseSource.start(now);
+        noiseSource.stop(now + noiseDuration);
+        activeSources.push(noiseSource);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(volume * 0.4, now + 0.005); // 峰值0.8
+        gain.gain.exponentialRampToValueAtTime(volume * 0.3, now + 0.15); // 衰减到0.3
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6); // 最终归零
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.65);
+        activeSources.push(osc);
+        setTimeout(() => {
+            const idx = activeSources.indexOf(osc);
+            if (idx > -1) activeSources.splice(idx, 1);
+        }, 750);
+        return;
+    }
+    if (soundName === 'guitar') {
+        const ctx = previewContext;
+        const now = ctx.currentTime;
+        const sampleRate = ctx.sampleRate;
+        const delayTime = 1 / freq;
+        const delaySamples = Math.round(sampleRate * delayTime);
+        const bufferSize = 256;
+        const delayBuffer = new Float32Array(delaySamples);
+        for (let i = 0; i < delaySamples; i++) {
+            delayBuffer[i] = (Math.random() * 2 - 1) * 0.25;
+        }
+        let delayIndex = 0;
+        const processor = ctx.createScriptProcessor(bufferSize, 0, 1);
+        const filterCoeff = 0.5; 
+        const damping = 0.985;
+        processor.onaudioprocess = (event) => {
+            const output = event.outputBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const current = delayBuffer[delayIndex];
+                const prevIndex = (delayIndex - 1 + delaySamples) % delaySamples;
+                const prev = delayBuffer[prevIndex];
+                const filtered = (current + prev) * filterCoeff;
+                const mixed = damping * filtered;
+                delayBuffer[delayIndex] = mixed;
+                output[i] = mixed;
+                delayIndex = (delayIndex + 1) % delaySamples;
+            }
+        };
+        const envelope = ctx.createGain();
+        envelope.gain.setValueAtTime(0.6, now);
+        envelope.gain.exponentialRampToValueAtTime(0.3, now + 0.25);
+        envelope.gain.setValueAtTime(0.3, now + 0.7);
+        envelope.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+        const bassBoost = ctx.createBiquadFilter();
+        bassBoost.type = "lowshelf";
+        bassBoost.frequency.value = 200;
+        bassBoost.gain.value = 6;
+        processor.connect(envelope);
+        envelope.connect(bassBoost);
+        bassBoost.connect(ctx.destination);
+        const stopTime = now + 0.9;
+        setTimeout(() => {
+            processor.disconnect();
+            envelope.disconnect();
+            bassBoost.disconnect();
+            const idx = activeSources.indexOf(processor);
+            if (idx > -1) activeSources.splice(idx, 1);
+        }, (stopTime - now) * 1000);
+        activeSources.push(processor);
+        return;
+    }
     if (soundName === 'flute') {
         const ctx = previewContext;
         const now = ctx.currentTime;
@@ -1192,13 +1262,6 @@ if (soundName === 'guitar') {
             if (idx > -1) activeSources.splice(idx, 1);
         }, (decayTime + 0.1) * 1000);
         return;
-    } else if (soundName === 'bass') {
-        const lp = ctx.createBiquadFilter();
-        lp.type = "lowpass";
-        lp.frequency.value = 600;
-        lp.Q.value = 0.8;
-        osc.connect(lp);
-        lp.connect(gain);
     } else {
         osc.connect(gain);
     }
