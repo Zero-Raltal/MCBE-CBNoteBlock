@@ -1221,13 +1221,10 @@ window.addEventListener('DOMContentLoaded', function() {
     var modal = document.getElementById('updateModal');
     var closeBtn = document.getElementById('modalCloseBtn');
     modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
     closeBtn.addEventListener('click', function() {
         modal.classList.add('hidden');
-    });
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.classList.add('hidden');
-        }
+        document.body.style.overflow = '';
     });
 });
 </script>
