@@ -2,7 +2,7 @@
 
 > 基于 MIDI / NBS 文件，一键生成基岩版命令方块音乐序列
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/ZeroRaltal/MusicCommandGenerator)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)](./index.html)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
 ---
