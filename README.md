@@ -30,7 +30,7 @@
 ## 如何使用
 
 ### 1. 在线使用（推荐）
-直接访问作者发布的在线页面
+<a href="https://zero-raltal.github.io/MCBE-CBNoteBlock/" style="display:inline-block;background:#3e8e62;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;font-weight:bold;">点击前往</a>
 
 ### 2. 本地运行
 将 `index.html` 下载到本地，用现代浏览器（Chrome / Edge / Firefox / Safari）打开即可，无需任何后端环境。
