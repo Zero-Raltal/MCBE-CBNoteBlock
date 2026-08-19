@@ -1,0 +1,2440 @@
+<!--
+ ________   _______    ________   ________     
+|\_____  \ |\  ___ \  |\   __  \ |\   __  \    
+ \|___/  /|\ \   __/| \ \  \|\  \\ \  \|\  \   
+     /  / / \ \  \_|/__\ \   _  _\\ \  \\\  \  
+    /  /_/__ \ \  \_|\ \\ \  \\  \|\ \  \\\  \ 
+   |\________\\ \_______\\ \__\\ _\ \ \_______\
+    \|_______| \|_______| \|__|\|__| \|_______|
+
+                @Zero Raltal 2026
+-->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+	<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABUklEQVR42n2TT0vDQBDF8z1EibFgkqZaaQIWShWVCnopBalYoTc/gRdvoh68Cnryw475jZ3tZvvnMLxMdt/svLezUdZK5KRIG1EdtzXKo7yRh3GYxBLx8XJ3Ke/TC/mYDBSJ53F/Jew/CIfiWuDzcSTj3r68TfsOZ6epfM+vZD4o5PfpVpF8VrU0h6MFep1cXidDGWV78vMwlOt8dy2y/nV/7pBuyyL774C2/NPtVHJD7ao+Xbuou0MG3Ig2KKCndWLdAEI8y3Zcbkgh/sNpeGAafc0NTxbabR2OdoAO9IQaQ0+2ekA1vzqn+V7YjYC2z92CeWDawJtusqIZpBvzpuEBjob3vmkuDOFoAXQwB+u0bpsHOBs9CO/fR5vG5S3UD8bmAO0QDdEK2hyYF+YBXPeY/EdDdSL8RrflcLSD9CBWLURVB2+DsG9bKxd5t73cg4l/FJHaEezZJsMAAAAASUVORK5CYII=">
+    <title>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</title>
+    <style>
+        :root {
+            --bg-body: #1a2a32;
+            --bg-box: #1e2f38;
+            --bg-pre: #021016;
+            --bg-stats: #071016;
+            --bg-mode: #0a151a;
+            --bg-waterfall: #0a151a;
+            --bg-waterfall-label: #071016;
+            --bg-progress-track: #2a3d3f;
+            --bg-input: #2a3d3f;
+            --bg-select: #2a3d3f;
+            --bg-option: #1a2a32;
+            --bg-cmd-playing: #1a3a2a;
+            --bg-cmd-copied: #555555;
+            --bg-btn-copy: #2d5f55;
+            --bg-btn-primary: #3e8e62;
+            --bg-btn-primary-hover: #4fa573;
+            --bg-btn-preview: #3e5f6b;
+            --bg-btn-preview-running: #8a4f3c;
+            --bg-btn-close: #3e8e62;
+            --bg-btn-close-hover: #57b984;
+            --bg-modal: #1e2f38;
+            --bg-overlay: #000000b3;
+            --bg-scrollbar-track: #0a151a;
+            --bg-scrollbar-thumb: #3e8e62;
+            --bg-scrollbar-thumb-hover: #57b984;
+            --text-primary: #ffffff;
+            --text-secondary: #8abf9a;
+            --text-muted: #5f8b78;
+            --text-error: #ff6655;
+            --text-success: #57b984;
+            --text-modal-title: #ffff30;
+            --text-update-green: #72ff30;
+            --text-warning-red: #ff3030;
+            --text-tick: #8abf9a;
+            --border-accent: #57b984;
+            --border-cmd-playing: #ffaa44;
+            --border-cmd-copied: #666666;
+            --border-input: #5f8b78;
+            --border-input-focus: #57b984;
+            --border-select-hover: #57b984;
+            --border-waterfall-grid: #1a2a32;
+            --border-waterfall-current: #57b984;
+            --btn-text: #ffffff;
+            --progress-fill: #57b984;
+            --seq-bg: #2e5f4b;
+            --seq-text: #ffffff;
+            --waterfall-note-stroke: #ffffff;
+            --scrollbar-color: #3e8e62 #0a151a;
+            --shadow-modal: 0 10px 40px #00000099;
+        }
+        [data-theme="dark-yellow"] {
+            --bg-body: #0d0d0d;
+            --bg-box: #1a1a1a;
+            --bg-pre: #111111;
+            --bg-stats: #0d0d0d;
+            --bg-mode: #1a1a1a;
+            --bg-waterfall: #0d0d0d;
+            --bg-waterfall-label: #111111;
+            --bg-progress-track: #2a2a2a;
+            --bg-input: #2a2a2a;
+            --bg-select: #2a2a2a;
+            --bg-option: #1a1a1a;
+            --bg-cmd-playing: #2a2a1a;
+            --bg-cmd-copied: #666666;
+            --bg-btn-copy: #d4a020;
+            --bg-btn-primary: #d4a020;
+            --bg-btn-primary-hover: #ffe100;
+            --bg-btn-preview: #d4a020;
+            --bg-btn-preview-running: #772a21;
+            --bg-btn-close: #d4a020;
+            --bg-btn-close-hover: #f0c040;
+            --bg-modal: #1a1a1a;
+            --bg-overlay: #000000cc;
+            --bg-scrollbar-track: #1a1a1a;
+            --bg-scrollbar-thumb: #d4a020;
+            --bg-scrollbar-thumb-hover: #f0c040;
+            --text-primary: #ffffff;
+            --text-secondary: #f0d060;
+            --text-muted: #a09050;
+            --text-error: #ff6655;
+            --text-success: #f0c040;
+            --text-modal-title: #ffd700;
+            --text-update-green: #b0ff50;
+            --text-warning-red: #ff5050;
+            --text-tick: #f0d060;
+            --border-accent: #f0c040;
+            --border-cmd-playing: #fffebd;
+            --border-cmd-copied: #888888;
+            --border-input: #8a7a40;
+            --border-input-focus: #f0c040;
+            --border-select-hover: #f0c040;
+            --border-waterfall-grid: #2a2a2a;
+            --border-waterfall-current: #f0c040;
+            --btn-text: #ffffff;
+            --progress-fill: #f0c040;
+            --seq-bg: #d4a020;
+            --seq-text: #ffffff;
+            --waterfall-note-stroke: #ffffff;
+            --scrollbar-color: #d4a020 #1a1a1a;
+            --shadow-modal: 0 10px 40px #000000cc;
+        }
+        [data-theme="light-blue"] {
+            --bg-body: #eef3f7;
+            --bg-box: #ffffff;
+            --bg-pre: #f0f4f8;
+            --bg-stats: #e8ecf0;
+            --bg-mode: #e8ecf0;
+            --bg-waterfall: #eef3f7;
+            --bg-waterfall-label: #e0e4e8;
+            --bg-progress-track: #d0d8e0;
+            --bg-input: #ffffff;
+            --bg-select: #ffffff;
+            --bg-option: #ffffff;
+            --bg-cmd-playing: #d4e8f0;
+            --bg-cmd-copied: #d0d0d0;
+            --bg-btn-copy: #2c6fb0;
+            --bg-btn-primary: #2c6fb0;
+            --bg-btn-primary-hover: #4a90d9;
+            --bg-btn-preview: #2c6fb0;
+            --bg-btn-preview-running: #c8a060;
+            --bg-btn-close: #2c6fb0;
+            --bg-btn-close-hover: #4a90d9;
+            --bg-modal: #ffffff;
+            --bg-overlay: #00000066;
+            --bg-scrollbar-track: #d0d8e0;
+            --bg-scrollbar-thumb: #2c6fb0;
+            --bg-scrollbar-thumb-hover: #4a90d9;
+            --text-primary: #1a2a3a;
+            --text-secondary: #2c6fb0;
+            --text-muted: #5a7a8a;
+            --text-error: #cc3333;
+            --text-success: #2c6fb0;
+            --text-modal-title: #1a5a8a;
+            --text-update-green: #2a8a3a;
+            --text-warning-red: #cc3333;
+            --text-tick: #2c6fb0;
+            --border-accent: #2c6fb0;
+            --border-cmd-playing: #8dddff;
+            --border-cmd-copied: #999999;
+            --border-input: #8a9aa8;
+            --border-input-focus: #2c6fb0;
+            --border-select-hover: #2c6fb0;
+            --border-waterfall-grid: #d0d8e0;
+            --border-waterfall-current: #2c6fb0;
+            --btn-text: #ffffff;
+            --progress-fill: #2c6fb0;
+            --seq-bg: #2c6fb0;
+            --seq-text: #ffffff;
+            --waterfall-note-stroke: #ffffff;
+            --scrollbar-color: #2c6fb0 #d0d8e0;
+            --shadow-modal: 0 10px 40px #00000044;
+        }
+        body {
+            background: var(--bg-body);
+            font-family: monospace;
+            padding: 20px;
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .box {
+            background: var(--bg-box);
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 0;
+            transition: background 0.3s ease;
+        }
+        button {
+            background: var(--bg-btn-primary);
+            color: var(--btn-text);
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: 0;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        button:hover:not(:disabled) {
+            background: var(--bg-btn-primary-hover);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        pre {
+            background: var(--bg-pre);
+            padding: 10px;
+            overflow-x: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .cmd-block {
+            background: var(--bg-pre);
+            border-left: 4px solid var(--border-accent);
+            margin: 8px 0;
+            padding: 8px;
+            font-size: 12px;
+            transition: border-left-color 0.2s ease, background 0.3s ease;
+        }
+        .cmd-block.copied {
+            border-left-color: var(--border-cmd-copied);
+        }
+        .cmd-block.playing {
+            background: var(--bg-cmd-playing);
+            border-left-color: var(--border-cmd-playing);
+        }
+        .stats {
+            background: var(--bg-stats);
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .note-grid {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            color: var(--text-error);
+        }
+        .success {
+            color: var(--text-success);
+        }
+        .mode-control {
+            background: var(--bg-mode);
+            padding: 10px;
+            border: 0;
+            margin-bottom: 15px;
+            transition: background 0.3s ease;
+        }
+        .mode-control label {
+            margin-right: 20px;
+        }
+        .seq-num {
+            display: inline-block;
+            background: var(--seq-bg);
+            padding: 2px 8px;
+            margin-right: 10px;
+            font-size: 11px;
+            color: var(--seq-text);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .copy-btn {
+            background: var(--bg-btn-copy);
+            border: none;
+            padding: 4px 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: #ffffff;
+        }
+        .copy-btn.copied {
+            background: var(--bg-cmd-copied);
+        }
+        .cmd-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .preview-controls {
+            background: var(--bg-mode);
+            padding: 10px;
+            border: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            transition: background 0.3s ease;
+        }
+        .preview-controls button {
+            background: var(--bg-btn-preview);
+            color: #ffffff;
+        }
+        .preview-controls button.running {
+            background: var(--bg-btn-preview-running);
+        }
+        .progress-bar {
+            flex: 1;
+            min-width: 200px;
+            height: 8px;
+            background: var(--bg-progress-track);
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--progress-fill);
+            pointer-events: none;
+            transition: background 0.3s ease;
+        }
+        .progress-bar:hover {
+            height: 12px;
+        }
+        .tick-display {
+            font-size: 12px;
+            color: var(--text-tick);
+            min-width: 100px;
+            transition: color 0.3s ease;
+        }
+        .speed-slider {
+            width: 150px;
+        }
+        .speed-value {
+            font-size: 12px;
+            min-width: 45px;
+            color: var(--text-secondary);
+        }
+        input[type="range"] {
+            border: 1px;
+            padding: 0px;
+        }
+        input[type="file"] {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            display: block;
+            background: var(--bg-input);
+            border: 1px solid var(--border-input);
+            color: var(--text-primary);
+            padding: 8px 36px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 12px;
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        input[type="file"]::file-selector-button {
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: var(--bg-btn-primary);
+            border: none;
+            color: var(--btn-text);
+            padding: 8px 18px;
+            margin-right: 12px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 12px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background: var(--bg-btn-primary-hover);
+        }
+        .speed-slider {
+            width: 150px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--bg-progress-track);
+            outline: none;
+            transition: background 0.3s ease;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--progress-fill);
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s ease, transform 0.15s ease;
+        }
+        .speed-slider::-webkit-slider-thumb:hover {
+            background: var(--border-accent);
+            transform: scale(1.2);
+        }
+        .speed-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--progress-fill);
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s ease;
+        }
+        .speed-slider::-moz-range-thumb:hover {
+            background: var(--border-accent);
+        }
+        select {
+            background: var(--bg-select);
+            border: 1px solid var(--border-input);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 12px;
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        select:hover {
+            border-color: var(--border-select-hover);
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--border-input-focus);
+            box-shadow: 0 0 0 1px var(--border-input-focus);
+        }
+        select option {
+            background: var(--bg-option);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .mode-control input[type="radio"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--border-input);
+            border-radius: 50%;
+            background: var(--bg-select);
+            margin-right: 4px;
+            vertical-align: middle;
+            cursor: pointer;
+            position: relative;
+            top: -1px;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .mode-control input[type="radio"]:checked {
+            background: var(--border-accent);
+            border-color: var(--border-accent);
+            box-shadow: inset 0 0 0 2px var(--bg-body);
+        }
+        .mode-control input[type="radio"]:hover {
+            border-color: var(--border-select-hover);
+        }
+        input[type="file"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--border-input-focus);
+            box-shadow: 0 0 0 1px var(--border-input-focus);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-scrollbar-track);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-scrollbar-thumb);
+            border-radius: 4px;
+            border: 1px solid var(--bg-body);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bg-scrollbar-thumb-hover);
+        }
+        ::-webkit-scrollbar-corner {
+            background: var(--bg-scrollbar-track);
+        }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-color);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-overlay);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+        .modal-box {
+            background: var(--bg-modal);
+            padding: 25px 30px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 0;
+            box-shadow: var(--shadow-modal);
+            color: var(--text-primary);
+            position: relative;
+            text-align: center;
+            transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .modal-box h1 {
+            margin-top: 0;
+            color: var(--text-modal-title);
+            transition: color 0.3s ease;
+        }
+        .modal-box h3 {
+            text-align: left;
+            color: var(--text-primary);
+        }
+        .modal-close-btn {
+            background: var(--bg-btn-close);
+            color: var(--btn-text);
+            border: none;
+            padding: 10px 30px;
+            font-size: 16px;
+            border-radius: 0;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.2s ease;
+        }
+        .modal-close-btn:hover {
+            background: var(--bg-btn-close-hover);
+        }
+        .waterfall-wrapper {
+            background: var(--bg-waterfall);
+            padding: 0;
+            margin-top: 12px;
+            border: 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0;
+            transition: background 0.3s ease;
+        }
+        .waterfall-wrapper canvas {
+            display: block;
+            width: 100%;
+            height: 220px;
+            background: var(--bg-waterfall);
+            cursor: crosshair;
+            transition: background 0.3s ease;
+        }
+        .waterfall-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 4px 10px;
+            background: var(--bg-waterfall-label);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            border-top: 1px solid var(--border-waterfall-grid);
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .waterfall-label .left {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .waterfall-label .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+        .waterfall-label .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .waterfall-label .note-count {
+            color: var(--text-muted);
+            font-size: 11px;
+            transition: color 0.3s ease;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        h1, h3 {
+            color: var(--text-primary);
+        }
+        h3[style*="color:#ff3030"] {
+            color: var(--text-warning-red) !important;
+        }
+        h3[style*="color:#72ff30"] {
+            color: var(--text-update-green) !important;
+        }
+        .theme-control {
+            background: var(--bg-mode);
+            padding: 10px;
+            border: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: background 0.3s ease;
+        }
+        .theme-control label {
+            color: var(--text-primary);
+            font-size: 13px;
+            transition: color 0.3s ease;
+        }
+        .theme-control select {
+            background: var(--bg-select);
+            border: 1px solid var(--border-input);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            font-family: monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        .theme-control select:hover {
+            border-color: var(--border-select-hover);
+        }
+        .theme-control select:focus {
+            outline: none;
+            border-color: var(--border-input-focus);
+            box-shadow: 0 0 0 1px var(--border-input-focus);
+        }
+        .theme-control select option {
+            background: var(--bg-option);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+<div id="updateModal" class="modal-overlay">
+    <div class="modal-box">
+        <h1>大更新完成！！！</h1>
+        <button class="modal-close-btn" id="modalCloseBtn">确定</button>
+        <br>
+        <h3>2026.8.19更新日志:</h3>
+        <h3 style="color:#72ff30">1.增加了对自定义音色的支持，使用自定义音色仅改变指令生成，不改变预览效果</h3>
+        <br>
+        <h3>2026.8.16更新日志:</h3>
+        <h3>1.推出了CBND格式，可在播放效果完全一致的情况下，减少80%的文件体积</h3>
+        <h3>2.调整音色模式和移调时不会停止预览播放，实时更新</h3>
+        <h3>3.更详细的错误信息显示</h3>
+        <h3>4.预览播放时可以再不清空进度的情况下暂停</h3>
+        <h3>5.更平滑的播放速度控制</h3>
+        <h3>6.修复了由于音频上下文造成的内存泄漏问题</h3>
+        <h3>7.又吃了一包白象火鸡面</h3>
+        <br>
+        <h3>2026.8.14 20:00更新日志:</h3>
+        <h3 style="color:#72ff30">1.增加了两个新的主题，美化页面</h3>
+        <h3>2.修复了NBS解析中文作者名时乱码的BUG</h3>
+        <h3>3.将所有emoji更换为SVG图案</h3>
+        <br>
+        <h3>2026.8.14更新日志:</h3>
+        <h3>1.将MP3音源更换为OGG音源，并用Base91编码存储</h3>
+        <h3>2.吃了一包白象火鸡面</h3>
+        <br>
+        <h3>2026.8.13更新日志:</h3>
+        <h3 style="color:#72ff30">1.重写音符提取逻辑，预览和生成的指令播放效果与原NBS完全相同</h3>
+        <h3 style="color:#72ff30">2.重写MIDI转换逻辑，转换效果与NBS软件完全相同</h3>
+        <h3 style="color:#72ff30">3.优化预览音色，现在的预览音色与 NBS软件/游戏内 音色完全相同</h3>
+        <br>
+        <h3>2026.8.12 23:00更新日志:</h3>
+        <h3>1.优化了瀑布图的显示，自动调整音符范围</h3>
+        <br>
+        <h3>2026.8.12 20:00更新日志:</h3>
+        <h3 style="color:#72ff30">1.增加了一个瀑布图，方便预览音符</h3>
+        <h3>2.解决了拖动进度条和速度滑块导致播放卡顿的问题</h3>
+        <h3>3.优化了pling,bit的音色</h3>
+        <h3>4.让作者陪对象去五一广场当老吃家</h3>
+        <br>
+        <h3>2026.8.12 14:00更新日志:</h3>
+        <h3>1.支持解析V0/V1/V2版本的古早NBS</h3>
+        <h3>2.再次清理了一些死代码，缩小体积 </h3>
+        <br>
+        <h3>2026.8.12更新日志:</h3>
+        <h3>1.修复了由50/previewSpeed导致的预览速度不准</h3>
+        <h3>2.删除了一些没用到的函数，提高加载速度</h3>
+        <h3>3.解决了作者的手机电量不足的问题</h3>
+        <br>
+        <h3>2026.8.11 18:00更新日志:</h3>
+        <h3 style="color:#72ff30">1.修复了NBS解析器的7个BUG</h3>
+        <br>
+        <h3>2026.8.11 14:00更新日志:</h3>
+        <h3>1.再次优化了预览音色，提升听感</h3>
+        <h3>2.修复了在这个弹窗按F12导致页面崩溃的BUG</h3>
+        <h3>3.把这个弹窗的关闭按钮移到了顶部 </h3>
+        <br>
+        <h3>2026.8.11更新日志:</h3>
+        <h3>1.优化了预览音色，尽量还原游戏内的效果</h3>
+        <h3>2.优化了浏览器滚动条的样式，提升观感</h3>
+        <h3>3.修复了某些浏览器无法正常复制指令的BUG</h3>
+        <h3>4.解决了页面的一些文本提示表达不当/含糊不清的问题</h3>
+        <h3>5.解决了作者家里零食过多的问题</h3>
+        <h3 style="color:#72ff30">6.解决了作者和对象逛街时钱包余额不足的问题</h3>
+        <br>
+        <h3>2026.8.10更新日志:</h3>
+        <h3>1.修复了在Linux系统用Firefox浏览器打开时,无法预览MIDI/NBS的BUG</h3>
+        <h3>2.修复了上传某些体积巨大的MIDI导致解析失败的BUG</h3>
+        <h3>3.解决了老版本NBS无法解析的问题</h3>
+        <h3>4.解决了一些提交BUG的用户</h3>
+    </div>
+</div>
+<div style="max-width:1400px;margin:0 auto">
+    <h1>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</h1>
+	<h3 style="color:#ff3030">转载/二改请保留MIT声明，感谢理解!</h3>
+    <div class="theme-control">
+        <label>主题配色: </label>
+        <select id="themeSelect">
+            <option value="auto">自动</option>
+            <option value="classic">经典绿</option>
+            <option value="dark-yellow">神秘黄</option>
+            <option value="light-blue">晴空蓝</option>
+        </select>
+    </div>
+    <div class="box">
+		<label>上传(.mid/.midi/.nbs/.cbnd)文件: </label>
+        <br>
+        <br>
+        <input type="file" id="fileInput">
+        <br>
+        <div class="waterfall-wrapper" id="waterfallWrapper">
+            <canvas id="waterfallCanvas" height="220"></canvas>
+            <div class="waterfall-label">
+                <div class="left">
+                    <span class="note-count" id="wfNoteCount">-</span>
+                </div>
+                <div id="wfLegend" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+            </div>
+        </div>
+        <div class="preview-controls">
+            <span>预览播放:</span>
+            <button id="playBtn" disabled>-</button>
+            <button id="stopBtn" disabled>-</button>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span class="tick-display" id="tickDisplay">Tick: - / -</span>
+            <span>速度:</span>
+            <input type="range" id="previewSpeed" min="0.10" max="5.00" step="0.05" value="1.00" class="speed-slider">
+            <span class="speed-value" id="speedValue">1.00x</span>
+        </div>
+        <div class="mode-control">
+            <label>音色模式:</label>
+            <label><input type="radio" name="soundMode" value="multi" checked> 乐器映射 </label>
+            <label><input type="radio" name="soundMode" value="harp"> Harp Only </label>
+            <label><input type="radio" name="soundMode" value="custom"> 自定义音色 </label>
+            <input type="text" id="customSoundInput" value="note.pling" maxlength="64" disabled style="width:150px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+        </div>
+        <div class="shift-control">
+            <label>八度移调: </label>
+            <select id="octaveShift">
+                <option value="-4">-4 八度</option>
+                <option value="-3">-3 八度</option>
+                <option value="-2">-2 八度</option>
+                <option value="-1">-1 八度</option>
+                <option value="0" selected>+0 八度 </option>
+                <option value="1">+1 八度</option>
+                <option value="2">+2 八度</option>
+                <option value="3">+3 八度</option>
+                <option value="4">+4 八度</option>
+            </select>
+        </div>
+        <div class="stats" id="stats">等待上传文件...</div>
+    </div>
+    <div class="box">
+        <h4>1.聊天栏输入</h4>
+		<pre>/scoreboard objectives add t dummy</pre>
+		<pre>/scoreboard players set @a t 0</pre>
+		<h4>2.脉冲命令方块(初始复位与重置播放进度)</h4>
+        <pre>scoreboard players set @a t 0</pre>
+        <h4>3.循环命令方块</h4>
+        <div id="cycleCmd"><pre>scoreboard players add @a t 1</pre></div>
+        <h4>4.连锁命令方块</h4>
+        <div id="chainList" class="note-grid"><pre>尚未解析</pre></div>
+        <button id="exportCBND">导出为CBND序列</button>
+        <button id="copyCycle">复制循环指令</button>
+        <button id="copyAll">复制全部连锁指令</button>
+        <button id="download">导出为文本文件</button>
+    </div>
+</div>
+</body>
+<script>
+let originalFileName = '';
+let currentSongName = '';
+let previewTimePerTick = 50;
+let previewTimer = null;
+let isDragging = false;
+let dragTargetTick = 0;
+let isDraggingProgress = false;
+let wasPlayingBeforeDrag = false;
+//SVG 图标
+const ICON_PLAY=`<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle"><polygon points="5,3 19,12 5,21"/></svg>`;
+const ICON_PAUSE=`<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+const ICON_STOP=`<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle"><rect x="4" y="4" width="16" height="16"/></svg>`;
+const ICON_COPY=`<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
+const ICON_NOTE=`<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>`;
+const ICON_SUCCESS=`<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+const ICON_ERROR=`<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
+const ICON_CHECK=`<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+// MIDI解析器
+class midiParser {
+    static parse(buffer) {
+        const u8 = new Uint8Array(buffer);
+        const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+        if (u8[0]!==0x4D||u8[1]!==0x54||u8[2]!==0x68||u8[3]!==0x64) throw new Error('Missing MThd');
+        const format = dv.getUint16(8, false);
+        const trackCount = dv.getUint16(10, false);
+        const timeDivision = dv.getUint16(12, false);
+        let tracks = [];
+        let tempoEvents = [];
+        let offset = 14;
+        for (let t=0; t<trackCount; t++) {
+            if (u8[offset]!==0x4D||u8[offset+1]!==0x54||u8[offset+2]!==0x72||u8[offset+3]!==0x6B) 
+                throw new Error(`MTrk missing at track ${t}`);
+            const trackLen = dv.getUint32(offset+4, false);
+            const start = offset+8;
+            const end = start+trackLen;
+            let ptr = start;
+            let events = [];
+            let absTick = 0;
+            let runningStatus = null;
+            while (ptr < end) {
+                let delta=0, shift=0, b;
+                do { b = u8[ptr++]; delta = (delta<<7) | (b&0x7F); shift+=7; } while (b&0x80);
+                absTick += delta;
+                if (ptr>=end) break;
+                
+                let status = u8[ptr];
+                if (status < 0x80) {
+                    if (runningStatus===null) throw new Error('Running status without previous');
+                    status = runningStatus;
+                } else { 
+                    ptr++; 
+                    runningStatus = status; 
+                }
+                if (status === 0xFF) {
+                    const metaType = u8[ptr++];
+                    const len = this._readVarInt(u8, ptr);
+                    ptr += len.len;
+                    ptr += len.value;
+                    if (metaType === 0x51) {
+                        const dataPtr = ptr - len.value;
+                        let tempo = 0;
+                        for (let i=0; i<3; i++) tempo = (tempo<<8) | u8[dataPtr+i];
+                        tempoEvents.push({ tick: absTick, tempo });
+                    }
+                    continue;
+                }
+                if (status === 0xF0 || status === 0xF7) {
+                    const len = this._readVarInt(u8, ptr);
+                    ptr += len.len + len.value;
+                    continue;
+                }
+                if (status >= 0x80 && status < 0xF0) {
+                    const type = status>>4;
+                    const channel = status&0x0F;
+                    
+                    if (type===0x8||type===0x9) {
+                        const note = u8[ptr++];
+                        const vel = u8[ptr++];
+                        if (type===0x9 && vel>0) {
+                            events.push({ tick: absTick, type: 'noteOn', noteNumber: note, velocity: vel, channel });
+                        } else {
+                            events.push({ tick: absTick, type: 'noteOff', noteNumber: note, velocity: vel, channel });
+                        }
+                    } 
+                    else if (type===0xC) {
+                        const program = u8[ptr++];
+                        events.push({ tick: absTick, type: 'programChange', channel: channel, program: program });
+                    }
+                    else if (type===0xA) ptr+=2;
+                    else if (type===0xB) ptr+=2;
+                    else if (type===0xD) ptr+=1;
+                    else if (type===0xE) ptr+=2;
+                } else ptr++;
+            }
+            tracks.push(events);
+            offset = end;
+        }
+        return { format, trackCount, timeDivision, tracks, tempoEvents };
+    }
+    static _readVarInt(u8, offset) {
+        let val=0, len=0, b;
+        do { b = u8[offset+len]; val = (val<<7) | (b&0x7F); len++; } while (b&0x80);
+        return { value: val, len };
+    }
+}
+function midiTickToSeconds(tick, division, tempoEvents) {
+    let currentTempo = 500000;
+    let lastTempoTick = 0;
+    const teLength = tempoEvents.length;
+    for (let i = 0; i < teLength; i++) {
+        const te = tempoEvents[i];
+        if (te.tick <= tick) {
+            currentTempo = te.tempo;
+            lastTempoTick = te.tick;
+        } else {
+            break;
+        }
+    }
+    const ticksSinceTempo = tick - lastTempoTick;
+    const secondsPerTick = currentTempo / 1000000 / division;
+    let totalSeconds = 0;
+    let prevTick = 0;
+    let prevTempo = 500000;
+    for (let i = 0; i < teLength; i++) {
+        const te = tempoEvents[i];
+        if (te.tick > tick) break;
+        const ticksInSegment = te.tick - prevTick;
+        totalSeconds += ticksInSegment * (prevTempo / 1000000 / division);
+        prevTick = te.tick;
+        prevTempo = te.tempo;
+    }
+    totalSeconds += ticksSinceTempo * secondsPerTick;
+    return totalSeconds;
+}
+function parseMIDI(arrayBuffer) {
+    const parsed = midiParser.parse(arrayBuffer);
+    const timeDivision = parsed.timeDivision;
+    const tempoEvents = parsed.tempoEvents;
+    const tracks = parsed.tracks;
+    const allNotes = [];
+    let allEvents = [];
+    for (let t = 0; t < tracks.length; t++) {
+        const track = tracks[t];
+        for (let e = 0; e < track.length; e++) {
+            allEvents.push(track[e]);
+        }
+    }
+    allEvents.sort(function(a, b) {
+        if (a.tick === b.tick) return 0;
+        return a.tick - b.tick;
+    });
+    const activeNotes = new Map();
+    const channelInstruments = new Array(16).fill(0);
+    function closeNote(key) {
+        const noteOn = activeNotes.get(key);
+        if (!noteOn) return;
+        const startSec = midiTickToSeconds(noteOn.tick, timeDivision, tempoEvents);
+        const nbsTick = Math.round(startSec * 20);
+        let instrument;
+        if (noteOn.channel === 9) {
+            instrument = DRUM_TO_MINECRAFT[noteOn.noteNumber] || 4;
+        } else {
+            instrument = GM_TO_MINECRAFT[noteOn.instrument] || 0;
+        }
+        let noteKey = noteOn.noteNumber - 12;
+        if (noteOn.channel === 9) {
+            const pitchOffset = DRUM_PITCH_OFFSET[noteOn.noteNumber] || 0;
+            noteKey += pitchOffset;
+        } else {
+            const octaveOffset = GM_OCTAVE_OFFSET[noteOn.instrument] || 0;
+            noteKey += octaveOffset;
+        }
+        allNotes.push({
+            tick: nbsTick,
+            key: noteKey,
+            velocity: noteOn.velocity,
+            instrument: instrument,
+            channel: noteOn.channel
+        });
+        activeNotes.delete(key);
+    }
+    const lastEventTick = allEvents.length > 0 ? allEvents[allEvents.length - 1].tick : 0;
+    const eventsLength = allEvents.length;
+    for (let idx = 0; idx < eventsLength; idx++) {
+        const event = allEvents[idx];
+        if (event.type === 'programChange') {
+            channelInstruments[event.channel] = event.program;
+            continue;
+        }
+        if (event.type === 'noteOn') {
+            const key = event.channel + '_' + event.noteNumber;
+            if (activeNotes.has(key)) closeNote(key);
+            activeNotes.set(key, {
+                tick: event.tick,
+                velocity: event.velocity,
+                channel: event.channel,
+                noteNumber: event.noteNumber,
+                instrument: channelInstruments[event.channel]
+            });
+        }
+        else if (event.type === 'noteOff') {
+            const key = event.channel + '_' + event.noteNumber;
+            closeNote(key);
+        }
+    }
+    for (const key of [...activeNotes.keys()]) {
+        closeNote(key);
+    }
+    allNotes.sort(function(a, b) {
+        if (a.tick === b.tick) return 0;
+        return a.tick - b.tick;
+    });
+    let maxTick = 0;
+    if (allNotes.length > 0) {
+        maxTick = allNotes[allNotes.length - 1].tick + 20;
+    }
+    for (const note of allNotes) {
+        if (note.channel === 9) {
+            let key = note.key;
+            while (key < 42) key += 12;
+            while (key > 65) key -= 12;
+            note.key = key;
+        }
+    }
+    return { notes: allNotes, songLength: maxTick, songName: "MIDI导入" };
+}
+// NBS解析器
+function parseNBS(arrayBuffer) {
+    class BufferWrapper {
+        buffer; viewer; nextByte = 0;
+        constructor(e) {
+            this.buffer = e;
+            this.viewer = new DataView(e);
+        }
+    }
+    class BufferReader extends BufferWrapper {
+        readByte() {
+            let e = this.viewer.getInt8(this.nextByte);
+            this.nextByte += 1;
+            return e;
+        }
+        readUnsignedByte() {
+            let e = this.viewer.getUint8(this.nextByte);
+            this.nextByte += 1;
+            return e;
+        }
+        readShort() {
+            let e = this.viewer.getInt16(this.nextByte, true);
+            this.nextByte += 2;
+            return e;
+        }
+        readInt() {
+            let e = this.viewer.getInt32(this.nextByte, true);
+            this.nextByte += 4;
+            return e;
+        }
+        readString() {
+            const len = this.readInt();
+            const bytes = new Uint8Array(this.buffer, this.nextByte, len);
+            this.nextByte += len;
+            return new TextDecoder('utf-8').decode(bytes);
+        }
+    }
+    const builtInBuilder = {
+        0: { name: "Harp"},
+        1: { name: "Double Bass"},
+        2: { name: "Bass Drum"},
+        3: { name: "Snare Drum" },
+        4: { name: "Click"},
+        5: { name: "Guitar"},
+        6: { name: "Flute"},
+        7: { name: "Bell"},
+        8: { name: "Chime"},
+        9: { name: "Xylophone"},
+        10: { name: "Iron Xylophone"},
+        11: { name: "Cow Bell"},
+        12: { name: "Didgeridoo"},
+        13: { name: "Bit"},
+        14: { name: "Banjo"},
+        15: { name: "Pling"},
+        16: { name: "Trumpet"},
+        17: { name: "Exposed Trumpet"},
+        18: { name: "Weathered Trumpet"},
+        19: { name: "Oxidized Trumpet"}
+    };
+    const defaultInstrumentOptions = { name: "", soundFile: "", key: 45, pressKey: false };
+    class Instrument {
+        isBuiltIn = false;
+        name; soundFile; key; pressKey;
+        constructor(e = defaultInstrumentOptions) {
+            let t = { ...defaultInstrumentOptions, ...e };
+            this.name = t.name ?? "";
+            this.soundFile = t.soundFile ?? "";
+            this.pressKey = t.pressKey ?? false;
+            this.key = t.key ?? 45;
+        }
+    }
+    const builtInInstruments = Object.fromEntries(
+        Object.entries(builtInBuilder).map(([e, t]) => {
+            let r = new Instrument(t);
+            if (t.name === "Harp") r.pressKey = true;
+            r.isBuiltIn = true;
+            return [e, r];
+        })
+    );
+    class SongInstruments {
+        all = { ...builtInInstruments };
+        firstCustomIndex = +(Object.keys(builtInInstruments).at(-1) ?? 0) + 1;
+        getTotal() { return Object.keys(this.all).length; }
+        set(e, t) { this.all[e] = t; return t; }
+        add(e) { return this.set(this.getTotal(), e); }
+        create(e) { return this.add(new Instrument(e)); }
+        delete(e) { delete this.all[e]; }
+        *[Symbol.iterator]() {
+            for (let [e, t] of Object.entries(this.all)) yield [+e, t];
+        }
+    }
+    const defaultNoteOptions = { key: 45, velocity: 100, panning: 0, pitch: 0 };
+    class Note {
+        instrument = 0;
+        key; velocity; panning; pitch;
+        constructor(e, t = defaultNoteOptions) {
+            let r = { ...defaultNoteOptions, ...t };
+            this.instrument = e;
+            this.key = r.key;
+            this.velocity = r.velocity;
+            this.panning = r.panning;
+            this.pitch = r.pitch;
+        }
+    }
+    class LayerNotes {
+        all = {};
+        getTotal() { return Object.keys(this.all).length; }
+        getTicks() { return Object.keys(this.all).map(e => +e); }
+        set(e, t) { this.all[e] = t; return t; }
+        add(e, t) { return this.set(e, t); }
+        create(e, t, r = defaultNoteOptions) { return this.add(e, new Note(t, r)); }
+        delete(e) { delete this.all[e]; }
+        *[Symbol.iterator]() {
+            for (let [e, t] of Object.entries(this.all)) yield [+e, t];
+        }
+    }
+    const defaultLayerOptions = { name: undefined, isLocked: false, isSolo: false, volume: 100, stereo: 0 };
+    class Layer {
+        notes = new LayerNotes();
+        name; isLocked; isSolo; volume; stereo;
+        constructor(e = defaultLayerOptions) {
+            let t = { ...defaultLayerOptions, ...e };
+            this.name = t.name;
+            this.isLocked = t.isLocked;
+            this.isSolo = t.isSolo;
+            this.volume = t.volume;
+            this.stereo = t.stereo;
+        }
+    }
+    class SongLayers {
+        all = [];
+        getTotal() { return this.all.length; }
+        create() { let e = new Layer(); this.all[this.all.length] = e; return e; }
+        add(e) { this.all[this.all.length] = e; }
+        delete(e) { this.all.splice(e, 1); }
+        *[Symbol.iterator]() { for (let e of this.all) yield e; }
+    }
+    const defaultLoop = { enabled: false, startTick: 0, totalLoops: 0 };
+    const defaultAutoSave = { enabled: false, interval: 10 };
+    class Song {
+        #tempo = 10;
+        #timePerTick = 100;
+        getLength() {
+            let e = 0;
+            for (let t of this.layers.all) {
+                let r = +(Object.keys(t.notes.all).at(-1) ?? 0);
+                if (r > e) e = r;
+            }
+            return e;
+        }
+        version = 6;
+        name; author; originalAuthor; description; importName;
+        loop = { ...defaultLoop };
+        autoSave = { ...defaultAutoSave };
+        minutesSpent = 0;
+        leftClicks = 0;
+        rightClicks = 0;
+        blocksAdded = 0;
+        blocksRemoved = 0;
+        timeSignature = 4;
+        getTempo() { return this.#tempo; }
+        setTempo(e) { this.#tempo = e; this.#timePerTick = 20 / e * 50; }
+        setTimePerTick(e) { this.#timePerTick = e; this.#tempo = 50 / e * 20; }
+        instruments = new SongInstruments();
+        layers = new SongLayers();
+    }
+    function omitEmptyLayers(song, preservePrototype = true) {
+        let result = song;
+        for (let i = result.layers.all.length - 1; i > 0; i--) {
+            if (result.layers.all[i].notes.getTotal() === 0) {
+                result.layers.delete(i);
+            }
+        }
+        return result;
+    }
+    function fromArrayBuffer(arrayBuffer, options = { ignoreEmptyLayers: false }) {
+        const song = new Song();
+        const reader = new BufferReader(arrayBuffer);
+        let initialLength = reader.readShort();
+        if (initialLength === 0) {
+            song.version = reader.readByte();
+            reader.readByte();
+            if (song.version >= 3) initialLength = reader.readShort();
+        } else {
+            song.version = 1;
+        }
+        if (song.version > 6) throw new Error("This library does not support Note Block Songs created with versions greater than 6.");
+        const layerCount = reader.readShort();
+        song.name = reader.readString() || undefined;
+        song.author = reader.readString() || undefined;
+        song.originalAuthor = reader.readString() || undefined;
+        song.description = reader.readString() || undefined;
+        song.setTempo(reader.readShort() / 100);
+        song.autoSave.enabled = !!reader.readByte();
+        song.autoSave.interval = reader.readByte();
+        song.timeSignature = reader.readByte();
+        song.minutesSpent = reader.readInt();
+        song.leftClicks = reader.readInt();
+        song.rightClicks = reader.readInt();
+        song.blocksAdded = reader.readInt();
+        song.blocksRemoved = reader.readInt();
+        song.importName = reader.readString() || undefined;
+        if (song.version >= 4) {
+            song.loop.enabled = !!reader.readByte();
+            song.loop.totalLoops = reader.readByte();
+            song.loop.startTick = reader.readShort();
+        }
+        const rawNotes = [];
+        let tick = -1;
+        for (;;) {
+            const jump = reader.readShort();
+            if (jump === 0) break;
+            tick += jump;
+            let layer = -1;
+            for (;;) {
+                const layerJump = reader.readShort();
+                if (layerJump === 0) break;
+                layer += layerJump;
+                const instrument = reader.readByte();
+                const key = reader.readByte();
+                let velocity = 100, panning = 0, pitch = 0;
+                if (song.version >= 4) {
+                    velocity = reader.readByte();
+                    panning = reader.readUnsignedByte() - 100;
+                    pitch = reader.readShort();
+                }
+                rawNotes.push({ instrument, key:key+9, velocity, panning, pitch, layer, tick });
+            }
+        }
+        if (song.version > 0) {
+            for (let i = 0; i < layerCount; i++) {
+                const layer = song.layers.create();
+                const name = reader.readString();
+                layer.name = name || undefined;
+                if (song.version >= 4) {
+                    const flags = reader.readByte();
+                    if (flags === 1) layer.isLocked = true;
+                    if (flags === 2) layer.isSolo = true;
+                }
+                layer.volume = reader.readByte();
+                if (song.version >= 2) {
+                    layer.stereo = reader.readUnsignedByte() - 100;
+                }
+            }
+        }
+        const customInstrumentCount = reader.readByte();
+        for (let i = 0; i < customInstrumentCount; i++) {
+            const name = reader.readString();
+            const soundFile = reader.readString();
+            const key = reader.readByte();
+            const pressKey = !!reader.readByte();
+            song.instruments.set(song.instruments.firstCustomIndex + i, new Instrument({ name: name || undefined, soundFile, key, pressKey }));
+        }
+        for (const noteData of rawNotes) {
+            let layer = song.layers.all[noteData.layer];
+            if (!layer) {
+                while (song.layers.all.length <= noteData.layer) {
+                    song.layers.create();
+                }
+                layer = song.layers.all[noteData.layer];
+            }
+            layer.notes.create(noteData.tick, noteData.instrument, {
+                key: noteData.key,
+                velocity: noteData.velocity,
+                panning: noteData.panning,
+                pitch: noteData.pitch
+            });
+        }
+        if (options.ignoreEmptyLayers) {
+            return omitEmptyLayers(song, false);
+        }
+        return song;
+    }
+    try {
+        const song = fromArrayBuffer(arrayBuffer);
+        const notes = [];
+        for (const layer of song.layers) {
+            for (const [tick, note] of layer.notes) {
+                if (note.key >= 0 && note.key <= 87) {
+                    notes.push({
+                        tick: tick,
+                        layer: 0,
+                        instrument: note.instrument,
+                        key: note.key,
+                        velocity: note.velocity,
+                        panning: note.panning || 0,
+                        pitch: note.pitch || 0
+                    });
+                }
+            }
+        }
+        let songLength = 0;
+        for (const layer of song.layers) {
+            const maxTick = Math.max(...layer.notes.getTicks(), 0);
+            if (maxTick > songLength) songLength = maxTick;
+        }
+        if (notes.length === 0) {
+            return { notes: [], songLength: 0, tempo: 10, songName: "", songAuthor: "", version: 0 };
+        }
+        return {
+            notes,
+            songLength: songLength + 1,
+            tempo: song.getTempo(),
+            timePerTick: 20 / song.getTempo() * 50,
+            songName: song.name || "",
+            songAuthor: song.author || "",
+            version: song.version
+        };
+    } catch (e) {
+        console.error("NBS 解析出错:", e);
+        throw new Error('NBS 解析出错 ' + e.message);
+    }
+}
+// 乐器映射
+const GM_TO_MINECRAFT = [
+    0, 15, 15, 15, 0, 0, 5, 14, 7, 7, 7, 10, 10, 9, 7, 5,
+    6, 10, 6, 6, 6, 6, 6, 6, 5, 5, 0, 5, 1, 12, 12, 5,
+    1, 1, 1, 1, 5, 5, 1, 15, 6, 6, 6, 6, 6, 1, 0, 3,
+    6, 6, 6, 6, 6, 6, 6, 3, 6, 6, 6, 12, 6, 12, 12, 6,
+    6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    13, 6, 6, 6, 5, 6, 6, 1, 7, 6, 6, 6, 6, 6, 6, 8,
+    8, 6, 8, 5, 15, 6, 6, 5, 14, 14, 14, 5, 10, 6, 6, 6,
+    8, 11, 10, 9, 2, 3, 3, 8, 4, 6, 8, 6, 7, 2, 3, 3
+];
+
+const GM_OCTAVE_OFFSET = [
+    0, 0, 0, 0, 0, 0, 12, 0, -24, -24, -24, 0, 0, -24, -24, 12,
+    -12, 0, -12, -12, -12, -12, -12, -12, 12, 12, 0, 12, 24, 24, 24, 36,
+    24, 24, 24, 24, 12, 12, 24, 0, -12, -12, -12, -12, -12, 24, 0, 0,
+    -12, -12, -12, -12, -12, -12, -12, -12, -12, -12, -12, 24, -12, 24, 24, -12,
+    -12, -12, -12, -12, -12, -12, -12, -12, -12, -12, -12, -12, -12, -12, -12, -12,
+    0, -12, -12, -12, 12, -12, -12, 24, -24, -12, -12, -12, -12, -12, -12, -24,
+    -24, -12, -24, 12, 0, -12, -12, 12, 0, 0, 0, 12, 0, -12, -12, -12,
+    -24, -12, 0, -24, 0, 0, 0, -24, 12, -12, -24, 12, 24, 0, 0, 0
+];
+const DRUM_TO_MINECRAFT = {
+    24:13, 25:3, 26:4, 27:3, 28:3, 29:4, 30:4, 31:4, 32:4, 33:4,
+    34:8, 35:2, 36:2, 37:4, 38:3, 39:4, 40:3, 41:2, 42:3, 43:2,
+    44:3, 45:2, 46:3, 47:2, 48:2, 49:3, 50:2, 51:3, 52:3, 53:3,
+    54:4, 55:3, 56:11, 57:3, 58:4, 59:3, 60:4, 61:4, 62:4, 63:2,
+    64:2, 65:3, 66:3, 67:9, 68:9, 69:4, 70:4, 71:6, 72:6, 73:4,
+    74:4, 75:4, 76:4, 77:4, 78:12, 79:12, 80:4, 81:8, 82:3, 83:8,
+    84:8, 85:4, 86:2, 87:2
+};
+const DRUM_PITCH_OFFSET = {
+    24:39, 25:8, 26:25, 27:18, 28:27, 29:16, 30:13, 31:9, 32:6, 33:2,
+    34:17, 35:10, 36:6, 37:6, 38:8, 39:6, 40:4, 41:6, 42:22, 43:13,
+    44:22, 45:15, 46:18, 47:20, 48:23, 49:17, 50:23, 51:24, 52:8, 53:13,
+    54:18, 55:18, 56:5, 57:13, 58:2, 59:13, 60:9, 61:2, 62:8, 63:22,
+    64:15, 65:13, 66:8, 67:12, 68:5, 69:20, 70:23, 71:34, 72:33, 73:17,
+    74:11, 75:18, 76:10, 77:5, 78:25, 79:26, 80:16, 81:19, 82:22, 83:6,
+    84:15, 85:21, 86:14, 87:7
+};
+const INSTRUMENT_SOUND_MAP = {0:"harp",1:"bass",2:"bd",3:"snare",4:"hat",5:"guitar",6:"flute",7:"bell",8:"chime",9:"xylophone",10:"iron_xylophone",11:"cow_bell",12:"didgeridoo",13:"bit",14:"banjo",15:"pling"};
+const PERCUSSION_INSTRUMENTS = [2,3,4];
+const SAMPLE_BASE91 = {
+    "iron_xylophone": "zU3<UACAAAAAAAAAH|O`]AAAC\"uqT]T\",AtrG3K:wCAAAAeZzHAAB\"B\"#AiBv(B\"B\"[:JVc^ddAAAAAAAAAAY4,Qb1KAAA@QM,Js.y{~B\"B\"B\"B\"B\"B\"?Qftj>*Nx#JQAAAAn)gkk2~$TvWQhDAAC\"JAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAECAAAAAAW>1+NaAAAAawpmTUbv0QQUbalZH5r1E?tt$L`2(P5JfDqer4XvS<SExfaB{lm~O|_zR&QW>q*.=E$7?D}`0maO5(p}|!Y;y%It\"P7*y`VU~ZC\"VADAk6$J6P11v/`.xuKdJP.6k[Ao5FY49ml@%RfEJZm0S^:KkUJ\"(KAAAAO{l3LZTIRtqCLBAA0)0)sg~~;><r;):bcm#zQewsvYoH}j,Jm>?AJ*yCAAAAlxj>&&AAAAuNBA#;Sc`RBtC\"hqJX47G51fQepU<EeWC\"Q@eAAAAAI8#QBAAAx^BAgMCAKA_s6l\"cu1L4<WD`57V(l_@BAA5AGOAAmO1$aDAAv(?EY4rJ,>KAJAbnda@d@oLD{dGY5V.o:AyAAA*hDoMABtv:k_cBGAy!NNf@HaXY^6s1:KkUJ\"JAAA0kc,dZAAt~Dt}9`OuJC\"GT_^R.C{FrF[KCgBL|[QNcAA|;u[uAC\"v:kn/`fQhBNBz3Ld~6Xd~Ll.vCrBTB2yEA=ZAAAAU.+rSDAAY4ECk_;($:/,4kC\"pS,|G.0gyco:(alF]Kw(7L[AuWG8(AAApfT\"gB,ckUvWuXuP2unrpt0wGAB,bvMdI,$D6vc!It3BOaCA~*B@K!iiTD*h=)oJ`B3,1kBty(>2ET07tV:<oByKP(ROWF/dTcO*gBQsA0>h[M@Q=Zl{v~4yn$O]/jv(/KHAOauNn_|@CEk_)\">okUVNX>;Ck_*t3FeWv(DAAAA",
+    "pling": "zU3<UACAAAAAAAAANdR^bCAAC\"#f:FoA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAABtNa7V6AAA6yGP[>LX(~B\"B\"B\"B\"B\"B\"u(dBtrG3K:m$AAAA7Dm3yl[?:I\"$pNAAAAmAAAvj7J.Jc,7;l6s<*8ASNz2xajOc*%`+0P1oAG_y`AAABAUE?WK6<8roNFdPW)sE]tnZ#O+^/F,XIa/Le]}$E+$I,c<+aOk@TX5!KAC\"AAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAfDAAAAAAya#!&fAAAA6UXy2e++0cR)`EBk_ih2i&KC7RV%wbu#R1):qK|=)\"^J>)mQiR\"NZ{C6|<fcU0sdRe}i;*whJsf|T@MjcUM)I\"8H^0:pzJMAA0~3,|P_irj_{lB\"N(J|7sz~fAl%P}K)j)]9nL]t*(W}S_y7qzbeKb+)?!/|Ey34A**15{&*z*!DrT3jnvGK39=Zagi,5@hx{6Pv/8AJ[;cgJ&|YO2E1zLGH/S@dv=T|Q\"OVOA:dSAyu@DX~66*2bN=a7?R7@RAAsjCN$(y6\"vm&D:uIzFJ9D/U9B4G({B/SEF8)f|?*Gv6L)0XqTqC\"PI@&YwvxpZuFO.d\"+H+>ZIBt{apA.ohGi}ahRD4sHAEsfD5FgBAABt5GBt;B6:g*!^9bE\"[4AA#Q_opMwo(L|a5T_Emt9(DA]aBA`x6!!2@A_)UA)U{AcsJABNAAvQv(!Jsc,t/8DkE\"F)PEJ>IwMKgxaQ]Ef(QA))DAYEKA@Q)kQ&hZ2e<BT|KFH7?AGOBA#bEAx7*hEt,[HSCtD)HE)=VC1RAy^m4}.h&tIBVdAAuW^[aAO!6D4}K<DA9TC\"SAPzjnO@xdLh#imA}AD|FvrRIu,HtQm|1({z+>?+pAAAKK`.DA_NDAvyWAN~LAbA6Mhg|*C2LI{RCtFA\"<C?K6k+%HO1xCpT_ELAI@IAFLAA95_RlAAUGAkQrAX;DAoE+>5\"k7`RmimA#bHLA9$[_8MOoP}O{7>Ehdot9(2BdBAAN/R}@A1[WA3LrAl%AAUCk_dA>;*B%imAkc.ASqofBZ)L)]4/m`A8d\"JC+>>+0DAA:S7}OAP;hAP(0Bu{9AAExdot=BT||RCt@2/hw()%mUYD<fNwMz<*<J9~{eUE[AAA$Y3~CAF^]Ag$sA}}fAmt\"PD|}W+H>As)e~tH}Z69zl.5~W$~eA+br1cAAAE0mFDA8h}9)h4(Kc~lKt/&LvvB&[vrAAold|=f.#\"YPHu=3AyPv(&z^AAAd~fYSA,NAAG9GAHjDHSq@\"<9tPG>O/D\"qH=oree#YGt0P~d\"3UBAOAcAAAP^]m<BY4LALvVAn7AA.EoI<h#EtnCqv(slH%}He#4GtQDg3AZSjn4AVBAAN/&>IB^|ZA<s$B6yCArPv(a\"]kpImqvrEAqc}>ga8@HJ:b`ipCmWAAM3*BAAwgp}C\"ghD\"q#BtF82X~.vrFj7(3MqCaCqy\")Rn^7f,&zJgoF%N%(DtcwCA;v@nBA@QLA<c\"lX\"in2\"RE*Bk0eJpyv(NckA1CS/l_nsA4#%>Mn0h`0WIBJVZXSABtZH4ExdIAy&KBcsN/Gt=YC0f5mn%(<6?DD_[wqUeFu6O/T|BZsM$dlzuG$Ci:&a{ZTtxBwP:cEA>A~57(aBEC1R(,_H1hz:S,V,[{kf<P7,8yq7V+6+U;6[9P_eJ}0P^6Z]lX#pka.=O)k1_KknF\"HiHgNi.p>Mw.kq*]<)3FstUY<sKEFG`rCtes#+9O4^|M6f=f7N>eq>+:RT2ha@f0n^$s8q$j|b)2{JW`)?!e/P`ovi.zEw(gU6][8A",
+    "snare": "zU3<UACAAAAAAAAAMg5!iBAAAA}PPqgA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAABt+lI$vAAABtC04#LX(~B\"B\"B\"B\"B\"B\"u(dBtrG3K:m$AAAA7Dm3yl[?:I\"$pNAAAAmAAAvj7J.Jc,7;l6s<*8ASNz2xajOc*%`+0P1oAG_y`AAABAUE?WK6<8roNFdPW)sE]tnZ#O+^/F,XIa/Le]}$E+$I,c<+aOk@TX5!KAC\"AAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAcAAAAAAAY$VjBOAAAA.iFE>D;B|KKU&9]SOZ]0I\"<REg.Z,6Vk/!V1W$%[D#*)p6258b?*{;nZ/[UtL^\"$K6N|STp[#EQ.%G2U5^n[5[{~u|8*opIIX$>TnppcQFc2Y`$hGAue^rd2y`O<!A(#11B:YVQB2ockd;uc2rXAFdMjSCRI4^/7iYk|u~2m(NyFV86<7Ps=vXqV^f\"Ej8DS1;~(6{1g?[.kp^ADSQzR2O;|dmD2Q*rA>2xZ:;q|n)Nps;GSvt``;n+NZ_uKqUU7&8o}N#9i3Bp]X8n3zY6+e0H#7:_]T.)A<Mx**!X&k{H78?0}B6i[4%p,siOgF>w*KVVNf*gHquH,qQUIX*%<o?%QIC?,(ftr+qx#u*o?T?>f,`(+1^7{fJ^hM)GHAAriY~BZS%Ft)d}PC~Z1ou9S2I=6.Z{H1r\"Ot}V?ndU@Q#|2NxlF007<h2S#G}ns@!C_h{VUlw3ULcp4^D=@k+%yK9(H6r#>AA",
+    "banjo": "zU3<UACAAAAAAAAAMk/QxCAAAAN|%!zA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAAC\"[0noeAAAT|%clqzL@~B\"B\"B\"B\"B\"B\")h!\"j>*Nx#JQAAAAn)gkk2~$TvWQhDAAC\"JAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAzBAAAAAAu2U(8gAAAA_!i$KRt[Tc`c4GSt#d1KZRd$U/Xnf4qB.T:exoGVMb,.DOL4pK\"~fRJ&^T~YzH.143R8T.6<|/w9{cA@;9+}{k|r*~ErP^oUzXAif~NwA/nSjoGO4_|W=^|/U$O)@)s4i(1Y^F;<r6|fHgjUqk,g3Uq5s.dGEd$k2cV2U!g<|>t!DA^|F?&2bnI[qR0t}lnC}xBAcA2K`ER9D7fo10rD1)eWUd6yd2LDT|*Pv(]B)_3H%W1E>?K?&teP>A2VDR8VFJ^T)8yImZf?.WVA9~nni5sh$mAzbt|/$VJVyKAAd8YBT@dRp}&%kX_cRKuW.Dk_jEAAUB%hqB,;=BE@Mt9_sbPv2PrHoB~\"Z\"dA4(0dDt_RQl8`eX`g+U<`P;OtLACUDt]O4Al~N?4TdE.T]YBtOj_A.}PA\"iyA~NH7Bbf?_C\">}2k\"?AsA0CAk7Ya\"P!Wjcl+>:5/<rq+5b9>d{cuV$V3r[9YL8`uAi6Oe%OXChNDAKWv(65:`GozGhh9`dQhTGC]W~82\"LYmK3A#7Am^|VtgBeG>T[oT|zj^*[ldOw5qflflr0k<>IA&dCBMcI^]AVDJ`^D+>!Zk_+>C@9SeZA$EimgTqtYyGaA!?A^aB!QlBtn2dKFgIk,N0)p2UypS8WV$C#DbHkJcA=5!h5Y*hVCJJt~gNiKOt>DS}/h9rRwf!YIQTjKo.,nA$CAmtl+GA)UQ8.d_l}HI*)}D>eAGtEtdxHF*hP]i>_Q9Zl.D\"|B^30tdyKA0gjn)O=BgkF5x(!D!)7B1Bs\"m4!DQIY4rCCw8W&d5):<dW7xQIJF?7UEtr@djq*u[\"Sh%({\"DEzzHK!>IT2B%haRem1wuvYZhdv(JG`h3n}#UV}&p4k_F\"*fE)vN\"BS3(5O?[]8#+D|cj?QA8%a+0W;h2b!g7iZmcx_z*7Eg.A\"*:tO\"T3K.)];mQsxAL$,b|~E!b?Z~)g&bc{uwVFd~@Vz>8%o]>q|ITsmk(S%ULoOv};_*B(2m`IY?CA)yV0b0v1?&_pHA",
+    "bd": "zU3<UACAAAAAAAAAuq[_,AAABthF5!kA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAABt09i~oAAAk_.P5FLX(~B\"B\"B\"B\"B\"B\"u(dBtrG3K:m$AAAA7Dm3yl[?:I\"$pNAAAAmAAAvj7J.Jc,7;l6s<*8ASNz2xajOc*%`+0P1oAG_y`AAABAUE?WK6<8roNFdPW)sE]tnZ#O+^/F,XIa/Le]}$E+$I,c<+aOk@TX5!KAC\"AAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIA<AAAAAAAB`*?;MAAAA>[$O`EZ*@Gr#ckt8@Ls8:>o_<VPNe[cSp;vbgSc.Dn2^@:ed*Mml;S@Pz@>kt;K[n3Z$%&5sN+B@B`NZpSv<baje9lz$O=Ow5IPGYReMwi8YF*dxXLB_&KCuC9GtD\"$QUo<$5o{4.6wxIF6!2{D^JGeST/BhAl`#,zkVrQN/!]M2aeDAP!c[KA*BC\"V%aI%%>g>crEcxE(q{).wAK*hN[DwQl^hatdv(ntoU1mAAFAp1p(2BBt,L~gwmt7ZBItN{[~|yBAEi$H8MMH/l+)4z$LuWQhEPWHDC*MComGQH]h4HrFVf1F+>%r:4JCWPBAR#XAsGwDa+U4^x.0.0.0]2a[M$H##B`Omc`7$;|r_7N5K5=V>bdw_2o_%TjnUA5iX(CG+>BAAAA",
+    "xylophone": "zU3<UACAAAAAAAAA^Dm$pCAAC\"kaaFsA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAABtA):{7AAA[9:*##OX(~B\"B\"B\"B\"B\"B\"u(dBtrG3K:m$AAAA7Dm3yl[?:I\"$pNAAAAmAAAvj7J.Jc,7;l6s<*8ASNz2xajOc*%`+0P1oAG_y`AAABAUE?WK6<8roNFdPW)sE]tnZ#O+^/F,XIa/Le]}$E+$I,c<+aOk@TX5!KAC\"AAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIA4AAAAAAA;H:mPQAAAAkv#%XEa{v8YK2tD+:O^/;%EDWu?A1x<Du2gu:nRx5f$fO57SE,QhPq=yqo`ioHZc:86}lKP=rnCdF2dHvSP2w@c4*s;sb~f@HMp#7y@N5la$*wV3:W8^/pY4eR+iF@ptNAUt5x.#uWB`?XsJ$KXj9xP(]~6I<D5FR9=JFW=K)s5*TWO}g])+Bt^!ZR>)H6M&M^,A.Y9jjpFm&{z6s=7&tCCel\"9M*[w+<T,?$b}~Ny5E4dm#SXiAAACoMZimeRWe4oN,@wkwV)Y*}ebZ$7^JlONW(hX$}IX>a/OAryQ!@Q:(Hj8A[X1=`^m<${dkAj9m{eLA1bJ~5FMYv:=m.?9+0Py4TJj~xDAA=JC,^F%DMceGUJ^O5FG$Eu_ys`a(6FkpICCDD|IUY4HUp!YIBHZ(]YVW(M}q.#M\"GlVA+!;QCDAAi6~]*VCAWoWAb(b3Y]3}AGNcM/cHFhW6JV{%%*]z\"2nnVYdG3;f4%$HPUqaYh6RA6C@Av(VAA",
+    "bell": "zU3<UACAAAAAAAAA3T,.LCAAC\"47e_rA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAAC\"4`PKcAAABt%XfGzL@~B\"B\"B\"B\"B\"B\")h!\"j>*Nx#JQAAAAn)gkk2~$TvWQhDAAC\"JAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAiCAAAAAAm>FVCfAAAAw}2;1XC]AS&qLaMa=t%zmx<MLb8I2U3pcn;%qD8)PLP\"MT9S4Mban_cC>*Tg(_\"PNABt_#``lh7kW`uKye[b.n<2e|_M;qY{SZB$EgZ;g:m3y\"Uev*l}03y2#{k>9Vo_uEBt6kxAZnIIC\"w*[NWPmu6@$p<DAA^XI$fkR5aO:C6{:&AAq{[&W8CtZ#lp1>1>^&,.[C6hM;?Bs8TKX;u{VE,1FAAAC\"Ld*BAAAAs/.]cic]r]OA?Lv(uD|fz[1}Q8|3&mP.nelAhviBDPJFeq_BAAAAUEdGAAAA|;/D&!w:pP+>N\"p:Z6b_>^_V&H3[7$G8DtNAM8(HEyJCAAAA@QTEFAAA+>bMk_A4BASDaATnu$M}z[[|s(A}/JDev(!_[9KA~9BBAAAAT|,AAAAAxF6yJAe\"Z:jpR|?sOWC,U/I/g8SA#)vWH0QqDAAAAA]6KArP$QC\"\"fHHk_`&}a.`b~,sw`$r+VCew(+>w[t[KAAAk_8B4Y.>qT1kLAjP_f5|x}hnYyQEe(z8KAZB@BYYWAAAAAAAHLBA>L[9_9BA7ZK[$>$=t{~Oo_@E*D~lAAnSN[TEAAAABtaBBtXA1[:?v(LANZ$S|~y}_>{rZrz8mM~lAAZc+}!DAAAAMcgBv(\"D*hMUzX:&Zdf~)~utQV%OHeD\"Z4_3gEAAN/AA8YBAfAv(k1{OT|kat_<~DEk.m3O8uWi4_3q~uAAA4}fA^|xA1[</E)v(BD;t0[PQ_U>(+Iv0@QbSX#gIRAAA[9ZCuWiHAA!TJ.1(}.d0i.2D_&FAN/|L!r#EAAAA7KwkCt.Z8AIaZ1uW&:p@0M&C[=OAT*C`fuWg:}@{$i3W&v+Yw</k5P=GT>v^rUi@o^^P]Ni@wr;=LsRJ,]}]0Nf2Em</Y7nm$9;Mhmb)Y]Y7_P",
+    "bit": "zU3<UACAAAAAAAAAsMUjxCAAAAJ){gnA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAAAA^c1peAAA*hr/Gv0L@~B\"B\"B\"B\"B\"B\")h!\"j>*Nx#JQAAAAn)gkk2~$TvWQhDAAC\"JAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAjBAAAAAA`x>y9gAAAAdpXXnPFloa?O5zRt|`V9W<olp?xG5N^X%G}|e_anI0m+Z1@O,B(HE+PhG<j1TowGs~HG81caxiklz`M1SYM]uuc\"}Ghv,9@0O]~DfqU9b{SZLA2!jOVm{r^b^9XLmAhYZlWh6y78PAYIBAF;SAg$ZA+OWtE1$TZ4;ArBvjcMRv&Ack3a6m.kwlK.~U$V3r=GdB*hgyDbvWJfo{pDAABt)pDAAA!>#QBt<EflCAt~bQC\"?M]KCD[lcAE_`AGC8<<>fMjH#Tw(T8B!T5xv*;!x[p/>ZC_EF!Ctw<X^cHuWv:nAAAT|$DAAv(q#[AAA$$QHAAmHC\"cBv(e(vBY4rUAAjAH7m_PtwD1B`;6zU8bd}:<1Pk<{k_BCVB~1SvoAlx}`AAAAk_hrAA{s0GAAS|ZBY4CAT|It2b+>RMBtujGtSA+OmnNAzA%(>f8`)iht27fJi?1(*MSqQ)GAB[pQKA6&p;AAAABLtAAAk_c=BAAAUUFAN/?Av(Vad~mAk8IAAgNA|rKA#DwQp1l_Dtwd*z:[5Fkh##Vwd\"QCSqdt,y+`w4AA0b%0AABt/jFAAA2>UFAA^rjAhBaS5(Dk(,RBA0oIDtPAd5ZLBtx:mN{1T$;p[_]:eANWqChNej9De+mV6MAAAAk8tAMc/cBA.@yC$QC\"fA`N]Qs\"4B+C[dT|o\"$D`ZSqWdx/*Rc)X`)0$J8s>Aj?*hr[Db_X#/BNX~ooLDAAJV#BAAv(pmVA|;1Cv(IASqDAx9/h_A1H%9Z4E\"UZ4YzW5_!tNJLH1tAT8Q,LZwnL>bF{*{%>Yx_JWtXs,m8RY4D_69,h7QoPNA8~&Sw}ql>2}JlpiA6f&(`shUDf|IqxBtN$^ACDHLbCoA",
+    "bass": "zU3<UACAAAAAAAAAb375ZBAAAAi4GtjA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAAC\"U]JaXAAAN/3p2_0L@~B\"B\"B\"B\"B\"B\")h!\"j>*Nx#JQAAAAn)gkk2~$TvWQhDAAC\"JAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAuCAAAAAANp0y5bAAAAkI%{<WiOkTBXk,2i{\"8,Er!M8Iy.e8xSE\"3)]|F>lE_wOF7x>l&r.;~eDd(@+l<RgvS;?,txrqh&f9&D}ad0>ZdbaYtsa+\"v[{FA`v\"40caONHRc(TQ=N1?s4].A5FK&%h6Cwp~:r]9S,RYVDYKDJ.3J%kJmh,!cEHn/o>A&t1AJ\"]veSB9ZRA1RyY\"~x,/@y*lx=6NHcRn^*71e$(1)Y]Nj!Xx/V@:34AIChq9~zmiPL3aA)>NR6yeOC\"#hXWAn*HoMJ}4JkxbRDH~VFAdR43=U)5l%MpG>3<\"N51BtWnCiIAMck(3VT:L+}JdT:#`R8deC?$hAn2>3GqMtteG@3W,A5VlC}HA)IA1[aHA/|q0xq)e`/BC|<a/VXA3^833GcK)k+>`u\"p{QfAR=*9FAv(kAK&M_Cn=&7V*v[:M.fYZ4JPqDz36^PisNnt$Ti<l_.odtl{S~5gx&XeXrlrECX?uOv(As`Dd|~2p9ey6u6YG\"gx03f4@ax;~3~si$knR\"b0S~#WQL!Gr[&cct}XBAM}pw3r83a9YXF4Qc<em\"ebG+HqNtGHSq~dm^F0fA;3<zDt%M5DA$Oq9]tJ;k6K_VX2B(L\"0Rw(539#d4&CLa$Z9MY\"`GW=zW=E:S)`kC6y]CIoMF}mXhhpX5}<KPmQ#M.C3r[Ald:kq>|Es8/Bl?<Pw3A?2Av<xmGAEMG\"q{Tqlfs?&@6XStlMdw/_{A!q4XgU*yZh1Va!xmRaxaM=H;PDCq|`#b`kD\"5<GA8M/Au[bpQiS=b@fljm<jPe*]19HA!i&%:6[8jo8%QtNgFhlk:**IUpnAKVNJcsW/wJ6XBAVSiBdZ3B51Y|ae*%8S,]5j2!:)ig$:~/xwUTWexY`4:H/jM%rK7aI@yO7j(YHS@.N#HHJV^3x[[W+E*h`SIt?MpIYsg2.ddE]4d{&U,$jYLriKFmWKC}Qa\"tOO`bb^b@R$%#UKemp@npX/pzdY/q,eVB5ith2jcUN/;99AUwwWAtz_s=S~jNESa&GK.x+rS!}mU9#UQEMcM7#a6c8M4A",
+    "cow_bell": "zU3<UACAAAAAAAAA0k|ltAAAAA#*S^g\",AtrG3K:wCAAAAeZzHAAB\"B\"#AiBv(B\"B\"[:JVc^ddAAAAAAAAAAAA,|@#EAAA2!B=qfl+~~B\"B\"B\"B\"B\"B\"nI!(Rn@G,<EIAAC\"TiQST.sg3XLI!BAABtJAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIA.AAAAAAAN/^;WMAAAAp8kkiFE{_NVK]N`XWNF`%HHA<GUE.Qp?TF0:/&MIGu8,EXF5+:u,rWpu<9~hN*Tr7@4&v9(s~Le4ZLl*V>&*7c*/w#rU+{Ar;4*C=@xy0C1[W8jj0~wp2(cLSMy66xPQHA@KI8d_qqRyuqOL5]tJ[I0)lI8h:<@?$;ND.AD1*fiKg_2apbXkL14BP#~8VV;Jp3i(l15JtA`NUw[(&,CAAA^|8_[<OKF3s5JF@$S{=6\"f<oL.^i2j~_k3LOQFi92*e1oc9qPs8BK>5aI9&/AkSgeSK&;4~063j6ws6R5H`Q>XZbl<ZkN!x:(MC\"/KuWFn*,FHhPc2(8!EQf}9=jnb<vo5uq<_yT>ioRG)!#ulMM=H,74}51C*y=fPw>hw;+(z{S2!wc#[!9AAk_&U3M0`J^>>EE9.MlhiF4,,!:MLtAd#enPte2S}FQA^yz*I+zdm%Ul?BApiTpE`Mg~w/S.l/wYo0ZII!m|i>&sE^|XWCAgw2t6,QYss(QfG[\"c!=!*b[f)T1<]B}*}`0qI@dEm1)AyKUcAA*hE~5>!D",
+    "hat": "zU3<UACAAAAAAAAAcI;/NAAABtbTP(!A0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAABty)s%hAAA*hK9zIOX(~B\"B\"B\"B\"B\"B\"u(dBtrG3K:m$AAAA7Dm3yl[?:I\"$pNAAAAmAAAvj7J.Jc,7;l6s<*8ASNz2xajOc*%`+0P1oAG_y`AAABAUE?WK6<8roNFdPW)sE]tnZ#O+^/F,XIa/Le]}$E+$I,c<+aOk@TX5!KAC\"AAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIASAAAAAAA4Q55yLAAAAH07}lD1#qOv/8$eJLK+PXCA3VfkN\"[jp^jQ5cC8K`spdohB_Ez~T))Bm*EBtm,+GMTW8\"lS1}E6Y]c{PUD+>ZmjS4uOn]]V.jvY)Y.8,DAwp/W[=tQPEpg@?c};p5yJ</v/Y>d&SA,r<Ph^L|uf.9aj><6/}/!r_INv%]/=YJhG+^OzZH8sD{KZM=!9xDYs9:\"(!BA@j7EG+yl:lS2YENXx|Um|}~{#_%Yk9o\"\"l`P0O*y0uP,.}16*(Zka46qPaDo_;O=5BV/h]`2t{A&rxSOuuxE+=IWR3CY?\"C|oKdAl/Q;/_NbkfaCy:;FrQWIC,[j0@q~SiXTfUjrlIGYWn]pDx&}c[yUOTyUKAt(MN,[&ejSvbe&/faOUl6b2#DA",
+    "didgeridoo": "zU3<UACAAAAAAAAA6:?8qCAAC\"A|KAc\",AtrG3K:wCAAAAeZzHAAB\"B\"#AiBv(B\"B\"[:JVc^ddAAAAAAAAAAuW+K]BPAAAv(\"Z|_.y{~B\"B\"B\"B\"B\"B\"?Qftj>*Nx#JQAAAAn)gkk2~$TvWQhDAAC\"JAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAGCAAAAAAscq#igAAAAE2t}2USODfc2c:F38uLLkH<v\"Ke1RK[9t+cqD;u(=C9.E;8R|h84cMCzNb16q`c~L1zlCCVASSG`fW)7ZF4*)s:QIa@@Xu>qGWUDtpvXVAmhm1d=4WnDT|IZy}ATB0!K#9Bsr#~G,R{}c$Lb?{(d63/l)F5#(am@EvVF^9{eq^p?Z#pfmzfuQy}KBtlT8!MOx7bfNqFCaLq^~Y1c9Im>b5BMkUhzUead\"r[s+\"_5lDLNq&7jj>JNJ{}^^6=0Epe*42G`/u,U7{Y}Uf~In7+R/(3ktyj,2?}Mqpt4C\"]H9r0WZ&Pj|.9AhB<0FU5(k{ul:GChgz<:(\"{@k%uxgUyZvIKzm*Wrp]QRVWlY/j?wpdDIPqaH)fbo|nFjvtQ[pT1fy!5w<>EvDK<LI22!Cc[W!Ry&)D^\"jYa^<[vfsUj0;8tGFqZZEj*n2WNavo%KXO)1^u*3:YoZ.z(x5m~=K*6O>mZWfmLjf]VV6ksK_eOASAh|xhVZ^XPtg_+pb#I7rc2WY_%g|T13yi[na[=dWRY:.BlVb%8*QcSVoVu%d6DtcX[qcIuJGT\"`ZzrPaDwe|gbk#o#B8+RDP\"W;|qyW!Gf;o&)WYtCdOAH&gD#ej0=lB_mgKzJKg%P;0/}fZ>{Xhp^~7+J(Q^zLwEc+cX![^^w;9f8i8A48n.)PFZHA2(I=D=kMnB=Z|.2AiEiCgQ^\"U.+ba(>{N84;P6y70wP57V)}hu:~bJh,AzW@I)A>3#_[NymF:N}j]o;D@>1CM=0pAewb}e>wk_~7%NuWiZ+;xvAAnmMHg$QH@8!nG(u<ADqx9]HW.x_rLTp2>T05Vxw#9$tvZv{CA5qG{)[+Dms_P/9jAL+]p{4$]V+W.>1SxgD\",F|.VIu\"Z3oAJh0p+q=YfVDpVS_^!Q3c>;hk:#XtnX#owql>{57{CQ+Gf~TQo,K/6,)pg,^\"&s(#i>#&,>^M5gBA0(#=+A+OL5+>`TyC%iJ!qcB*owF#>7EF:+$T/Am&DN!o*_.9B3>:.3NE27oY/\"wW3Q0avA$0zEIJXL4Y`SyB0kYGXH%Nm;bmnT}NHxKrH!T&l%}_bQ@QzTgs+DC~~`.Z,h3+&71:mPpD;Sv*MmuFuW,>/}S>OB!W6Y=gkt]F:BZ|5{C^J5MHiv6xu5nWG+hJgkd@S6)%r8g*Q|<T4c,*5?UT]=^lX0N//qH/l<Z>(u6yxFm%#`qS!tC^{m_9)P,BR[8mKHzB4@7zRrcS7?s.?5f`LS}I>?~Z#*XCs{7]SJl[Qhn`aIwQDH#ncAA",
+    "flute": "zU3<UACAAAAAAAAAsMzKLAAABtr9f{rA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAAAAlGy!QAAA[9]PKhzL@~B\"B\"B\"B\"B\"B\")h!\"j>*Nx#JQAAAAn)gkk2~$TvWQhDAAC\"JAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAECAAAAAA`xWq\"WAAAAtz}+HUSOlZFaOc;y?Xx5K?%tSKvl*2PPK5gYQKk`{3kJL8A@Qma9K#R~DkQ[e64rxK^N8\"B.4KKP(2CtU=S;5@U8l&A\">$?{d.La6UHoAA~cxS8cF>Cm$G8MBEy7Uo%{0dvWmJBtN|?S>,J|BTjxn$@uy$dB!*t{_<O/o(x*_=27*eVYukE9oE/!ft@S60D+[:P=TU_;uaJDrf}Fc*ILjAAA{e&3B0SD;y|rQGFjSAk`CA%m~BrHmiiI_PnHv^Et3zbe%EoXF86{`;O*Zt~S60Hy+7[%~SJ/{i2CCW1iS@CAAA+>rGQqT\"XLpnfB^QSGTTmyW\"(Q0k=&`\"f+il&!jOC6aCHp0[aa%D+>&xapH@v@2^tm`u>IWQ\"S/`?nP2BAAA]KUAAA[&TqxB[8Ys)UCAb=R/9rj?Ic_]Q8tFyARMoq2?q4~%:Ld`vbSjAAN9}8Isfn[!~#_;z/oo4aTt50*`wBv(YhAA}.z+<AB9GAjl4v@cf,S=Uq;=F&s:qX^)9VF!Q{6TRNcF%9C$a.g(%myhE~YywtuK\"imulN\"evAAA+>GEAAaS@dF^FtaH]:XFj^KP#P#^]D3Dw%I3)sEJsTd`$b60$6wC4}l9%8,}T!.sn}kbiwFE)Ebff57ngHAAC\"vYAAuWA=8_~{AtTH|f0k/BFh,d$NYtSsD@%9&52}ls\",{$#nFaoajPSqkfn<v|Do@N#|.x6WVzaRTV+&JAE_vAt/TLy[ehZxLtQ_pAQ>?$VkR\"^#4[P!;/o#vFrbL`xR~61Kh;h;k~ei3sl.^+lwL^/`zL&u:NKAAAb#\"]?S5Fwy5s*CmHI4}c:6O}R5:ElnXVwW4eyJ|8PsvOk~R67?BA+.qe\"UQqc$4VQ|/xGycw8tQ:GxrkAA@sGAt7>jCgS$ro|AG|o6&ORlY0nABVlRd:r6Ru85qdj.O@@+9z]MQ/fA8s@ko,DqVlN>/I{Q3Gyg;vu.@xKAVBVukh>4EfEi#8L?%,i[}:J`_KDApCl%[L+!*C2mKqL<RMw}O\"(_1qEoy<86bRzd*u)A:]3T>zG8@@4~eMN\"Vxq75EwQQtDsAx&)f^L|QEl!IU0$`NISCO{G{|NbC\"%yCAk_|}&JBA",
+    "chime": "zU3<UACAAAAAAAAA5l$JqAAAC\"A*Aqf\",AtrG3K:wCAAAAeZzHAAB\"B\"#AiBv(B\"B\"[:JVc^ddAAAAAAAAAAC\"d.U7EAAA?j9jrgl+~~B\"B\"B\"B\"B\"B\"nI!(Rn@G,<EIAAC\"TiQST.sg3XLI!BAABtJAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIAOEAAAAAAs8;mgYAAAA.]MC$k=[_WK2{x9ds)m0|$FN@PBXc,Qh>!KIpq`h){t/f12p?Ez3C\",}TFD7sD8M*ra$:%Y48vicuba)Az}8(6ghY,]^B>{<iI^CEAPjfHURRHEJ6~@IAA.shHAAR^nJK>Y]RTI{BAEC[9+bZDdAt{iTgG4BAAAAbH~6n<G<*G4ivAXLxpGoJB7ozAD(DGT3]mE/~]8>opey?b\"#\"8St18?J6jaF)_k%U5CAKAvrp_4ICt:zC\"PRxEFf&q&,I]xmsZTq[>EA4}.ODAgNM+a#@=.C]b\"`@%nJ4YGuDPWeKVk_wPAA2eAAMcl2BA59l%NAPjbA7#m^N~o>dmWAb/G9McFhK=S4}]Z$4f_6nP+rVAjA]iWtyWf>GAAAAAv()b`A!2AAS<$42~DG^|F\"5?#a3T;U+`O([#b>O0+_GKUey(g4M8{eonJA:1AAAAAAOW/dAAv(7AH7eAeWRFxxy=yPQtHAh,9.0[,Iz<Pb|`QdUeGt:WOJ@BOA%xtAAAAAv(%mDAsEk_#Y5lj>/9DGBtnIyK7:|~<rCn(oD[c|YWIX,t2A7f.sYF;|RqKAAA]f2k[9b4J\"VLD\"_/|_(0p&FmP$\"G~s(_APPjL7PA/GBAAA^M2*+QtAv(`eZc+>,>[Gk_0p(~M~gU^%A`EQ&xBP7yrIO{CtbmAAAAAAO{kCs4i_x96lABJFXbM&E3!~U(yE3<\"XCINgwlp13ry:%HAAAAz:=.W<99QAdAT|+RyKJA6?[?qP7s5^ylhIV;m;APPj4kDAnVRAAAicM}?s,,+QGFAA?@2WCtHA^3$r#2{~=}2<trx_q:8awl6yJONJ+>s^AAAAAA9~{9U)$.P:4pD6CAAA|besvb`s;96,?lm~t~=q)D.I]K:&MYAAuW\"@(9lmB,MA1[70k_r<^}!2!~M4I=2..rG_X*LN1R0ET|pIAA*h~oP2!%s%}Av(reAA0sKV61J4M/3sy3=rl,P%M\"RA0E*hMBAAAAAA+sMAv(o$Qwj<H4a4DA/Vt_]j9rqs/P\"^!|/^?fCP7yrI:>oB3,AAAAAAy:JERd.Ig`^>zAKAOqk\"6}e2Cc.`o<08nPlP=g1AJBaAyG[BAA|;;6B;e?zAv(HyAA.g<>7:f|j(yE;woX_q[i)DEUBtGAyOMAAAAAk_yf1kRo~.3]`BAASez(a7[}%}BhR#Ex>:@8:AXBnL6ADO5EAAAAAA;j|e]<~$&oJ\"CAWADn$fAA])[06?I/`UXkJvY=a8M\";(;vC\"OvAAAAAAO{eA}QY@sjbhvA6A.Qc4XA[NAS|4p&Fmdk%Hw3HeEt;(uWr\"r<GAAAAAH7(kq1&YeTf0R!NA9zQ\"Gz(@w~gU3#RzCX.p*SdZUXs4JvJAAArX2$8`}Sv(C]#^~Aqf6yOE{G0fuwoVyburSW|+@8qAzt:A4SMAAA/gOL*{4CAA.V5F9te?(OQw`BNAWY2.v@yvZ]B0NP!Up;1bE0mu$DGz1{vQ{%$jOW2Ev(3v>U+>ZPIALr]J[N,`daH,M|YV8Wi)WDAA$$h|gFw*fCv(x[BhDA",
+    "guitar": "zU3<UACAAAAAAAAAp=ai.CAAAAQ7Sq5A0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAAC\"<E^@fAAAe+TMUE0L@~B\"B\"B\"B\"B\"B\")h!\"j>*Nx#JQAAAAn)gkk2~$TvWQhDAAC\"JAAA[1_*{Y;Rn{2O5pS8uxaj^?;1DH|^VokaO3uuVjVABtAALvnLFdn;VU0C8HLiXv{W&5g0@p]C[LEN]FPpsgCjhxjOmjNHSo44cfFABtAAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIADDAAAAAA(nOv!hAAAAR(#+.aL7yirlwG<y>oQMRDfO{W]|8H>ff6+8JSl[Xb6++^|{cMw(oBjg.cXxCoz<n;E0k@*1.b9cjb1%G@)3VVp05De~zusSD8vKWedrPQwEE\"w$F.WVW1rtKtQM$Zc+P=A6m>mQgFZ\"YDgY29eP8Pak=m#\"Pqcr.\"|no^s,d2&8E<6ZGoz|KjT\"AXh!vMc]C\"<{Wd)l.Fs:9/$/U!@1wE4AsAj^A5WOP#3;]x75ai@Q+>)xL:uHCA<<_9uWO;Z}F]~j]PjtolcAAayYiG(ZhJG?SZoAJ*~SDn/7Aa~[I`oAw0wib4CPHX5O+>?S;a#|rGTdr@U2niqDEBB[CAW3lX>}hJx*YB<PY4@Q.De/#44FDEmw4Yc/tUT|*WXxPmuKqHi*.X6n20lB&0rvL7MA9e<ALA^DBt;0ZR.L)Zl*aI?xSltdAAcA:Yld^X}PcLmN~*~(6(8t.BrNVt[;{Q[tJGn()AIa5{+>X|PJ5?FMwYftyNRlR?lCLR3BbzKAqPG5jMgdWRip[/?)RRM4BRZ:cA*%K|^WD&Lf|A]R3FebuYz3^5,k/VBMSqxc|L:`=_PJZ3)AnDbtvGB{F:n]fs06VB%9KYVP+J1U@,%sL<>??EuI(wOAjr9eMy@B+7%y/9b3tNIO*W1+XtANwuSEtwCteN^x^J27<_4/6*+>B8aB&&yWEB4}WN:kPL/X$#r:y{0ExFt1O.4bv(72o+$=4Y)C<sME^Gv{rcsxSJHQIB2+8C>u2ebv3Qw(IASqn\"5u4U;LrjTq(Tk_yz#Dhsa.4S#d\"/TR.?jzmNhCFAQ~6nKh1G|d&\"$tsBxC&$OYPmX\"`I[Q)@`Rr<TqsnH!k_I\"CMbhiv>fVq*ZrH]y[EH{ck?4Y7BA~1evoAV^mH&1<+<ZVB+C#7NvT/:]@jPmkt/jyW=:ZLMN&a{L)Ef5zWK5.K2SnVzBgAOA0[*5GOC}:08b%JP)OBjn6y6LuW1zkg>Zcc5WL&4[t4WAp_XA|tMBeQSDNuq^_2zj;>)5_{6a~QNtj@FZU{GAmWBMDi)_b;PyhT\">YB6y_6hAW!cP|^!DpH5DG&~FI+Tzy&ek_AyH2B/WXuXmXBjs2W!89Bk/PGYLZ4xorJMtBSI0)Hw>|jQs~!bnAAcVMxDt_IiViu#z#DK&Oc>JupG>B<iG+eiAufTRa7%(LLA4X\"Ix/*nA?^ZD*BKAl1gtCfM}rI&!%XT2TA?DIoqQv(QIyG)]S7m\"T|q_>uhD@A_BQAV|QxWKYc/8(N_dT|2xAyTtmY(?WAD\"oqQ%_>\"`/lDXBLv;<]G$=oEA?j_{0D44~\"H8wnEAHr$FhD(a4})!x.wBHV\"KV/n/fG_A>qb7M(,%:`[>sPlBz3iF8e?X@&T$E;)&NO.QPj4SuOaS_eLi~p>Get>&vT$0n;E?v[t[?v#;nid7?hzFHmb?((M\"NAA&tAKAbzqcHlN&W4Wg9{TRo??AL%ECoI4cX[Xes?fBT&_3ss,>:v~Gw(QPumlRlL|O.>ru8ehhx(AA$KCt_>B{ht_Iyf0#\"R%{emtdp*w_rB|;?9N`HjZ[/(\"_.,HnvW_z\"/8LCNyW#]aGk8aK>q]9tCVAYA7CQAvTH*z(M84t!pM@%u{a?5KKl!l.>mY#id%S/RN_p@4?jr`1/wQRc=3}WBL&e03vF@fyAA/Q7v[eQO>!SMui]BH!bDob<*1<&l^81<jK(<=8BA",
+    "harp": "zU3<UACAAAAAAAAAVd\"x?BAAC\"kms<vA0B|^VokaNKAAAAbLXeAA~~B\"/C\"KAAB\"B\"wdn_P#abBAAAAAAAAABt^7)c1AAABtFCJGOX(~B\"B\"B\"B\"B\"B\"u(dBtrG3K:m$AAAA7Dm3yl[?:I\"$pNAAAAmAAAvj7J.Jc,7;l6s<*8ASNz2xajOc*%`+0P1oAG_y`AAABAUE?WK6<8roNFdPW)sE]tnZ#O+^/F,XIa/Le]}$E+$I,c<+aOk@TX5!KAC\"AAmOY9BN_5J37or5}$qop/Jo2.90T@?,za++dUc[L31ay.mRc[9=dR!@F%v#P37o!5Xz=?!w5o2.V0AZfx/Ou.dUX$5={c2.dUc[E.JouOe%L[P3vM!*LKk$vz7o2.vL[iv=NX2.dUd;F1io2.dUc[P37o2.dUc[P3=i0.dUc[P37o<mVUw*8g7o2.dUc[OK7o2.dUxCPJIeAAJAuWzwaYu54A1EEPC\"MAXLDH3wbY8if!XfoSWJd/88CA5FAACAC\"$+=5_cyOIK[0=b.[MHT2^dF8e:#P?0o,>gnQd/88CA.AAAbONH}xsC8keeBAJBAA+h0ciOAKDy(+Gk&`muVjVABtAAQAAA8IRH7wf*j@i`>qnV&3?.o[&`>qnV&3?.o[r:muVjVA5FAAXLLHci6W7X*DAAIAXL|X;Id]Y0)$~h4LGYT7WX$KjlzC03m)nxAr28UX]Cl>(oT_,&$F_y`AAABAU)pt|)yK4B4LHHc*_vWk(FquG!}MJd$K|Zd/QX]CK1qrz.,&K|TX5!KABtAADX]C4Lqu/FVXlZnOH6U0Td8weRD+*1roGy2RSCx4;o5b|Zt7X3x5rz1UjlzOX6bH9i/mn!t;o27o(EN,$I=ihxmR#*$I=ihxmR,tbvvHAAIAXL+y2RSC4Lqu>y>c<a3O|@KKCjTX5!KABtAAIAAA#T+Mkz%+h@nz%Z]Mqz)+(@i`!qfVK5yc~OAeJ8{gK(yhZnNq4,8m`!(e(8?0#]sm$%==m9&;?]np&%>go9&;?]np%Ud/88CA1BAAZzAU:MBy%+h@_cqOTX5!KA1RAAIA#T|J\"x%+h@go/Z]Mszp,(@i`+qSYK5eL;L@BAAIAlBAAAAAA0caORHBy&+U6b:>qzVO5ZdB8kS_7Ae36b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl<Cr+qAdZAASKByB+8?AoAUEKozbL;L@BuWGA:CAAzw\"Yh@go/Z*P[0q,0NUSi%xj4%/g/EeSQ8AA:CC\"AAAAAA#TQKJyF+j@S`!qXV63;b06b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:Nl0Sb2Nb16b:2\"bvNNAAZABt_Mo0fHmPF6%1f#PdnOmNz&4d8w>Zm^sHFXDFprK6U0:og>4O&58IIq<a4L2X`4pu>aLiA9i%`{k>=Cr+vB;vCABtEXgEmRC+`5KuCwuRn+FN6o\"c|ZqNGN50#1La:a@POo1buU,+G6?#&:?ZDlONpHAA$AOAXL(HxDr+vB;vCA;vEX5DvOG6919irZvOp6)IDdy.NU3@)IApccdU7[04@cN,uR/6P35uFFOUxC:1]GAA$AOAXL(HxDr+vB;vTAAAFUg*vLui*FEaKa54G6y.LaNOw7H0*dDd2PvOce1buUmZc3%5zz8i/Zf!&5hJ+fc9@P>*!I7ogx|SG6^f=f}P~8m$TfTgU.czw57b*f<N[8$#[f>f|8\"5?#&:)i&ln!u*N3<i2.G6AvZHda\"wBQ+@<:qoHlS%f*;39i_.r!_{L3pu&lZU@#P3<ioyv!F+9=#MEZc3v#9b*fkl.#%#[f@Z&l[8>*&:)igxe%u*L3La2P_P:0ZHUd?,JQ+@n/io9wVU&#L38lZco!J|p;yofx&VF$QK7om!v!_pY0ta*]b6j{s2Ix88(&j#J3>fmFfRr[P3Yx<^UX?#P3_i{bn!s[QKKmIFP9gC1eIx^,MXd[o>rrlR*#$C5gxu0.UX8[646r{_v7P1\"01a*]z!gCt2Zu)kS%g*e>>fQ_!VmDh>pu%l&V!*24<i%9dU=[8g9d%EzRxCcfAx?^1Ye[44tlmFX%MO5gxuy_9Y8[nhAAoIVBAA[Qwj+uVj*Ar?EAGuD3Ed*FwO?CCNG6ccDd!*7LrovzVUvOH6\"uvzFPQC:1&z`,>ZPO<PZ0meEaraH6?#Bd`fklmR$#!IMa~DH650E:Ld]747M;Iw>Z~@~5so}cMa&lH6?#EyLaQCs7puFd{c1Ps7be1b#RFZXKI0zz0i,Z[8]5{0Ma~wrOF$XHslAx?SY0RfUaXPw7n6,d{f?,TG&znx{Z~@~5Y0):Ma&lM3X0b/TawCs7G6se{c=,L3Bpac,R$YGNe*a00iQO[8]5Q<Ma(liRt;+:zl+Z~8G6RfMa*lmRX$Jd3UClONO*kc*fAxW%%#!IFaHmGN!*(dCgAxa%F$)IMa2PKN60):Cgw,C9c;>:rlOa,Sw*2gUdo]<#r[r;(lsar!u*MKLgb8?S_pE:tXClP6d*::)iBx;SL0O<{cImGN!*S<;lAx6VI0Rf{c2PKNG$!ICjv,47M;CIjoPaj!t;=3Dg.]w7c;!Izorar!9;@Kcd_OAAUE4ABtp1*RjX5!SAscAA@QbxmR8kY07o\"cxLa[P3jjHFVXKaM3pu:y,R.NnOX60.UXjl*4[5r;CguOw7@#}AAA((BAlBiCPa?nDH_y6B5FFA5Fg58Ipu#*uOxC2x9cfxUXH6%1]zSaeRb[BNCjHFEa~@P3puwGVXvOrOruBdMa@OAADH4ABt|;Hb0PPtPJ1HBA[AAA$IY[\"2A54.2U7wr7!#$:mc[7SNzpW<hr^.4#0{D1.J@OqRs;ugjoa8w346#=BjBA\"]_EC\"<(VX1EbaC\"8AuW$Ie*L37o1DmRc[P3GXfxdUc[fHro2.UXP7%17o,FVXb[OKquecWUc[3LI04.MXuOH6BpHFVXuOH67o/FMavOQ3puDdMapAC\"@>AA$A&cy2}h]WfSPPBA8CAA:i:y]zp;PRb[44|:jvmRNOvOuYHF>c\"w^Sqo:y8iZ/14G6!ISu@NnO@#L3*ajl;S`{1LDdX8MX`{@<yo>^+Vg*^f7o|.HCC\"FCHAtptJ7!oDkGnX5!SAyqAA!WKamRc[xx8iGydUbkXH=i0.dU!*%17oHFfR#*P3ZulxVUc[3LTj?,dU[C547oHFVX]CQ37o/FVXd[04pu/FmUxC4LquccAA+OVBAA]9NMO3cM,O;LaDXLcAAA]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqud/dUc[P37o2.dUc[P37o2.dUc[EAq>/Tv(4F~ny8~[]u3E+4cfJAznAAGO>CH6IuBdMa~[X3BpsGMaZw04Y05bMavO94Y0DdVXvOH6quacMauOH6Y0DdMavOH6Y0Dd|ZvOH6Y0Dd@O.NH6X0DdMaZ@~56uBdMavO94Y0DdMavOH6Y0DdMavOH6Y0wGVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVX]C4Lqu/FVXOOAAtT4A;vA<FJ1zP#|x+$bvNNBt1BAAuOb[JN%5uGDdh*b7/uxz>cvO$L<i1b2U2DCNJ0NFOU[CGNH6%d>cc[SK[5:yUalZXKbuRHdXLaGNY0HFMamZCNH6yGlXKaXKH6BdUa5DKNo0Dd>c?O54:utzUa4DKNp0=F|ZkZU36uzz{ci]qOH6xzDd,ZKN^z<y{c5D4LH6wGEaKaw7@5W0{c_CCN:uY0DdLas7G6%dUaXDGNH6gcEa@OvOH6zzUaBA+>_EAAz(V/!R5jH!yNw)EtPJ20AAJBAAwzl;=Usz%FTd|,tSd*vLWNo,,LHNS*pdhxVUdR_ytivbexRO4Lau=?>ZwvoEc7i>2U<BF$$Il>arRAAA%FC\"muEAFBKOsEBt`EFRXB/oFt_ESB*h~FA2KCru*TpN+>6F;yKAyiFH*gQIqu&yMG_wqn&N~?q=>G]4+FAAAAAAEApFAAec;vAYC2[uVQPz2xwn.)`KPDJAAAAAXLBtPA6ytBAYB55gwPvtlELmt51Kh\"$MAAAAAAAAAAi\"lBAAAAC\"AAAARtLpR#pAIA.CAAAAAA]a_TAeAAAAM0_BpZLD)Z9AE7mTd%B.#k(zlK3S)k(g+%l(qD6G{QJ6,2IXTim!l8|gOtZZ.M4KOt&)y0*>,;%}4#\"#Td]fE,Z6$ZByM4B:Xu3_vw>Q&M,!.XY6zQD\"@6YQXhSelBPG=/MFlC*p)YBsm{_RI4((SGI04@hC#ueyh7CmTp6zXv0;#q}?Y)sQS>~7:*u0WGyZs:\"vJs8Fh0AAXUHEBtB~[Ky!5EowvKSq$bLtU4^Gq{oA.?/A[;Fh_j8YQ,]qmH3!PZX:AB7c$/Xr2xlRg\")pkToAPxyA3A2jAAUo/AC\"o}EF3DKqEB$$NAD|l_//U|<>ZZqCO<RM~exx,;^#Q#kqbPf?XqBt8pkTHMp[KUmCL|BAdtJ0lAdZWKj>#MJlvBY42AZliAy:1D+u:>zCc5:nJi8fO^EzZH/fOtWzXVw@C\"[S$#rx(=X5SG$CeWkCOAjgAAyua>gWSAM<BAt}\"O5`QHY}<DSq,>kAH31R0X`_?Dc+J%>PqoAABAy!K62H8j,x!e<E|bBA787ydUAA/Fjg~Ec)6EY49jAAUeC\"zE+>.W_K+>Rc}()1U~{iv:h8EHkGOW(O|P5018mGlF0E>hrZAAe+h0/GDtn*o_4NMsl_j8U|G\":A5Gv(lx0Gz3:$aKcBHJF\"b0jjq71geN3BgB!Oy(c\"bDAA7f=;BA:&CA(XqDiKWtxOV|KUg|vtmc|7`R9l_4Ou19DA*O5@)!^1Jw{h+JP(AAiC9ZAA)0F_dG*hbB4})DXL)DH7dDE_$$!sb^EiZ}BYDa(MkUk_Ly/^^]QcKIv{k_J\"l4Tw*BAA~DpPAAIBBt9A5GJ1H\",A/wl!hSWCdo{AqC~C4}R5lkf>SJPG:K/VGtewCAuW>],A]qNtpy2[,AbNTn+e@jeulNA]w,3kZBBVf]9j4HtZB^Z4QDpZ,BAAW?~E+>hB%9`9xaV[M\"GjzJEG4tD=++WK}2/zOAaAVtKH,|rb*guGTBrjAAxBbOAAE_<p1B!mPA#(EA!/1[SA[3LHSO{Ch4g?q*3BkSCqd#M2^.mK]hR\"GLgQ/ABt$_;sLASyk_qDT73(DC7vM*r|+Hx=A0v;:.f&K:YCTP%3vA5K$a_0iDX\"giR\"vAizEA@QrhEA*7,hoA`VOt\"b/VOoCwL@7L7b52:#]ZW7#g$;cjk*s=LCh9Et?Q3nDt4AhPQ@VsC6wcBtUvk9&{4a/v$m3}b0!,@^}({Z!AK^z9hzUVqt4z|;ZL7B?D*/aA,b%[^MCA<WBABtvAA"
+};
+const B91_ALPH = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"";
+function base91Decode(str) {
+    let v = -1, b = 0, n = 0, out = [];
+    for (let i = 0; i < str.length; i++) {
+        const c = B91_ALPH.indexOf(str[i]);
+        if (c === -1) continue;
+        if (v < 0) {
+            v = c;
+        } else {
+            v += c * 91;
+            b |= v << n;
+            n += (v & 8191) > 88 ? 13 : 14;
+            while (n > 7) {
+                out.push(b & 255);
+                b >>= 8;
+                n -= 8;
+            }
+            v = -1;
+        }
+    }
+    if (v > -1) {
+        b |= v << n;
+        out.push(b & 255);
+    }
+    return new Uint8Array(out);
+}
+const sampleBuffers = {};
+let samplesPreloaded = false;
+async function preloadAllSamples() {
+    if (samplesPreloaded) return;
+    if (!previewContext) {
+        previewContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const soundNames = Object.keys(SAMPLE_BASE91);
+    let loaded = 0;
+    for (const name of soundNames) {
+        try {
+            const data = base91Decode(SAMPLE_BASE91[name]);
+            const audioBuffer = await previewContext.decodeAudioData(data.buffer);
+            sampleBuffers[name] = audioBuffer;
+            loaded++;
+        } catch (e) {
+            console.warn(`加载音色 "${name}" 失败:`, e);
+        }
+    }
+    samplesPreloaded = true;
+    console.log(`音色样本加载完成：${loaded}/${soundNames.length} 个`);
+}
+async function loadSample(soundName) {
+    return sampleBuffers[soundName] || null;
+}
+function getSoundFileName(instrumentId, harpOnly) { return (harpOnly && !PERCUSSION_INSTRUMENTS.includes(instrumentId)) ? "harp" : (INSTRUMENT_SOUND_MAP[instrumentId] || "harp"); }
+// 预览播放器
+let previewContext = null, previewNotes = [], previewSongLength = 0, previewInterval = null, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 0.25, previewSpeed = 1.0, activeSources = [], isPlaying = false;
+
+async function playNoteSynthesizer(note) {
+    const soundName = getSoundFileName(note.instrument, previewHarpOnly);
+    const octaveShift = parseInt(document.getElementById('octaveShift').value) || 0;
+    const shiftedKey = note.key + (octaveShift * 12);
+    const baseMidi = 54;
+    const playbackRate = Math.pow(2, (shiftedKey - baseMidi) / 12);
+    let volMultiplier = 1;
+    const volume = previewVolume * (note.velocity / 100) * volMultiplier;
+    const buffer = await loadSample(soundName);
+    if (!buffer) return;
+    const ctx = previewContext;
+    const now = ctx.currentTime;
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.value = playbackRate;
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+    source.connect(gain);
+    gain.connect(ctx.destination);
+    source.start(now);
+    activeSources.push(source);
+    source.onended = () => {
+        const idx = activeSources.indexOf(source);
+        if (idx > -1) activeSources.splice(idx, 1);
+    };
+}
+function playNoteAtTick(tick){
+    previewNotes.filter(n=>n.tick===tick).forEach(n => {
+        playNoteSynthesizer(n);
+    });
+    highlightPlayingCommand(tick);
+}
+function highlightPlayingCommand(tick){
+    document.querySelectorAll('.cmd-block').forEach(b=>b.classList.remove('playing'));
+    if(window.lastChainCmds){
+        for(let i=0;i<window.lastChainCmds.length;i++){
+            if(window.lastChainCmds[i].ticks.includes(tick)){
+                const block=document.getElementById(`cmd-block-${i}`);
+                if(block) block.classList.add('playing');
+                break;
+            }
+        }
+    }
+}
+function seekToTick(newTick) {
+    if (previewSongLength === 0) return;
+    if (newTick < 0) newTick = 0;
+    if (newTick > previewSongLength) newTick = previewSongLength;
+    const wasPlaying = isPlaying;
+    activeSources.forEach(s => { try { s.stop(); } catch(e) {} });
+    activeSources = [];
+    if (previewTimer) {
+        clearTimeout(previewTimer);
+        previewTimer = null;
+    }
+    previewCurrentTick = newTick;
+    lastTickTime = performance.now();
+    updateProgressVisual(previewCurrentTick);
+    playNoteAtTick(previewCurrentTick);
+    if (wasPlaying && previewCurrentTick < previewSongLength) {
+        isPlaying = true;
+        scheduleNextTick();
+    } else if (previewCurrentTick >= previewSongLength) {
+        stopPreview();
+        document.getElementById('progressFill').style.width = '0%';
+    }
+}
+function initProgressBar() {
+    const progressBar = document.getElementById('progressBar');
+    if (!progressBar) return;
+    progressBar.addEventListener('click', (e) => {
+        if (previewSongLength === 0) return;
+        const rect = progressBar.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = Math.min(1, Math.max(0, x / rect.width));
+        const newTick = Math.floor(percent * previewSongLength);
+        seekToTick(newTick);
+    });
+    progressBar.addEventListener('mousedown', (e) => {
+        if (previewSongLength === 0) return;
+        isDragging = true;
+        isDraggingProgress = true;
+        if (isPlaying) {
+            wasPlayingBeforeDrag = true;
+            if (previewTimer) {
+                clearTimeout(previewTimer);
+                previewTimer = null;
+            }
+        } else {
+            wasPlayingBeforeDrag = false;
+        }
+        const rect = progressBar.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = Math.min(1, Math.max(0, x / rect.width));
+        dragTargetTick = Math.floor(percent * previewSongLength);
+        updateProgressVisual(dragTargetTick);
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = progressBar.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = Math.min(1, Math.max(0, x / rect.width));
+        dragTargetTick = Math.floor(percent * previewSongLength);
+        updateProgressVisual(dragTargetTick);
+    });
+    window.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            isDraggingProgress = false;
+            const target = dragTargetTick;
+            seekToTick(target);
+            wasPlayingBeforeDrag = false;
+        }
+    });
+    progressBar.addEventListener('touchstart', (e) => {
+        if (previewSongLength === 0) return;
+        const touch = e.touches[0];
+        const rect = progressBar.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const percent = Math.min(1, Math.max(0, x / rect.width));
+        dragTargetTick = Math.floor(percent * previewSongLength);
+        isDragging = true;
+        isDraggingProgress = true;
+        if (isPlaying) {
+            wasPlayingBeforeDrag = true;
+            if (previewTimer) {
+                clearTimeout(previewTimer);
+                previewTimer = null;
+            }
+        } else {
+            wasPlayingBeforeDrag = false;
+        }
+        updateProgressVisual(dragTargetTick);
+    }, { passive: true });
+    progressBar.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const rect = progressBar.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const percent = Math.min(1, Math.max(0, x / rect.width));
+        dragTargetTick = Math.floor(percent * previewSongLength);
+        updateProgressVisual(dragTargetTick);
+    }, { passive: false });
+    progressBar.addEventListener('touchend', () => {
+        if (isDragging) {
+            isDragging = false;
+            isDraggingProgress = false;
+            const target = dragTargetTick;
+            seekToTick(target);
+            wasPlayingBeforeDrag = false;
+        }
+    }, { passive: true });
+}
+function updateProgressVisual(tick) {
+    if (previewSongLength === 0) return;
+    const clampedTick = Math.max(0, Math.min(tick, previewSongLength));
+    const progress = (clampedTick / previewSongLength) * 100;
+    document.getElementById('progressFill').style.width = `${Math.min(100, progress)}%`;
+    document.getElementById('tickDisplay').innerText = `Tick: ${clampedTick} / ${previewSongLength}`;
+}
+function startPreview() {
+    if (previewCurrentTick >= previewSongLength) {
+        previewCurrentTick = 0;
+        updateProgressVisual(0);
+    }
+    if (previewTimer) {
+        clearTimeout(previewTimer);
+        previewTimer = null;
+    }
+    stopPreviewClean();
+    if (!previewContext) {
+        previewContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (previewContext.state === 'suspended') {
+        previewContext.resume();
+    }
+    isPlaying = true;
+    const playBtn = document.getElementById('playBtn');
+    playBtn.innerHTML = `${ICON_PAUSE} 暂停`;
+    playBtn.classList.add('running');
+    document.getElementById('stopBtn').disabled = false;
+    lastTickTime = performance.now();
+    playNoteAtTick(previewCurrentTick);
+    scheduleNextTick();
+}
+function pausePreview() {
+    if (!isPlaying) return;
+    activeSources.forEach(s => { try { s.stop(); } catch(e) {} });
+    activeSources = [];
+    if (previewTimer) {
+        clearTimeout(previewTimer);
+        previewTimer = null;
+    }
+    isPlaying = false;
+    const playBtn = document.getElementById('playBtn');
+    playBtn.innerHTML = `${ICON_PLAY} 播放`;
+    playBtn.classList.remove('running');
+}
+function performTick() {
+    if (!isPlaying) return;
+    if (previewCurrentTick >= previewSongLength) {
+        stopPreview();
+        document.getElementById('progressFill').style.width = '0%';
+        return;
+    }
+    previewCurrentTick++;
+    lastTickTime = performance.now();
+    updateProgressVisual(previewCurrentTick);
+    playNoteAtTick(previewCurrentTick);
+    scheduleNextTick();
+}
+function scheduleNextTick() {
+    if (!isPlaying) return;
+    if (previewCurrentTick >= previewSongLength) {
+        stopPreview();
+        document.getElementById('progressFill').style.width = '0%';
+        return;
+    }
+    const delay = previewTimePerTick / previewSpeed;
+    previewTimer = setTimeout(() => {
+        performTick();
+    }, delay);
+}
+function stopPreviewClean() {
+    activeSources.forEach(s => { try { s.stop(); } catch(e) {} });
+    activeSources = [];
+    isPlaying = false;
+    if (previewTimer) {
+        clearTimeout(previewTimer);
+        previewTimer = null;
+    }
+}
+function stopPreview() {
+    stopPreviewClean();
+    previewCurrentTick = 0;
+    updateProgressVisual(0);
+    const playBtn = document.getElementById('playBtn');
+    playBtn.innerHTML = `${ICON_PLAY} 播放`;
+    playBtn.classList.remove('running');
+    document.getElementById('stopBtn').disabled = true;
+    document.querySelectorAll('.cmd-block').forEach(b => b.classList.remove('playing'));
+    if (typeof clearWaterfall === 'function') {
+        clearWaterfall();
+    }
+}
+function updateSpeed() {
+    const newSpeed = parseFloat(document.getElementById('previewSpeed').value);
+    document.getElementById('speedValue').innerText = newSpeed.toFixed(2) + 'x';
+    if (isPlaying && previewTimer) {
+        const now = performance.now();
+        const elapsed = now - lastTickTime;
+        const totalDuration = previewTimePerTick / previewSpeed;
+        let remaining = totalDuration - elapsed;
+        if (remaining < 0) remaining = 0;
+        clearTimeout(previewTimer);
+        previewTimer = null;
+        previewSpeed = newSpeed;
+        if (remaining > 0) {
+            previewTimer = setTimeout(() => {
+                performTick();
+            }, remaining);
+        } else {
+            performTick();
+        }
+    } else {
+        previewSpeed = newSpeed;
+    }
+}
+// 工具函数
+function keyToPitch(key, octaveShift){ let shiftedKey=key+(octaveShift*12); return Math.pow(2,(shiftedKey-54)/12).toFixed(6); }
+function getNoteName(key){
+    const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    if (key < 0) {
+        const noteIndex = ((key % 12) + 12) % 12;
+        return names[noteIndex];
+    }
+    return names[key % 12] + Math.floor(key / 12);
+}
+function getShiftedNoteName(key, octaveShift){ return getNoteName(key + octaveShift * 12); }
+function groupNotesByInstrumentAndPitch(notes){
+    const map=new Map();
+    for(const note of notes){ const key=`${note.instrument}_${note.key}`; if(!map.has(key)) map.set(key,{instrument:note.instrument,key:note.key,ticks:[]}); map.get(key).ticks.push(note.tick); }
+    const result=[];
+    for(const data of map.values()){ const uniqueTicks=[...new Set(data.ticks)].sort((a,b)=>a-b); result.push({...data,ticks:uniqueTicks,noteName:getNoteName(data.key),tickCount:uniqueTicks.length}); }
+    return result.sort((a,b)=>a.instrument-b.instrument||a.key-b.key);
+}
+function escapeHtml(str){ return str.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function copyToClipboard(text,btn,block){
+    navigator.clipboard.writeText(text).then(()=>{
+        if(btn && !btn.classList.contains('copied')){ btn.classList.add('copied'); btn.innerHTML = `${ICON_CHECK} 已复制`; }
+        if(block && !block.classList.contains('copied')) block.classList.add('copied');
+    }).catch(()=>alert('复制失败'));
+}
+function generateCommands(groups, octaveShift, harpOnly, customSoundKey){
+    const cycleCmd = `scoreboard players add @a t 1`;
+    let chainCmds = [];
+    if (harpOnly) {
+        const pitchMap = new Map();
+        for (const group of groups) {
+            const isPercussion = PERCUSSION_INSTRUMENTS.includes(group.instrument);
+            const effectiveInstrument = isPercussion ? group.instrument : 0;
+            const mapKey = `${effectiveInstrument}_${group.key}`;
+            if (!pitchMap.has(mapKey)) {
+                pitchMap.set(mapKey, {
+                    instrument: effectiveInstrument,
+                    key: group.key,
+                    ticks: [],
+                    noteName: group.noteName,
+                    shiftedNoteName: getShiftedNoteName(group.key, octaveShift)
+                });
+            }
+            pitchMap.get(mapKey).ticks.push(...group.ticks);
+        }
+        for (const [mapKey, data] of pitchMap) {
+            const uniqueTicks = [...new Set(data.ticks)].sort((a,b) => a-b);
+            const excludeEntries = uniqueTicks.map(t => `t=!${t + 1}`).join(',');
+            const pitch = keyToPitch(data.key, octaveShift);
+            let instrumentName = INSTRUMENT_SOUND_MAP[data.instrument] || "harp";
+            let sound;
+            if (PERCUSSION_INSTRUMENTS.includes(data.instrument)) {
+                sound = `note.${instrumentName}`;
+            } else if (customSoundKey && customSoundKey.trim() !== '') {
+                sound = customSoundKey.trim();
+                instrumentName = sound;
+            } else {
+                sound = `note.harp`;
+                instrumentName = 'harp';
+            }
+            const cmd = `execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound ${sound} @s ~ ~ ~ 1 ${pitch}`;
+            chainCmds.push({
+                seq: chainCmds.length + 1,
+                noteName: getNoteName(data.key),
+                shiftedNoteName: data.shiftedNoteName,
+                instrument: data.instrument,
+                instrumentName: instrumentName,
+                key: data.key,
+                pitch: pitch,
+                sound: sound,
+                ticks: uniqueTicks,
+                tickCount: uniqueTicks.length,
+                cmd: cmd
+            });
+        }
+        chainCmds.sort((a, b) => {
+            if (a.instrument === b.instrument) return a.key - b.key;
+            const aIsPerc = PERCUSSION_INSTRUMENTS.includes(a.instrument);
+            const bIsPerc = PERCUSSION_INSTRUMENTS.includes(b.instrument);
+            if (aIsPerc && !bIsPerc) return 1;
+            if (!aIsPerc && bIsPerc) return -1;
+            return a.instrument - b.instrument;
+        });
+        chainCmds.forEach((cmd, index) => cmd.seq = index + 1);
+    } else {
+        for (let idx = 0; idx < groups.length; idx++) {
+            const g = groups[idx];
+            const excludeEntries = g.ticks.map(t => `t=!${t + 1}`).join(',');
+            const pitch = keyToPitch(g.key, octaveShift);
+            const shiftedNoteName = getShiftedNoteName(g.key, octaveShift);
+            const sound = `note.${INSTRUMENT_SOUND_MAP[g.instrument] || "harp"}`;
+            const cmd = `execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound ${sound} @s ~ ~ ~ 1 ${pitch}`;
+            chainCmds.push({
+                seq: idx + 1,
+                noteName: g.noteName,
+                shiftedNoteName: shiftedNoteName,
+                instrument: g.instrument,
+                instrumentName: INSTRUMENT_SOUND_MAP[g.instrument] || "harp",
+                key: g.key,
+                pitch: pitch,
+                sound: sound,
+                ticks: g.ticks,
+                tickCount: g.tickCount,
+                cmd: cmd
+            });
+        }
+    }
+    return { cycleCmd, chainCmds };
+}
+// 渲染
+let lastChainCmds=[];
+function renderResults(notes, songLength, songName, octaveShift, harpOnly, timePerTick, customSoundKey) {
+    if(!notes||notes.length===0) return false;
+    const groups=groupNotesByInstrumentAndPitch(notes);
+    const effectiveCustomKey = (harpOnly && customSoundKey && customSoundKey.trim() !== '') ? customSoundKey.trim() : null;
+    const {cycleCmd,chainCmds}=generateCommands(groups,octaveShift,harpOnly,effectiveCustomKey);
+    document.getElementById('cycleCmd').innerHTML=`<pre>${escapeHtml(cycleCmd)}</pre>`;
+    lastChainCmds=chainCmds; window.lastChainCmds=chainCmds;
+    if(chainCmds.length===0) document.getElementById('chainList').innerHTML='<div class="cmd-block">无音符数据</div>';
+    else{
+        let html='';
+        for (let i = 0; i < chainCmds.length; i++) {
+            const c = chainCmds[i];
+            const timePreview = c.ticks.slice(0, 20).join(', ') + (c.ticks.length > 20 ? ` ... 共${c.tickCount}个` : '');
+            html += `<div class="cmd-block" id="cmd-block-${i}">
+                        <div class="cmd-header">
+                            <span class="seq-num">#${c.seq}</span>
+                            <span><b>${ICON_NOTE} ${c.noteName} → ${c.shiftedNoteName}</b></span>
+                            <span style="color:var(--text-secondary)">| ${c.instrumentName} (ID=${c.instrument}) | pitch=${c.pitch} | ${c.tickCount}次</span>
+                            <button class="copy-btn" data-idx="${i}">${ICON_COPY} 复制</button>
+                        </div>
+                        <pre>${escapeHtml(c.cmd)}</pre>
+                        <div style="font-size:11px;color:var(--text-secondary)">时间点: ${timePreview}</div>
+                    </div>`;
+        }
+        document.getElementById('chainList').innerHTML=html;
+        document.querySelectorAll('.copy-btn').forEach(btn=>{
+            btn.addEventListener('click',()=>{
+                const idx=parseInt(btn.dataset.idx);
+                const block=document.getElementById(`cmd-block-${idx}`);
+                copyToClipboard(lastChainCmds[idx].cmd,btn,block);
+            });
+        });
+    }
+    previewNotes = notes;
+    previewSongLength = songLength;
+    previewHarpOnly = harpOnly;
+    if (timePerTick !== undefined) {
+        previewTimePerTick = timePerTick;
+    } else {
+        previewTimePerTick = 50;
+    }
+    document.getElementById('playBtn').disabled=false; document.getElementById('stopBtn').disabled=true;
+    document.getElementById('tickDisplay').innerText=`Tick: 0 / ${songLength}`; document.getElementById('progressFill').style.width='0%';
+    const durationSec=(songLength/20).toFixed(1);
+    const uniqueInstruments=[...new Set(notes.map(n=>n.instrument))];
+    const instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
+    document.getElementById('stats').innerHTML = `<span class="success">${ICON_SUCCESS} 解析成功 | ${songName||''} | 音符:${notes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${octaveShift}</span>`;
+    const usedSounds = [...new Set(notes.map(n => getSoundFileName(n.instrument, harpOnly)))];
+    if (!previewContext) {
+        previewContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (typeof initWaterfall === 'function') {
+        initWaterfall(notes, songLength);
+    }
+    return true;
+}
+// 文件处理
+let currentNotes=[];
+function handleFile(arrayBuffer, fileType){
+    if(isPlaying) stopPreview();
+    let result;
+    try {
+        if (fileType === 'nbs') {
+            result = parseNBS(arrayBuffer);
+        } else if (fileType === 'cbnd') {
+            result = parseCBND(arrayBuffer);
+            result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
+            result.songName = 'CBND导入';
+        } else if (fileType === 'midi') {
+            result = parseMIDI(arrayBuffer);
+        } else {
+            document.getElementById('stats').innerHTML = `<span class="error">${ICON_ERROR} 未知文件类型</span>`;
+            return;
+        }
+    } catch (err) {
+        document.getElementById('stats').innerHTML = `<span class="error">${ICON_ERROR} 解析出错: ${err.message || err}</span>`;
+        console.error('解析错误:', err);
+        return;
+    }
+    if (!result || !result.notes || result.notes.length === 0) {
+        document.getElementById('stats').innerHTML = `<span class="error">${ICON_ERROR} 解析失败: 未提取到任何音符</span>`;
+        return;
+    }
+    currentNotes = result.notes;
+    currentSongName = result.songName || '';
+    const octaveShift = parseInt(document.getElementById('octaveShift').value);
+    const mode = document.querySelector('input[name="soundMode"]:checked').value;
+    const isHarpOrCustom = (mode === 'harp' || mode === 'custom');
+    let customSoundKey = null;
+    if (mode === 'custom') {
+        customSoundKey = document.getElementById('customSoundInput').value;
+    }
+    renderResults(result.notes, result.songLength, currentSongName, octaveShift, isHarpOrCustom, result.timePerTick, customSoundKey);
+}
+function sanitizeCustomSound(value) {
+    return value.replace(/[^a-zA-Z0-9.]/g, '').substring(0, 64);
+}
+function updateRenderAndRestoreState() {
+    if (!currentNotes.length) return;
+    const wasPlaying = isPlaying;
+    const currentTick = previewCurrentTick;
+    if (previewTimer) {
+        clearTimeout(previewTimer);
+        previewTimer = null;
+    }
+    const octaveShift = parseInt(document.getElementById('octaveShift').value);
+    const mode = document.querySelector('input[name="soundMode"]:checked').value;
+    const isHarpOrCustom = (mode === 'harp' || mode === 'custom');
+    let customSoundKey = null;
+    if (mode === 'custom') {
+        customSoundKey = sanitizeCustomSound(document.getElementById('customSoundInput').value);
+    }
+    renderResults(currentNotes, previewSongLength, currentSongName, octaveShift, isHarpOrCustom, previewTimePerTick, customSoundKey);
+    previewCurrentTick = Math.min(currentTick, previewSongLength - 1);
+    if (previewCurrentTick < 0) previewCurrentTick = 0;
+    updateProgressVisual(previewCurrentTick);
+    if (wasPlaying) {
+        startPreview();
+    } else {
+        document.getElementById('stopBtn').disabled = true;
+        document.getElementById('playBtn').innerHTML = `${ICON_PLAY} 播放`;
+        document.getElementById('playBtn').classList.remove('running');
+    }
+}
+// 自动解析
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+    const file=e.target.files[0];
+    if(!file) return;
+	const fileName = file.name.toLowerCase();
+    const fullName = file.name;
+    const baseName = fullName.replace(/\.[^.]+$/, '');
+    originalFileName = baseName || 'song';
+	const fileType = fileName.endsWith('.nbs') ? 'nbs' : (fileName.endsWith('.mid') || fileName.endsWith('.midi') ? 'midi' : fileName.endsWith('.cbnd') ? 'cbnd' : null);
+    if(!fileType){ alert('请选择 .nbs / .mid / .cbnd 文件'); return; }
+    document.getElementById('stats').innerHTML='正在解析...';
+    const reader=new FileReader();
+    reader.onload=(e)=>handleFile(e.target.result, fileType);
+    reader.onerror=()=>document.getElementById('stats').innerHTML = `<span class="error">${ICON_ERROR} 文件读取失败</span>`;
+    reader.readAsArrayBuffer(file);
+});
+document.getElementById('playBtn').addEventListener('click', function() {
+    if (!previewNotes.length) {
+        alert('请先选择文件');
+        return;
+    }
+    if (isPlaying) {
+        pausePreview();
+    } else {
+        startPreview();
+    }
+});
+document.getElementById('stopBtn').addEventListener('click',stopPreview);
+document.getElementById('previewSpeed').addEventListener('input',updateSpeed);
+document.getElementById('octaveShift').addEventListener('change', updateRenderAndRestoreState);
+document.querySelectorAll('input[name="soundMode"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const customInput = document.getElementById('customSoundInput');
+        if (this.value === 'custom') {
+            customInput.style.display = 'inline-block';
+            customInput.disabled = false;
+        } else {
+            customInput.style.display = 'none';
+            customInput.disabled = true;
+        }
+        updateRenderAndRestoreState();
+    });
+});
+
+document.getElementById('customSoundInput').addEventListener('blur', function() {
+    if (document.querySelector('input[name="soundMode"]:checked').value === 'custom') {
+        const filtered = sanitizeCustomSound(this.value);
+        this.value = filtered;
+        updateRenderAndRestoreState();
+    }
+});
+document.getElementById('copyAll').addEventListener('click',()=>{
+    if(!lastChainCmds.length){ alert('没有可复制的指令'); return; }
+    copyToClipboard(lastChainCmds.map(c=>c.cmd).join('\n\n'), null, null);
+    alert(`已复制 ${lastChainCmds.length} 条指令`);
+});
+document.getElementById('download').addEventListener('click',()=>{
+    if(!lastChainCmds.length){ alert('没有可导出的内容'); return; }
+    const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
+    let content=`【命令导出】\n\n【导出时间: ${new Date().toLocaleString()}】\n\n【模式: ${harpOnly?'Harp Only':'乐器映射'}】\n\n【工具作者: ZeroRaltal】\n\n【Github: https://github.com/Zero-Raltal/MCBE-CBNoteBlock/】\n\n【聊天栏】\n/scoreboard objectives add t dummy\n/scoreboard players set @a t 0\n\n【循环命令方块】\nscoreboard players add @a t 1\n\n【连锁命令方块】\n`;
+    for(let i=0;i<lastChainCmds.length;i++){
+        const c=lastChainCmds[i];
+        content+=`${c.cmd}\n\n`;
+    }
+    const blob=new Blob([content],{type:'text/plain'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    const baseName = originalFileName || 'commandblock_export';
+    a.download = `${baseName}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+});
+window.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('playBtn').innerHTML = `${ICON_PLAY} 播放`;
+    document.getElementById('stopBtn').innerHTML = `${ICON_STOP} 停止`;
+    var modal = document.getElementById('updateModal');
+    var closeBtn = document.getElementById('modalCloseBtn');
+    const initialMode = document.querySelector('input[name="soundMode"]:checked').value;
+    const customInput = document.getElementById('customSoundInput');
+    if (initialMode === 'custom') {
+        customInput.style.display = 'inline-block';
+        customInput.disabled = false;
+    } else {
+        customInput.style.display = 'none';
+        customInput.disabled = true;
+    }
+    document.getElementById('customSoundInput').disabled = (initialMode !== 'custom');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    closeBtn.addEventListener('click', function() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    });
+    preloadAllSamples();
+    initProgressBar();
+    initWaterfall(null, 0);
+});
+// 瀑布图核心函数
+const WF_BASE_HEIGHT = 220;
+const WF_INSTRUMENT_COLORS = [
+    '#3C6B9A', '#538359', '#A06D6E', '#ADAD3C', '#996B98',
+    '#7C5950', '#A5A167', '#B13CB1', '#658F99', '#B1B1B1',
+    '#3C8CAB', '#B14447', '#B06847', '#3CB13C', '#A53C64', '#696969'
+];
+function getInstrumentColor(id) {
+    return WF_INSTRUMENT_COLORS[id % WF_INSTRUMENT_COLORS.length] || '#888888';
+}
+let waterfallCtx = null;
+let waterfallCanvas = null;
+let waterfallWidth = 0;
+let waterfallHeight = WF_BASE_HEIGHT;
+let waterfallRafId = null;
+let waterfallAllNotes = [];
+let waterfallWindowTicks = 10;
+let lastTickTime = 0;
+let resizeObserver = null;
+let waterfallMinKey = 0;
+let waterfallMaxKey = 127;
+function initWaterfall(notes, songLength) {
+    const canvas = document.getElementById('waterfallCanvas');
+    if (!canvas) return;
+    waterfallCanvas = canvas;
+    waterfallCtx = canvas.getContext('2d');
+    waterfallHeight = WF_BASE_HEIGHT;
+    waterfallAllNotes = notes || [];
+    waterfallTotalNotes = waterfallAllNotes.length;
+    if (waterfallAllNotes.length > 0) {
+        let minKey = Infinity, maxKey = -Infinity;
+        for (const n of waterfallAllNotes) {
+            if (n.key < minKey) minKey = n.key;
+            if (n.key > maxKey) maxKey = n.key;
+        }
+        minKey = minKey - 3;
+        maxKey = maxKey + 3;
+        if (minKey < 0) minKey = 0;
+        if (maxKey - minKey < 6) {
+            const mid = (minKey + maxKey) / 2;
+            minKey = mid - 3;
+            maxKey = mid + 3;
+            if (minKey < 0) minKey = 0;
+        }
+        waterfallMinKey = minKey;
+        waterfallMaxKey = maxKey;
+    } else {
+        waterfallMinKey = 0;
+        waterfallMaxKey = 127;
+    }
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    const displayWidth = rect.width || canvas.parentElement.clientWidth || 600;
+    canvas.width = displayWidth * dpr;
+    canvas.height = WF_BASE_HEIGHT * dpr;
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = WF_BASE_HEIGHT + 'px';
+    waterfallWidth = displayWidth;
+    const legendEl = document.getElementById('wfLegend');
+    if (legendEl && waterfallAllNotes.length > 0) {
+        const uniqueInstruments = [...new Set(waterfallAllNotes.map(n => n.instrument))].slice(0, 16);
+        legendEl.innerHTML = uniqueInstruments.map(id => {
+            const name = INSTRUMENT_SOUND_MAP[id] || id;
+            const color = getInstrumentColor(id);
+            return `<span class="legend-item"><span class="legend-dot" style="background:${color};"></span>${name}</span>`;
+        }).join('');
+        if (uniqueInstruments.length === 0) {
+            legendEl.innerHTML = '<span style="color:var(--text-muted);font-size:11px;">无乐器数据</span>';
+        }
+    } else if (legendEl) {
+        legendEl.innerHTML = '<span style="color:var(--text-muted);font-size:11px;">等待加载...</span>';
+    }
+    const noteCountEl = document.getElementById('wfNoteCount');
+    if (noteCountEl) noteCountEl.textContent = `音符: ${waterfallAllNotes.length}`;
+    drawWaterfall();
+    if (window.ResizeObserver) {
+        if (resizeObserver) resizeObserver.disconnect();
+        const wrapper = document.getElementById('waterfallWrapper');
+        resizeObserver = new ResizeObserver(() => {
+            resizeWaterfall();
+        });
+        resizeObserver.observe(wrapper);
+    }
+    window.removeEventListener('resize', resizeWaterfall);
+    window.addEventListener('resize', resizeWaterfall);
+    window.removeEventListener('orientationchange', resizeWaterfall);
+    window.addEventListener('orientationchange', resizeWaterfall);
+    if (!waterfallRafId) {
+        waterfallRafId = requestAnimationFrame(waterfallLoop);
+    }
+}
+function drawWaterfall() {
+    const ctx = waterfallCtx;
+    const canvas = waterfallCanvas;
+    if (!ctx || !canvas) return;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const bgColor = rootStyles.getPropertyValue('--bg-waterfall').trim() || '#0a151a';
+    const gridColor = rootStyles.getPropertyValue('--border-waterfall-grid').trim() || '#1a2a32';
+    const currentLineColor = rootStyles.getPropertyValue('--border-waterfall-current').trim() || '#57b984';
+    const noteStrokeColor = rootStyles.getPropertyValue('--waterfall-note-stroke').trim() || '#ffffff';
+    const textColor = rootStyles.getPropertyValue('--text-muted').trim() || '#5f8b78';
+    const progressTrackColor = rootStyles.getPropertyValue('--bg-progress-track').trim() || '#2a3d3f';
+    let displayTick = previewCurrentTick;
+    if (isDraggingProgress && dragTargetTick !== undefined) {
+        displayTick = dragTargetTick;
+    } else if (lastTickTime > 0 && isPlaying) {
+        const now = performance.now();
+        const elapsed = now - lastTickTime;
+        const tickDuration = previewTimePerTick / previewSpeed;
+        let fraction = elapsed / tickDuration;
+        if (fraction > 1) fraction = 1;
+        displayTick = previewCurrentTick + fraction;
+    }
+    const displayWidth = waterfallWidth;
+    const displayHeight = waterfallHeight;
+    const dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, displayWidth, displayHeight);
+    const minKey = waterfallMinKey;
+    const maxKey = waterfallMaxKey;
+    const keyRange = maxKey - minKey;
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 0.5;
+    const startGrid = Math.ceil(minKey / 12) * 12;
+    for (let k = startGrid; k <= maxKey; k += 12) {
+        const x = ((k - minKey) / keyRange) * displayWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, displayHeight);
+        ctx.stroke();
+    }
+    ctx.strokeStyle = currentLineColor;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 8]);
+    ctx.beginPath();
+    ctx.moveTo(0, displayHeight - 2);
+    ctx.lineTo(displayWidth, displayHeight - 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = progressTrackColor;
+    ctx.font = '10px monospace';
+    ctx.fillText('@ ZeroRaltal', 4, 14);
+    const windowTicks = waterfallWindowTicks;
+    const noteHeight = 16;
+    for (const n of waterfallAllNotes) {
+        const tick = n.tick;
+        if (tick < displayTick || tick > displayTick + windowTicks) continue;
+        const ratio = (tick - displayTick) / windowTicks;
+        const y = displayHeight * (1 - ratio) - noteHeight / 2;
+        const key = n.key;
+        const x = ((key - minKey) / keyRange) * displayWidth;
+        const clampedX = Math.max(0, Math.min(x, displayWidth));
+        const noteWidth = Math.max(4, (displayWidth / keyRange) * 0.7);
+        const drawX = clampedX - noteWidth / 2;
+        const color = getInstrumentColor(n.instrument);
+        const alpha = 0.7 + (n.velocity || 80) / 200;
+        ctx.fillStyle = color;
+        ctx.globalAlpha = Math.min(1, alpha * 0.85);
+        ctx.fillRect(drawX, y, noteWidth, noteHeight);
+        ctx.globalAlpha = 1.0;
+        ctx.strokeStyle = noteStrokeColor;
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(drawX, y, noteWidth, noteHeight);
+    }
+}
+function waterfallLoop(timestamp) {
+    if (!waterfallCanvas) {
+        waterfallRafId = null;
+        return;
+    }
+    drawWaterfall();
+    waterfallRafId = requestAnimationFrame(waterfallLoop);
+}
+function clearWaterfall() {
+    if (waterfallCtx && waterfallCanvas) {
+        drawWaterfall();
+    }
+    if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver = null;
+    }
+    window.removeEventListener('resize', resizeWaterfall);
+    window.removeEventListener('orientationchange', resizeWaterfall);
+}
+function resizeWaterfall() {
+    const canvas = waterfallCanvas;
+    if (!canvas || !waterfallCtx) return;
+    const parent = canvas.parentElement;
+    const displayWidth = parent ? parent.clientWidth : window.innerWidth - 40;
+    const displayHeight = WF_BASE_HEIGHT;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = displayHeight + 'px';
+    waterfallCtx.setTransform(1, 0, 0, 1, 0, 0);
+    waterfallWidth = displayWidth;
+    drawWaterfall();
+}
+(function initTheme() {
+    const STORAGE_KEY = 'cbnote_theme';
+    const select = document.getElementById('themeSelect');
+    if (!select) return;
+    function getSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-yellow' : 'light-blue';
+    }
+    function applyTheme(theme) {
+        const root = document.documentElement;
+        if (theme === 'auto') {
+            const system = getSystemTheme();
+            root.setAttribute('data-theme', system);
+            select.value = 'auto';
+        } else {
+            root.setAttribute('data-theme', theme);
+            select.value = theme;
+        }
+        try {
+            localStorage.setItem(STORAGE_KEY, select.value);
+        } catch (_) {}
+        if (typeof drawWaterfall === 'function') {
+            drawWaterfall();
+        }
+    }
+    function loadTheme() {
+        let saved;
+        try {
+            saved = localStorage.getItem(STORAGE_KEY);
+        } catch (_) {}
+        if (saved && ['auto', 'classic', 'dark-yellow', 'light-blue'].includes(saved)) {
+            return saved;
+        }
+        return 'auto';
+    }
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    media.addEventListener('change', function(e) {
+        if (select.value === 'auto') {
+            applyTheme('auto');
+        }
+    });
+    select.addEventListener('change', function() {
+        applyTheme(this.value);
+    });
+    applyTheme(loadTheme());
+})();
+const CBND_INSTRUMENT_ORDER = [
+    'harp', 'bass', 'bd', 'snare', 'hat', 'guitar', 'flute', 'bell',
+    'chime', 'xylophone', 'iron_xylophone', 'cow_bell', 'didgeridoo',
+    'bit', 'banjo', 'pling'
+];
+function getCBNDInstrumentId(instrumentName) {
+    const idx = CBND_INSTRUMENT_ORDER.indexOf(instrumentName);
+    return idx === -1 ? 0 : idx;
+}
+class BitWriter {
+    constructor() {
+        this.bits = [];
+    }
+    writeBits(value, bitLength) {
+        for (let i = bitLength - 1; i >= 0; i--) {
+            this.bits.push((value >> i) & 1);
+        }
+    }
+    toUint8Array() {
+        while (this.bits.length % 8 !== 0) this.bits.push(0);
+        const bytes = new Uint8Array(this.bits.length / 8);
+        for (let i = 0; i < bytes.length; i++) {
+            let byte = 0;
+            for (let j = 0; j < 8; j++) {
+                byte = (byte << 1) | this.bits[i * 8 + j];
+            }
+            bytes[i] = byte;
+        }
+        return bytes;
+    }
+}
+function exportToCBND(chainCmds, tempo) {
+    const writer = new BitWriter();
+    writer.writeBits(Math.min(255, Math.max(0, tempo)), 8);
+    writer.writeBits(0, 16);
+    for (let i = 0; i < chainCmds.length; i++) {
+        const cmd = chainCmds[i];
+        const instrId = getCBNDInstrumentId(cmd.instrumentName);
+        writer.writeBits(instrId, 4);
+        writer.writeBits(Math.min(127, Math.max(0, cmd.key)), 7);
+        for (const tick of cmd.ticks) {
+            const tVal = tick + 1;
+            if (tVal >= 1 && tVal <= 65534) writer.writeBits(tVal, 16);
+        }
+        if (i < chainCmds.length - 1) {
+            writer.writeBits(0, 16);
+        }
+    }
+    writer.writeBits(0xFFFF, 16);
+    return writer.toUint8Array();
+}
+function downloadCBND(binaryData, filename = 'song.cbnd') {
+    const blob = new Blob([binaryData], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+document.getElementById('exportCBND').addEventListener('click', function() {
+    if (!lastChainCmds || lastChainCmds.length === 0) {
+        alert('没有可导出的指令数据，请先解析文件。');
+        return;
+    }
+    const tempo = Math.min(255, Math.round(1000 / previewTimePerTick));
+    const binary = exportToCBND(lastChainCmds, tempo);
+    const baseName = originalFileName || 'song';
+    const fileName = `${baseName}.cbnd`;
+    downloadCBND(binary, fileName);
+});
+class BitReader {
+    constructor(bytes) {
+        this.bytes = bytes;
+        this.bitIndex = 0;
+        this.length = bytes.length * 8;
+    }
+    readBits(bitLength) {
+        if (this.bitIndex + bitLength > this.length) 
+            throw new Error('BitReader 读取超出范围');
+        let value = 0;
+        for (let i = 0; i < bitLength; i++) {
+            const byteIndex = Math.floor(this.bitIndex / 8);
+            const bitOffset = 7 - (this.bitIndex % 8); // 高位在前
+            const bit = (this.bytes[byteIndex] >> bitOffset) & 1;
+            value = (value << 1) | bit;
+            this.bitIndex++;
+        }
+        return value;
+    }
+}
+function parseCBND(arrayBuffer) {
+    const bytes = new Uint8Array(arrayBuffer);
+    const reader = new BitReader(bytes);
+    const tempo = reader.readBits(8);
+    const startMarker = reader.readBits(16);
+    if (startMarker !== 0) throw new Error('无效的 .cbnd 文件：起始标志错误');
+    const allNotes = [];
+    let maxTick = 0;
+    let isEnd = false;
+    while (!isEnd) {
+        const instrId = reader.readBits(4);
+        const instrName = CBND_INSTRUMENT_ORDER[instrId] || 'harp';
+        const key = reader.readBits(7);
+        let tVal;
+        while (true) {
+            tVal = reader.readBits(16);
+            if (tVal === 0) {
+                break;
+            } else if (tVal === 0xFFFF) {
+                isEnd = true;
+                break;
+            } else {
+                const tick = tVal - 1;
+                if (tick > maxTick) maxTick = tick;
+                allNotes.push({
+                    tick: tick,
+                    key: key,
+                    velocity: 100,
+                    instrument: instrId,
+                    channel: 0
+                });
+            }
+        }
+    }
+    const songLength = maxTick + 1;
+    return { notes: allNotes, songLength, tempo };
+}
+console.warn(`
+  _____ _____  ____    ___  
+ |__  /| ____||  _ \\  / _ \\ 
+   / / |  _|  | |_) || | | |
+  / /_ | |___ |  _ < | |_| |
+ /____||_____||_| \\_\\ \\___/ 
+   ____         _  _          _ 
+ |  _ \\  __ _ | || |_  __ _ | |
+ | |_) |/ _' || || __|/ _' || |
+ |  _ < ||_| || || |_ ||_| || |
+ |_| \\_\\\\__,_||_| \\__|\\__,_||_|
+`);
+</script>
+</html>
