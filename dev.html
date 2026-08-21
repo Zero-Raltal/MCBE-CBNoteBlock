@@ -637,6 +637,62 @@
             background: var(--bg-option);
             color: var(--text-primary);
         }
+        .snap-control {
+            background: var(--bg-mode);
+            padding: 10px;
+            border: 0;
+            margin-bottom: 15px;
+            transition: background 0.3s ease;
+        }
+        .snap-control label {
+            color: var(--text-primary);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .snap-control input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-input);
+            border-radius: 3px;
+            background: var(--bg-input);
+            cursor: pointer;
+            position: relative;
+            vertical-align: middle;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            flex-shrink: 0;
+        }
+        .snap-control input[type="checkbox"]:checked {
+            background: var(--border-accent);
+            border-color: var(--border-accent);
+        }
+        .snap-control input[type="checkbox"]:checked::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--btn-text);
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .snap-control input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .snap-control input[type="checkbox"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--border-input-focus);
+        }
+        .snap-control label:has(input:disabled) {
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -644,6 +700,9 @@
     <div class="modal-box">
         <h1>大更新完成！！！</h1>
         <button class="modal-close-btn" id="modalCloseBtn">确定</button>
+        <br>
+        <h3>2026.8.21更新日志:</h3>
+        <h3>1.新增了MIDI优化选项，可以使音符对齐 20 tick/s，防止节奏变乱</h3>
         <br>
         <h3>2026.8.19更新日志:</h3>
         <h3 style="color:#72ff30">1.增加了对自定义音色的支持，使用自定义音色仅改变指令生成，不改变预览效果</h3>
@@ -751,8 +810,13 @@
             <input type="range" id="previewSpeed" min="0.10" max="5.00" step="0.05" value="1.00" class="speed-slider">
             <span class="speed-value" id="speedValue">1.00x</span>
         </div>
+        <div class="snap-control">
+            <label>
+                MIDI优化: <input type="checkbox" id="enableSnap" checked> 自动对齐 20 tick/s
+            </label>
+        </div>
         <div class="mode-control">
-            <label>音色模式:</label>
+            <label>音色模式: </label>
             <label><input type="radio" name="soundMode" value="multi" checked> 乐器映射 </label>
             <label><input type="radio" name="soundMode" value="harp"> Harp Only </label>
             <label><input type="radio" name="soundMode" value="custom"> 自定义音色 </label>
@@ -792,6 +856,8 @@
 </div>
 </body>
 <script>
+var currentFileArrayBuffer = null;
+var currentFileType = null;
 let originalFileName = '';
 let currentSongName = '';
 let previewTimePerTick = 50;
@@ -926,16 +992,54 @@ function midiTickToSeconds(tick, division, tempoEvents) {
     totalSeconds += ticksSinceTempo * secondsPerTick;
     return totalSeconds;
 }
-function parseMIDI(arrayBuffer) {
-    const parsed = midiParser.parse(arrayBuffer);
-    const timeDivision = parsed.timeDivision;
-    const tempoEvents = parsed.tempoEvents;
-    const tracks = parsed.tracks;
-    const allNotes = [];
-    let allEvents = [];
-    for (let t = 0; t < tracks.length; t++) {
-        const track = tracks[t];
-        for (let e = 0; e < track.length; e++) {
+function computeBestTempo(secondsArray) {
+    if (!secondsArray || secondsArray.length === 0) return 20;
+    var minTempo = 15, maxTempo = 25, step = 0.05;
+    var bestTempo = 20, bestError = Infinity;
+    for (var v = minTempo; v <= maxTempo; v += step) {
+        var error = 0;
+        for (var i = 0; i < secondsArray.length; i++) {
+            var tick = secondsArray[i] * v;
+            var rounded = Math.round(tick);
+            var diff = tick - rounded;
+            error += diff * diff;
+        }
+        if (error < bestError) { bestError = error; bestTempo = v; }
+    }
+    return bestTempo;
+}
+function processMidi(arrayBuffer, enableSnap) {
+    var result = parseMIDI(arrayBuffer, enableSnap);
+    var tempo = result.tempo || 20;
+    result.timePerTick = 1000 / tempo;
+    result.songName = result.songName || 'MIDI导入';
+    currentNotes = result.notes;
+    currentSongName = result.songName;
+    var octaveShift = parseInt(document.getElementById('octaveShift').value);
+    var mode = document.querySelector('input[name="soundMode"]:checked').value;
+    var isHarpOrCustom = (mode === 'harp' || mode === 'custom');
+    var customSoundKey = null;
+    if (mode === 'custom') {
+        customSoundKey = sanitizeCustomSound(document.getElementById('customSoundInput').value);
+    }
+    renderResults(result.notes, result.songLength, currentSongName, octaveShift, isHarpOrCustom, result.timePerTick, customSoundKey);
+}
+document.getElementById('enableSnap').addEventListener('change', function() {
+    if (currentFileType === 'midi' && currentFileArrayBuffer) {
+        stopPreview();
+        processMidi(currentFileArrayBuffer, this.checked);
+    }
+});
+function parseMIDI(arrayBuffer, enableSnap) {
+    var parsed = midiParser.parse(arrayBuffer);
+    var timeDivision = parsed.timeDivision;
+    var tempoEvents = parsed.tempoEvents;
+    var tracks = parsed.tracks;
+    var allNotes = [];
+    var allEvents = [];
+    for (var t = 0; t < tracks.length; t++) {
+        var track = tracks[t];
+        for (var e = 0; e < track.length; e++) {
             allEvents.push(track[e]);
         }
     }
@@ -943,46 +1047,46 @@ function parseMIDI(arrayBuffer) {
         if (a.tick === b.tick) return 0;
         return a.tick - b.tick;
     });
-    const activeNotes = new Map();
-    const channelInstruments = new Array(16).fill(0);
+    var activeNotes = new Map();
+    var channelInstruments = new Array(16).fill(0);
+    var noteStartSeconds = [];
     function closeNote(key) {
-        const noteOn = activeNotes.get(key);
+        var noteOn = activeNotes.get(key);
         if (!noteOn) return;
-        const startSec = midiTickToSeconds(noteOn.tick, timeDivision, tempoEvents);
-        const nbsTick = Math.round(startSec * 20);
-        let instrument;
+        var startSec = midiTickToSeconds(noteOn.tick, timeDivision, tempoEvents);
+        var instrument;
         if (noteOn.channel === 9) {
             instrument = DRUM_TO_MINECRAFT[noteOn.noteNumber] || 4;
         } else {
             instrument = GM_TO_MINECRAFT[noteOn.instrument] || 0;
         }
-        let noteKey = noteOn.noteNumber - 12;
+        var noteKey = noteOn.noteNumber - 12;
         if (noteOn.channel === 9) {
-            const pitchOffset = DRUM_PITCH_OFFSET[noteOn.noteNumber] || 0;
+            var pitchOffset = DRUM_PITCH_OFFSET[noteOn.noteNumber] || 0;
             noteKey += pitchOffset;
         } else {
-            const octaveOffset = GM_OCTAVE_OFFSET[noteOn.instrument] || 0;
+            var octaveOffset = GM_OCTAVE_OFFSET[noteOn.instrument] || 0;
             noteKey += octaveOffset;
         }
         allNotes.push({
-            tick: nbsTick,
+            tick: 0,
             key: noteKey,
             velocity: noteOn.velocity,
             instrument: instrument,
-            channel: noteOn.channel
+            channel: noteOn.channel,
+            sec: startSec
         });
+        noteStartSeconds.push(startSec);
         activeNotes.delete(key);
     }
-    const lastEventTick = allEvents.length > 0 ? allEvents[allEvents.length - 1].tick : 0;
-    const eventsLength = allEvents.length;
-    for (let idx = 0; idx < eventsLength; idx++) {
-        const event = allEvents[idx];
+    for (var idx = 0; idx < allEvents.length; idx++) {
+        var event = allEvents[idx];
         if (event.type === 'programChange') {
             channelInstruments[event.channel] = event.program;
             continue;
         }
         if (event.type === 'noteOn') {
-            const key = event.channel + '_' + event.noteNumber;
+            var key = event.channel + '_' + event.noteNumber;
             if (activeNotes.has(key)) closeNote(key);
             activeNotes.set(key, {
                 tick: event.tick,
@@ -993,30 +1097,37 @@ function parseMIDI(arrayBuffer) {
             });
         }
         else if (event.type === 'noteOff') {
-            const key = event.channel + '_' + event.noteNumber;
-            closeNote(key);
+            var key2 = event.channel + '_' + event.noteNumber;
+            closeNote(key2);
         }
     }
-    for (const key of [...activeNotes.keys()]) {
-        closeNote(key);
+    for (var key3 of activeNotes.keys()) {
+        closeNote(key3);
+    }
+    var bestTempo = 20;
+    if (enableSnap !== false) {
+        bestTempo = computeBestTempo(noteStartSeconds);
+    }
+    for (var n = 0; n < allNotes.length; n++) {
+        allNotes[n].tick = Math.round(allNotes[n].sec * bestTempo);
     }
     allNotes.sort(function(a, b) {
         if (a.tick === b.tick) return 0;
         return a.tick - b.tick;
     });
-    let maxTick = 0;
+    var maxTick = 0;
     if (allNotes.length > 0) {
         maxTick = allNotes[allNotes.length - 1].tick + 20;
     }
-    for (const note of allNotes) {
-        if (note.channel === 9) {
-            let key = note.key;
-            while (key < 42) key += 12;
-            while (key > 65) key -= 12;
-            note.key = key;
+    for (var nn = 0; nn < allNotes.length; nn++) {
+        if (allNotes[nn].channel === 9) {
+            var k = allNotes[nn].key;
+            while (k < 42) k += 12;
+            while (k > 65) k -= 12;
+            allNotes[nn].key = k;
         }
     }
-    return { notes: allNotes, songLength: maxTick, songName: "MIDI导入" };
+    return { notes: allNotes, songLength: maxTick, songName: "MIDI导入", tempo: bestTempo };
 }
 // NBS解析器
 function parseNBS(arrayBuffer) {
@@ -1884,41 +1995,44 @@ function renderResults(notes, songLength, songName, octaveShift, harpOnly, timeP
 }
 // 文件处理
 let currentNotes=[];
-function handleFile(arrayBuffer, fileType){
-    if(isPlaying) stopPreview();
-    let result;
-    try {
+function handleFile(arrayBuffer, fileType) {
+    if (isPlaying) stopPreview();
+    currentFileArrayBuffer = arrayBuffer;
+    currentFileType = fileType;
+    var enableSnap = document.getElementById('enableSnap');
+    if (fileType === 'midi') {
+        enableSnap.disabled = false;
+        processMidi(arrayBuffer, enableSnap.checked);
+    } else {
+        enableSnap.disabled = true;
+        var result;
         if (fileType === 'nbs') {
             result = parseNBS(arrayBuffer);
+            result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
+            result.songName = result.songName || '';
         } else if (fileType === 'cbnd') {
             result = parseCBND(arrayBuffer);
             result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
             result.songName = 'CBND导入';
-        } else if (fileType === 'midi') {
-            result = parseMIDI(arrayBuffer);
         } else {
-            document.getElementById('stats').innerHTML = `<span class="error">${ICON_ERROR} 未知文件类型</span>`;
+            document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 未知文件类型</span>';
             return;
         }
-    } catch (err) {
-        document.getElementById('stats').innerHTML = `<span class="error">${ICON_ERROR} 解析出错: ${err.message || err}</span>`;
-        console.error('解析错误:', err);
-        return;
+        if (!result || !result.notes || result.notes.length === 0) {
+            document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: 未提取到任何音符</span>';
+            return;
+        }
+        currentNotes = result.notes;
+        currentSongName = result.songName || '';
+        var octaveShift = parseInt(document.getElementById('octaveShift').value);
+        var mode = document.querySelector('input[name="soundMode"]:checked').value;
+        var isHarpOrCustom = (mode === 'harp' || mode === 'custom');
+        var customSoundKey = null;
+        if (mode === 'custom') {
+            customSoundKey = sanitizeCustomSound(document.getElementById('customSoundInput').value);
+        }
+        renderResults(result.notes, result.songLength, currentSongName, octaveShift, isHarpOrCustom, result.timePerTick, customSoundKey);
     }
-    if (!result || !result.notes || result.notes.length === 0) {
-        document.getElementById('stats').innerHTML = `<span class="error">${ICON_ERROR} 解析失败: 未提取到任何音符</span>`;
-        return;
-    }
-    currentNotes = result.notes;
-    currentSongName = result.songName || '';
-    const octaveShift = parseInt(document.getElementById('octaveShift').value);
-    const mode = document.querySelector('input[name="soundMode"]:checked').value;
-    const isHarpOrCustom = (mode === 'harp' || mode === 'custom');
-    let customSoundKey = null;
-    if (mode === 'custom') {
-        customSoundKey = document.getElementById('customSoundInput').value;
-    }
-    renderResults(result.notes, result.songLength, currentSongName, octaveShift, isHarpOrCustom, result.timePerTick, customSoundKey);
 }
 function sanitizeCustomSound(value) {
     return value.replace(/[^a-zA-Z0-9.]/g, '').substring(0, 64);
