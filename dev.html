@@ -693,6 +693,75 @@
         .snap-control label:has(input:disabled) {
             cursor: not-allowed;
         }
+        .playlist-quick {
+            background: var(--bg-mode);
+            padding: 12px 16px;
+            margin: 12px 0;
+            border: 0;
+            transition: background 0.3s ease;
+        }
+        .playlist-item {
+            background: var(--bg-playlist-item);
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid var(--border-playlist);
+            font-size: 13px;
+            color: var(--text-primary);
+            transition: background 0.2s, border-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .playlist-item:hover {
+            background: var(--bg-playlist-hover);
+            border-color: var(--border-accent);
+        }
+        .playlist-item .badge {
+            font-size: 10px;
+            background: var(--bg-btn-primary);
+            color: #fff;
+            padding: 0 6px;
+            border-radius: 10px;
+        }
+        #playlistList .playlist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 4px;
+            background: var(--bg-playlist-item);
+            border: 1px solid var(--border-playlist);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #playlistList .playlist-item:hover {
+            background: var(--bg-playlist-hover);
+            border-color: var(--border-accent);
+        }
+        #playlistList .playlist-item .info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            background: var(--bg-btn-primary);
+            color: var(--btn-text);
+            border: none;
+            padding: 4px 14px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .page-btn:hover:not(:disabled) {
+            background: var(--bg-btn-primary-hover);
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -771,6 +840,30 @@
         <h3>4.解决了一些提交BUG的用户</h3>
     </div>
 </div>
+<div id="playlistModal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width:800px; text-align:left; padding:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+            <h2 style="margin:0; color:var(--text-modal-title);">📋 全部歌单</h2>
+            <button id="closePlaylistBtn" class="modal-close-btn" style="padding:6px 20px; font-size:14px;">✕ 关闭</button>
+        </div>
+        <div style="margin-bottom:12px;">
+            <input type="text" id="playlistSearch" placeholder="搜索歌曲名称..." style="width:100%; padding:8px 12px; background:var(--bg-input); border:1px solid var(--border-input); color:var(--text-primary); font-family:monospace; font-size:14px; box-sizing:border-box;">
+        </div>
+        <div id="playlistList" style="max-height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:4px;">
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:16px;">
+            <span id="playlistPageInfo" style="color:var(--text-muted); font-size:13px;">第 1 / 1 页</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button id="playlistPrev" class="page-btn" disabled>《 上一页</button>
+                <button id="playlistNext" class="page-btn">下一页 》</button>
+                <span style="color:var(--text-muted); font-size:13px; display:flex; align-items:center; gap:4px;">
+                    跳转 <input type="number" id="playlistJump" min="1" value="1" style="width:50px; background:var(--bg-input); border:1px solid var(--border-input); color:var(--text-primary); padding:4px; text-align:center;"> 页
+                </span>
+                <button id="playlistJumpBtn" class="page-btn">跳转</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div style="max-width:1400px;margin:0 auto">
     <h1>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</h1>
 	<h3 style="color:#ff3030">转载/二改请保留MIT声明，感谢理解!</h3>
@@ -782,6 +875,15 @@
             <option value="dark-yellow">神秘黄</option>
             <option value="light-blue">晴空蓝</option>
         </select>
+    </div>
+    <div class="playlist-quick" id="playlistQuick">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <span style="color:var(--text-secondary); font-size:14px;">在线歌单</span>
+            <button id="openPlaylistBtn" style="background:var(--bg-btn-primary); padding:4px 16px; font-size:13px;">查看全部</button>
+        </div>
+        <div id="latestSongs" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+            <span style="color:var(--text-muted); font-size:13px;">加载中...</span>
+        </div>
     </div>
     <div class="box">
 		<label>上传(.mid/.midi/.nbs/.cbnd)文件: </label>
@@ -2160,6 +2262,8 @@ window.addEventListener('DOMContentLoaded', function() {
     preloadAllSamples();
     initProgressBar();
     initWaterfall(null, 0);
+    loadPlaylist();
+    initPlaylistEvents();
 });
 // 瀑布图核心函数
 const WF_BASE_HEIGHT = 220;
@@ -2537,6 +2641,219 @@ function parseCBND(arrayBuffer) {
     }
     const songLength = maxTick + 1;
     return { notes: allNotes, songLength, tempo };
+}
+let playlistData = [];
+let filteredPlaylist = [];
+let currentPage = 1;
+const pageSize = 10;
+async function loadPlaylist() {
+    if (window.location.protocol === 'file:') {
+        const quick = document.getElementById('playlistQuick');
+        if (quick) quick.style.display = 'none';
+        return;
+    }
+    try {
+        const resp = await fetch('./songs/songs.list');
+        if (!resp.ok) throw new Error('无法获取歌单文件');
+        const text = await resp.text();
+        const lines = text.split('\n')
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+        playlistData = lines.map(line => {
+            let fileName = line;
+            const lastSlash = line.lastIndexOf('/');
+            if (lastSlash !== -1) {
+                fileName = line.substring(lastSlash + 1);
+            }
+            const lastDot = fileName.lastIndexOf('.');
+            let name = fileName;
+            let ext = '';
+            if (lastDot > 0) {
+                name = fileName.substring(0, lastDot);
+                ext = fileName.substring(lastDot + 1).toLowerCase();
+            }
+            let type = 'nbs';
+            if (ext === 'mid' || ext === 'midi') type = 'midi';
+            else if (ext === 'nbs') type = 'nbs';
+            else if (ext === 'cbnd') type = 'cbnd';
+            let filePath = `./songs/${line}`;
+            return { name, file: filePath, type };
+        });
+        renderLatestSongs(playlistData.slice(0, 5));
+        filteredPlaylist = [...playlistData];
+        renderPlaylistPage(1);
+    } catch (e) {
+        console.error('歌单加载失败:', e);
+        document.getElementById('latestSongs').innerHTML = `<span style="color:var(--text-error);">歌单加载失败</span>`;
+    }
+}
+function renderLatestSongs(songs) {
+    const container = document.getElementById('latestSongs');
+    if (!songs || songs.length === 0) {
+        container.innerHTML = '<span style="color:var(--text-muted);">暂无歌曲</span>';
+        return;
+    }
+    container.innerHTML = songs.map(song => `
+        <span class="playlist-item" data-file="${song.file}" data-type="${song.type}">
+            ${song.name}
+            <span class="badge">${song.type}</span>
+        </span>
+    `).join('');
+    container.querySelectorAll('.playlist-item').forEach(el => {
+        el.addEventListener('click', function() {
+            loadSongFromPlaylist(this.dataset.file, this.dataset.type);
+        });
+    });
+}
+function renderPlaylistPage(page) {
+    const total = filteredPlaylist.length;
+    const totalPages = Math.ceil(total / pageSize) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentPage = page;
+    const start = (page - 1) * pageSize;
+    const end = Math.min(start + pageSize, total);
+    const pageItems = filteredPlaylist.slice(start, end);
+    const listEl = document.getElementById('playlistList');
+    if (pageItems.length === 0) {
+        listEl.innerHTML = '<div style="color:var(--text-muted); padding:20px; text-align:center;">没有匹配的歌曲</div>';
+    } else {
+        listEl.innerHTML = pageItems.map(song => `
+            <div class="playlist-item" data-file="${song.file}" data-type="${song.type}">
+                <span class="info">
+                    <span>${song.name}</span>
+                </span>
+                <span class="badge">${song.type}</span>
+            </div>
+        `).join('');
+        listEl.querySelectorAll('.playlist-item').forEach(el => {
+            el.addEventListener('click', function() {
+                loadSongFromPlaylist(this.dataset.file, this.dataset.type);
+                document.getElementById('playlistModal').classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+        });
+    }
+    document.getElementById('playlistPageInfo').textContent = `第 ${page} / ${totalPages} 页`;
+    document.getElementById('playlistPrev').disabled = (page <= 1);
+    document.getElementById('playlistNext').disabled = (page >= totalPages);
+    document.getElementById('playlistJump').value = page;
+    document.getElementById('playlistJump').max = totalPages;
+}
+function filterPlaylist(keyword) {
+    const kw = keyword.trim().toLowerCase();
+    if (!kw) {
+        filteredPlaylist = [...playlistData];
+    } else {
+        filteredPlaylist = playlistData.filter(item => 
+            item.name.toLowerCase().includes(kw)
+        );
+    }
+    renderPlaylistPage(1);
+}
+async function loadSongFromPlaylist(filePath, type) {
+    document.getElementById('fileInput').value = '';
+    try {
+        const resp = await fetch(filePath);
+        if (!resp.ok) throw new Error(`无法加载 ${filePath}`);
+        const buffer = await resp.arrayBuffer();
+        loadAndParseBuffer(buffer, type, filePath);
+    } catch (e) {
+        alert(`加载歌曲失败: ${e.message}`);
+        console.error(e);
+    }
+}
+function loadAndParseBuffer(arrayBuffer, fileType, fileName) {
+    if (isPlaying) stopPreview();
+    currentFileArrayBuffer = arrayBuffer;
+    currentFileType = fileType;
+    originalFileName = fileName.replace(/\.[^.]+$/, '') || 'song';
+    var enableSnap = document.getElementById('enableSnap');
+    try {
+        if (fileType === 'midi') {
+            enableSnap.disabled = false;
+            processMidi(arrayBuffer, enableSnap.checked);
+        } else {
+            enableSnap.disabled = true;
+            var result;
+            if (fileType === 'nbs') {
+                result = parseNBS(arrayBuffer);
+                result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
+                result.songName = result.songName || '';
+            } else if (fileType === 'cbnd') {
+                result = parseCBND(arrayBuffer);
+                result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
+                result.songName = 'CBND导入';
+            } else {
+                document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 未知文件类型</span>';
+                return;
+            }
+            if (!result || !result.notes || result.notes.length === 0) {
+                document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: 未提取到任何音符</span>';
+                return;
+            }
+            currentNotes = result.notes;
+            currentSongName = result.songName || '';
+            var octaveShift = parseInt(document.getElementById('octaveShift').value);
+            var mode = document.querySelector('input[name="soundMode"]:checked').value;
+            var isHarpOrCustom = (mode === 'harp' || mode === 'custom');
+            var customSoundKey = null;
+            if (mode === 'custom') {
+                customSoundKey = sanitizeCustomSound(document.getElementById('customSoundInput').value);
+            }
+            renderResults(result.notes, result.songLength, currentSongName, octaveShift, isHarpOrCustom, result.timePerTick, customSoundKey);
+        }
+        if (previewNotes && previewNotes.length > 0) {
+            setTimeout(() => {
+                startPreview();
+            }, 100);
+        }
+    } catch (e) {
+        document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: ' + e.message;
+    }
+}
+function initPlaylistEvents() {
+    document.getElementById('openPlaylistBtn').addEventListener('click', function() {
+        const modal = document.getElementById('playlistModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('playlistSearch').value = '';
+        filterPlaylist('');
+    });
+    document.getElementById('closePlaylistBtn').addEventListener('click', function() {
+        document.getElementById('playlistModal').classList.add('hidden');
+        document.body.style.overflow = '';
+    });
+    document.getElementById('playlistModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    });
+    document.getElementById('playlistSearch').addEventListener('input', function() {
+        filterPlaylist(this.value);
+    });
+    document.getElementById('playlistPrev').addEventListener('click', function() {
+        if (currentPage > 1) renderPlaylistPage(currentPage - 1);
+    });
+    document.getElementById('playlistNext').addEventListener('click', function() {
+        const total = filteredPlaylist.length;
+        const totalPages = Math.ceil(total / pageSize);
+        if (currentPage < totalPages) renderPlaylistPage(currentPage + 1);
+    });
+    document.getElementById('playlistJumpBtn').addEventListener('click', function() {
+        const val = parseInt(document.getElementById('playlistJump').value);
+        const total = filteredPlaylist.length;
+        const totalPages = Math.ceil(total / pageSize) || 1;
+        if (val >= 1 && val <= totalPages) {
+            renderPlaylistPage(val);
+        } else {
+            alert(`请输入 1 ~ ${totalPages} 之间的页码`);
+        }
+    });
+    document.getElementById('playlistJump').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') document.getElementById('playlistJumpBtn').click();
+    });
 }
 console.warn(`
   _____ _____  ____    ___  
