@@ -2659,7 +2659,7 @@ function getRandomSongs(arr, count) {
     return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 async function loadPlaylist() {
-    if (window.location.protocol === 'file1:') {
+    if (window.location.protocol === 'file:') {
         const quick = document.getElementById('playlistQuick');
         if (quick) quick.style.display = 'none';
         return;
