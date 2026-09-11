@@ -968,6 +968,7 @@ let originalFileName = '';
 let currentSongName = '';
 let previewTimePerTick = 50;
 let previewTimer = null;
+let playbackStartTime = 0;
 let isDragging = false;
 let dragTargetTick = 0;
 let isDraggingProgress = false;
@@ -1513,7 +1514,7 @@ function parseNBS(arrayBuffer) {
         const notes = [];
         for (const layer of song.layers) {
             for (const [tick, note] of layer.notes) {
-                if (note.key >= 0 && note.key <= 87) {
+                if (note.key >= 9 && note.key <= 96) {
                     notes.push({
                         tick: tick,
                         layer: 0,
@@ -1638,9 +1639,7 @@ const sampleBuffers = {};
 let samplesPreloaded = false;
 async function preloadAllSamples() {
     if (samplesPreloaded) return;
-    if (!previewContext) {
-        previewContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    ensureAudioChain();
     const soundNames = Object.keys(SAMPLE_BASE91);
     let loaded = 0;
     for (const name of soundNames) {
@@ -1661,19 +1660,54 @@ async function loadSample(soundName) {
 }
 function getSoundFileName(instrumentId, harpOnly) { return (harpOnly && !PERCUSSION_INSTRUMENTS.includes(instrumentId)) ? "harp" : (INSTRUMENT_SOUND_MAP[instrumentId] || "harp"); }
 // 预览播放器
-let previewContext = null, previewNotes = [], previewSongLength = 0, previewInterval = null, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 0.25, previewSpeed = 1.0, activeSources = [], isPlaying = false;
-
+let previewContext = null, previewNotes = [], previewSongLength = 0, previewInterval = null, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 1, previewSpeed = 1.0, activeSources = [], isPlaying = false;
+let masterGain = null;
+let limiterNode = null;
+let softClipper = null;
+function ensureAudioChain() {
+    if (!previewContext) {
+        previewContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (masterGain) return previewContext;
+    masterGain = previewContext.createGain();
+    masterGain.gain.value = 1.0;
+    limiterNode = previewContext.createDynamicsCompressor();
+    limiterNode.threshold.value = -2;
+    limiterNode.knee.value = 3;
+    limiterNode.ratio.value = 20;
+    limiterNode.attack.value = 0.001;
+    limiterNode.release.value = 0.1;
+    softClipper = previewContext.createWaveShaper();
+    const n = 8192;
+    const curve = new Float32Array(n);
+    const threshold = 0.85;
+    for (let i = 0; i < n; i++) {
+        const x = (i / (n - 1)) * 2 - 1;
+        if (Math.abs(x) <= threshold) {
+            curve[i] = x;
+        } else {
+            const sign = Math.sign(x);
+            const over = (Math.abs(x) - threshold) / (1 - threshold);
+            curve[i] = sign * (threshold + (1 - threshold) * Math.tanh(over));
+        }
+    }
+    softClipper.curve = curve;
+    softClipper.oversample = '4x';
+    masterGain.connect(limiterNode);
+    limiterNode.connect(softClipper);
+    softClipper.connect(previewContext.destination);
+    return previewContext;
+}
 async function playNoteSynthesizer(note) {
     const soundName = getSoundFileName(note.instrument, previewHarpOnly);
     const octaveShift = parseInt(document.getElementById('octaveShift').value) || 0;
     const shiftedKey = note.key + (octaveShift * 12);
     const baseMidi = 54;
     const playbackRate = Math.pow(2, (shiftedKey - baseMidi) / 12);
-    let volMultiplier = 1;
-    const volume = previewVolume * (note.velocity / 100) * volMultiplier;
+    const volume = previewVolume * (note.velocity / 100);
     const buffer = await loadSample(soundName);
     if (!buffer) return;
-    const ctx = previewContext;
+    const ctx = ensureAudioChain();
     const now = ctx.currentTime;
     const source = ctx.createBufferSource();
     source.buffer = buffer;
@@ -1681,7 +1715,7 @@ async function playNoteSynthesizer(note) {
     const gain = ctx.createGain();
     gain.gain.value = volume;
     source.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(masterGain);
     source.start(now);
     activeSources.push(source);
     source.onended = () => {
@@ -1689,22 +1723,50 @@ async function playNoteSynthesizer(note) {
         if (idx > -1) activeSources.splice(idx, 1);
     };
 }
+function buildPreviewIndexes(notes, chainCmds) {
+    previewNotesByTick = new Map();
+    for (let i = 0; i < notes.length; i++) {
+        const n = notes[i];
+        let arr = previewNotesByTick.get(n.tick);
+        if (!arr) { arr = []; previewNotesByTick.set(n.tick, arr); }
+        arr.push(n);
+    }
+    chainCmdByTick = new Map();
+    if (chainCmds) {
+        for (let i = 0; i < chainCmds.length; i++) {
+            const ticks = chainCmds[i].ticks;
+            for (let j = 0; j < ticks.length; j++) {
+                const t = ticks[j];
+                let arr = chainCmdByTick.get(t);
+                if (!arr) { arr = []; chainCmdByTick.set(t, arr); }
+                arr.push(i);
+            }
+        }
+    }
+}
 function playNoteAtTick(tick){
-    previewNotes.filter(n=>n.tick===tick).forEach(n => {
-        playNoteSynthesizer(n);
-    });
+    const arr = previewNotesByTick.get(tick);
+    if (arr) {
+        for (let i = 0; i < arr.length; i++) playNoteSynthesizer(arr[i]);
+    }
     highlightPlayingCommand(tick);
 }
 function highlightPlayingCommand(tick){
-    document.querySelectorAll('.cmd-block').forEach(b=>b.classList.remove('playing'));
-    if(window.lastChainCmds){
-        for(let i=0;i<window.lastChainCmds.length;i++){
-            if(window.lastChainCmds[i].ticks.includes(tick)){
-                const block=document.getElementById(`cmd-block-${i}`);
-                if(block) block.classList.add('playing');
-                break;
-            }
+    if (window._lastHighlighted) {
+        for (const idx of window._lastHighlighted) {
+            const el = document.getElementById(`cmd-block-${idx}`);
+            if (el) el.classList.remove('playing');
         }
+    }
+    const idxs = chainCmdByTick.get(tick);
+    if (idxs && idxs.length) {
+        for (const idx of idxs) {
+            const el = document.getElementById(`cmd-block-${idx}`);
+            if (el) el.classList.add('playing');
+        }
+        window._lastHighlighted = idxs;
+    } else {
+        window._lastHighlighted = null;
     }
 }
 function seekToTick(newTick) {
@@ -1719,8 +1781,11 @@ function seekToTick(newTick) {
         previewTimer = null;
     }
     previewCurrentTick = newTick;
+    const tickDuration = previewTimePerTick / previewSpeed;
+    playbackStartTime = performance.now() - previewCurrentTick * tickDuration;
     lastTickTime = performance.now();
     updateProgressVisual(previewCurrentTick);
+    requestWaterfallDraw();
     playNoteAtTick(previewCurrentTick);
     if (wasPlaying && previewCurrentTick < previewSongLength) {
         isPlaying = true;
@@ -1745,6 +1810,7 @@ function initProgressBar() {
         if (previewSongLength === 0) return;
         isDragging = true;
         isDraggingProgress = true;
+        ensureWaterfallRunning();
         if (isPlaying) {
             wasPlayingBeforeDrag = true;
             if (previewTimer) {
@@ -1834,9 +1900,7 @@ function startPreview() {
         previewTimer = null;
     }
     stopPreviewClean();
-    if (!previewContext) {
-        previewContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    ensureAudioChain();
     if (previewContext.state === 'suspended') {
         previewContext.resume();
     }
@@ -1845,9 +1909,12 @@ function startPreview() {
     playBtn.innerHTML = `${ICON_PAUSE} 暂停`;
     playBtn.classList.add('running');
     document.getElementById('stopBtn').disabled = false;
+    const tickDuration = previewTimePerTick / previewSpeed;
+    playbackStartTime = performance.now() - previewCurrentTick * tickDuration;
     lastTickTime = performance.now();
     playNoteAtTick(previewCurrentTick);
     scheduleNextTick();
+    ensureWaterfallRunning();
 }
 function pausePreview() {
     if (!isPlaying) return;
@@ -1882,10 +1949,10 @@ function scheduleNextTick() {
         document.getElementById('progressFill').style.width = '0%';
         return;
     }
-    const delay = previewTimePerTick / previewSpeed;
-    previewTimer = setTimeout(() => {
-        performTick();
-    }, delay);
+    const tickDuration = previewTimePerTick / previewSpeed;
+    const nextTickTime = playbackStartTime + (previewCurrentTick + 1) * tickDuration;
+    const delay = Math.max(0, nextTickTime - performance.now());
+    previewTimer = setTimeout(performTick, delay);
 }
 function stopPreviewClean() {
     activeSources.forEach(s => { try { s.stop(); } catch(e) {} });
@@ -1906,6 +1973,7 @@ function stopPreview() {
     document.getElementById('stopBtn').disabled = true;
     document.querySelectorAll('.cmd-block').forEach(b => b.classList.remove('playing'));
     if (typeof clearWaterfall === 'function') {
+        requestWaterfallDraw();
         clearWaterfall();
     }
 }
@@ -1913,21 +1981,19 @@ function updateSpeed() {
     const newSpeed = parseFloat(document.getElementById('previewSpeed').value);
     document.getElementById('speedValue').innerText = newSpeed.toFixed(2) + 'x';
     if (isPlaying && previewTimer) {
-        const now = performance.now();
-        const elapsed = now - lastTickTime;
-        const totalDuration = previewTimePerTick / previewSpeed;
-        let remaining = totalDuration - elapsed;
-        if (remaining < 0) remaining = 0;
+        let fractionalTick = previewCurrentTick;
+        const oldTickDuration = previewTimePerTick / previewSpeed;
+        const rawFraction = (performance.now() - playbackStartTime) / oldTickDuration;
+        if (isFinite(rawFraction) && rawFraction >= 0) {
+            fractionalTick = rawFraction;
+        }
         clearTimeout(previewTimer);
         previewTimer = null;
         previewSpeed = newSpeed;
-        if (remaining > 0) {
-            previewTimer = setTimeout(() => {
-                performTick();
-            }, remaining);
-        } else {
-            performTick();
-        }
+        const newTickDuration = previewTimePerTick / previewSpeed;
+        playbackStartTime = performance.now() - fractionalTick * newTickDuration;
+        lastTickTime = performance.now();
+        scheduleNextTick();
     } else {
         previewSpeed = newSpeed;
     }
@@ -2050,6 +2116,7 @@ function renderResults(notes, songLength, songName, octaveShift, harpOnly, timeP
     const {cycleCmd,chainCmds}=generateCommands(groups,octaveShift,harpOnly,effectiveCustomKey);
     document.getElementById('cycleCmd').innerHTML=`<pre>${escapeHtml(cycleCmd)}</pre>`;
     lastChainCmds=chainCmds; window.lastChainCmds=chainCmds;
+    buildPreviewIndexes(notes, chainCmds);
     if(chainCmds.length===0) document.getElementById('chainList').innerHTML='<div class="cmd-block">无音符数据</div>';
     else{
         let html='';
@@ -2091,16 +2158,17 @@ function renderResults(notes, songLength, songName, octaveShift, harpOnly, timeP
     const instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
     document.getElementById('stats').innerHTML = `<span class="success">${ICON_SUCCESS} 解析成功 | ${songName||''} | 音符:${notes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${octaveShift}</span>`;
     const usedSounds = [...new Set(notes.map(n => getSoundFileName(n.instrument, harpOnly)))];
-    if (!previewContext) {
-        previewContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    ensureAudioChain();
     if (typeof initWaterfall === 'function') {
         initWaterfall(notes, songLength);
+        requestWaterfallDraw();
     }
     return true;
 }
 // 文件处理
 let currentNotes=[];
+let previewNotesByTick = new Map();
+let chainCmdByTick = new Map();
 function handleFile(arrayBuffer, fileType) {
     if (isPlaying) stopPreview();
     currentFileArrayBuffer = arrayBuffer;
@@ -2290,6 +2358,10 @@ let lastTickTime = 0;
 let resizeObserver = null;
 let waterfallMinKey = 0;
 let waterfallMaxKey = 127;
+let waterfallBuckets = new Map();
+let waterfallMinTick = 0;
+let waterfallMaxTick = 0;
+let waterfallNeedsDraw = false;
 function initWaterfall(notes, songLength) {
     const canvas = document.getElementById('waterfallCanvas');
     if (!canvas) return;
@@ -2298,6 +2370,22 @@ function initWaterfall(notes, songLength) {
     waterfallHeight = WF_BASE_HEIGHT;
     waterfallAllNotes = notes || [];
     waterfallTotalNotes = waterfallAllNotes.length;
+    waterfallBuckets = new Map();
+    waterfallMinTick = 0;
+    waterfallMaxTick = 0;
+    if (waterfallAllNotes.length > 0) {
+        let mn = Infinity, mx = -Infinity;
+        for (let i = 0; i < waterfallAllNotes.length; i++) {
+            const n = waterfallAllNotes[i];
+            let arr = waterfallBuckets.get(n.tick);
+            if (!arr) { arr = []; waterfallBuckets.set(n.tick, arr); }
+            arr.push(n);
+            if (n.tick < mn) mn = n.tick;
+            if (n.tick > mx) mx = n.tick;
+        }
+        waterfallMinTick = mn;
+        waterfallMaxTick = mx;
+    }
     if (waterfallAllNotes.length > 0) {
         let minKey = Infinity, maxKey = -Infinity;
         for (const n of waterfallAllNotes) {
@@ -2356,9 +2444,7 @@ function initWaterfall(notes, songLength) {
     window.addEventListener('resize', resizeWaterfall);
     window.removeEventListener('orientationchange', resizeWaterfall);
     window.addEventListener('orientationchange', resizeWaterfall);
-    if (!waterfallRafId) {
-        waterfallRafId = requestAnimationFrame(waterfallLoop);
-    }
+    requestWaterfallDraw();
 }
 function drawWaterfall() {
     const ctx = waterfallCtx;
@@ -2371,17 +2457,17 @@ function drawWaterfall() {
     const noteStrokeColor = rootStyles.getPropertyValue('--waterfall-note-stroke').trim() || '#ffffff';
     const textColor = rootStyles.getPropertyValue('--text-muted').trim() || '#5f8b78';
     const progressTrackColor = rootStyles.getPropertyValue('--bg-progress-track').trim() || '#2a3d3f';
-    let displayTick = previewCurrentTick;
+    const VISUAL_DELAY_TICKS = 0.5;
+    let displayTick;
     if (isDraggingProgress && dragTargetTick !== undefined) {
-        displayTick = dragTargetTick;
-    } else if (lastTickTime > 0 && isPlaying) {
-        const now = performance.now();
-        const elapsed = now - lastTickTime;
+        displayTick = dragTargetTick - VISUAL_DELAY_TICKS;
+    } else if (isPlaying) {
         const tickDuration = previewTimePerTick / previewSpeed;
-        let fraction = elapsed / tickDuration;
-        if (fraction > 1) fraction = 1;
-        displayTick = previewCurrentTick + fraction;
+        displayTick = (performance.now() - playbackStartTime) / tickDuration - VISUAL_DELAY_TICKS;
+    } else {
+        displayTick = previewCurrentTick - VISUAL_DELAY_TICKS;
     }
+    if (displayTick > previewSongLength) displayTick = previewSongLength;
     const displayWidth = waterfallWidth;
     const displayHeight = waterfallHeight;
     const dpr = window.devicePixelRatio || 1;
@@ -2416,45 +2502,131 @@ function drawWaterfall() {
     ctx.fillText('@ ZeroRaltal', 4, 14);
     const windowTicks = waterfallWindowTicks;
     const noteHeight = 16;
-    for (const n of waterfallAllNotes) {
-        const tick = n.tick;
-        if (tick < displayTick || tick > displayTick + windowTicks) continue;
-        const ratio = (tick - displayTick) / windowTicks;
+    const noteWidthBase = Math.max(4, (displayWidth / keyRange) * 0.7);
+    const TOP_BUFFER_TICKS = 3;
+    const drawStart = Math.floor(displayTick);
+    const drawEnd = Math.ceil(displayTick + windowTicks + TOP_BUFFER_TICKS);
+    const FADE_COLOR = '#88888855';
+    for (let t = drawStart; t <= drawEnd; t++) {
+        const arr = waterfallBuckets.get(t);
+        if (!arr) continue;
+        const ratio = (t - displayTick) / windowTicks;
         const y = displayHeight * (1 - ratio) - noteHeight / 2;
-        const key = n.key;
-        const x = ((key - minKey) / keyRange) * displayWidth;
-        const clampedX = Math.max(0, Math.min(x, displayWidth));
-        const noteWidth = Math.max(4, (displayWidth / keyRange) * 0.7);
-        const drawX = clampedX - noteWidth / 2;
-        const color = getInstrumentColor(n.instrument);
-        const alpha = 0.7 + (n.velocity || 80) / 200;
-        ctx.fillStyle = color;
-        ctx.globalAlpha = Math.min(1, alpha * 0.85);
-        ctx.fillRect(drawX, y, noteWidth, noteHeight);
-        ctx.globalAlpha = 1.0;
-        ctx.strokeStyle = noteStrokeColor;
-        ctx.lineWidth = 0.5;
-        ctx.strokeRect(drawX, y, noteWidth, noteHeight);
+        const noteBottom = y + noteHeight;
+        const noteCenter = y + noteHeight / 2;
+        if (noteBottom < 0) continue;
+        if (noteCenter > displayHeight) continue;
+        const isFading = noteBottom >= displayHeight;
+        const byKey = new Map();
+        for (let i = 0; i < arr.length; i++) {
+            const n = arr[i];
+            let group = byKey.get(n.key);
+            if (!group) { group = []; byKey.set(n.key, group); }
+            group.push(n);
+        }
+        for (const [key, notes] of byKey) {
+            const x = ((key - minKey) / keyRange) * displayWidth;
+            const clampedX = Math.max(0, Math.min(x, displayWidth));
+            const drawX = clampedX - noteWidthBase / 2;
+            if (isFading) {
+                ctx.globalAlpha = 1.0;
+                ctx.fillStyle = FADE_COLOR;
+                ctx.fillRect(drawX, y, noteWidthBase, noteHeight);
+                ctx.strokeStyle = FADE_COLOR;
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(drawX, y, noteWidthBase, noteHeight);
+            } else if (notes.length === 1) {
+                const n = notes[0];
+                const color = getInstrumentColor(n.instrument);
+                const alpha = 0.7 + (n.velocity || 80) / 200;
+                ctx.globalAlpha = Math.min(1, alpha * 0.85);
+                ctx.fillStyle = color;
+                ctx.fillRect(drawX, y, noteWidthBase, noteHeight);
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = noteStrokeColor;
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(drawX, y, noteWidthBase, noteHeight);
+            } else {
+                const colors = [];
+                const seen = new Set();
+                for (let k = 0; k < notes.length; k++) {
+                    const c = getInstrumentColor(notes[k].instrument);
+                    if (!seen.has(c)) {
+                        seen.add(c);
+                        colors.push(c);
+                    }
+                }
+                ctx.globalAlpha = 1.0;
+                drawStripedRect(ctx, drawX, y, noteWidthBase, noteHeight, colors);
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = noteStrokeColor;
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(drawX, y, noteWidthBase, noteHeight);
+            }
+        }
     }
+}
+function drawStripedRect(ctx, x, y, w, h, colors) {
+    const n = colors.length;
+    if (n === 1) {
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(x, y, w, h);
+        return;
+    }
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    ctx.translate(cx, cy);
+    ctx.rotate(-Math.PI / 4);
+    const totalSpan = (w + h) / Math.SQRT2 + 4;
+    const stripeWidth = totalSpan / n;
+    const drawLen = totalSpan + w + h;
+    if (stripeWidth < 1.5) {
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(-drawLen / 2, -drawLen / 2, drawLen, drawLen);
+        ctx.restore();
+        return;
+    }
+    const startX = -totalSpan / 2;
+    for (let i = 0; i < n; i++) {
+        ctx.fillStyle = colors[i];
+        ctx.fillRect(startX + i * stripeWidth, -drawLen / 2, stripeWidth, drawLen);
+    }
+    ctx.restore();
 }
 function waterfallLoop(timestamp) {
     if (!waterfallCanvas) {
         waterfallRafId = null;
         return;
     }
-    drawWaterfall();
+    if (isPlaying || isDraggingProgress) {
+        drawWaterfall();
+        waterfallRafId = requestAnimationFrame(waterfallLoop);
+    } else if (waterfallNeedsDraw) {
+        drawWaterfall();
+        waterfallNeedsDraw = false;
+        waterfallRafId = null;
+    } else {
+        waterfallRafId = null;
+    }
+}
+function ensureWaterfallRunning() {
+    if (waterfallRafId) return;
+    if (!waterfallCanvas) return;
     waterfallRafId = requestAnimationFrame(waterfallLoop);
+}
+function requestWaterfallDraw() {
+    waterfallNeedsDraw = true;
+    ensureWaterfallRunning();
 }
 function clearWaterfall() {
     if (waterfallCtx && waterfallCanvas) {
-        drawWaterfall();
+        waterfallNeedsDraw = true;
+        ensureWaterfallRunning();
     }
-    if (resizeObserver) {
-        resizeObserver.disconnect();
-        resizeObserver = null;
-    }
-    window.removeEventListener('resize', resizeWaterfall);
-    window.removeEventListener('orientationchange', resizeWaterfall);
 }
 function resizeWaterfall() {
     const canvas = waterfallCanvas;
@@ -2491,8 +2663,8 @@ function resizeWaterfall() {
         try {
             localStorage.setItem(STORAGE_KEY, select.value);
         } catch (_) {}
-        if (typeof drawWaterfall === 'function') {
-            drawWaterfall();
+        if (typeof requestWaterfallDraw === 'function') {
+            requestWaterfallDraw();
         }
     }
     function loadTheme() {
@@ -2601,7 +2773,7 @@ class BitReader {
         let value = 0;
         for (let i = 0; i < bitLength; i++) {
             const byteIndex = Math.floor(this.bitIndex / 8);
-            const bitOffset = 7 - (this.bitIndex % 8); // 高位在前
+            const bitOffset = 7 - (this.bitIndex % 8);
             const bit = (this.bytes[byteIndex] >> bitOffset) & 1;
             value = (value << 1) | bit;
             this.bitIndex++;
