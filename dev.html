@@ -3154,14 +3154,40 @@ function filterPlaylist(keyword) {
 }
 async function loadSongFromPlaylist(filePath, type) {
     document.getElementById('fileInput').value = '';
+    const statsEl = document.getElementById('stats');
+    const shortName = String(filePath).split('/').pop();
     try {
-        const resp = await fetch(filePath);
-        if (!resp.ok) throw new Error(`无法加载 ${filePath}`);
-        const buffer = await resp.arrayBuffer();
+        let resp;
+        try {
+            resp = await fetch(filePath);
+        } catch (netErr) {
+            const msg = netErr && netErr.message ? netErr.message : String(netErr);
+            throw new Error(`无法访问歌曲地址（网络错误）\n地址: ${filePath}\n原因: ${msg}`);
+        }
+        if (!resp.ok) {
+            throw new Error(`服务器返回错误\n地址: ${filePath}\n状态: ${resp.status} ${resp.statusText || ''}`);
+        }
+        let buffer;
+        try {
+            buffer = await resp.arrayBuffer();
+        } catch (readErr) {
+            const msg = readErr && readErr.message ? readErr.message : String(readErr);
+            throw new Error(`读取歌曲数据失败\n地址: ${filePath}\n原因: ${msg}`);
+        }
+        if (!buffer || buffer.byteLength === 0) {
+            throw new Error(`歌曲文件为空\n地址: ${filePath}`);
+        }
         loadAndParseBuffer(buffer, type, filePath);
     } catch (e) {
-        alert(`加载歌曲失败: ${e.message}`);
-        console.error(e);
+        const fullMsg = (e && e.message) ? e.message : String(e);
+        console.error(`加载失败 (${filePath}):`, e);
+        if (statsEl) {
+            statsEl.innerHTML =
+                '<span class="error">' + ICON_ERROR + ' 在线歌曲加载失败<br>' +
+                '文件: ' + escapeHtml(shortName) + '<br>' +
+                '错误: ' + escapeHtml(fullMsg).replace(/\n/g, '<br>') +
+                '</span>';
+        }
     }
 }
 function loadAndParseBuffer(arrayBuffer, fileType, fileName) {
@@ -3211,8 +3237,14 @@ function loadAndParseBuffer(arrayBuffer, fileType, fileName) {
             }, 100);
         }
     } catch (e) {
-        console.error('加载歌单歌曲出错:', e);
-        document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: ' + (e && e.message ? e.message : e) + '</span>';
+        const shortName = String(fileName || '').split('/').pop().split('\\').pop();
+        const msg = (e && e.message) ? e.message : String(e);
+        console.error(`解析失败 (${fileName}):`, e);
+        document.getElementById('stats').innerHTML =
+            '<span class="error">' + ICON_ERROR + ' 解析失败<br>' +
+            '文件: ' + escapeHtml(shortName) + '<br>' +
+            '错误: ' + escapeHtml(msg) +
+            '</span>';
     }
 }
 function initPlaylistEvents() {
