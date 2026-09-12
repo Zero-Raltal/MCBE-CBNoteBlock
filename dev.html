@@ -1706,7 +1706,7 @@ async function loadSample(soundName) {
 }
 function getSoundFileName(instrumentId, harpOnly) { return (harpOnly && !PERCUSSION_INSTRUMENTS.includes(instrumentId)) ? "harp" : (INSTRUMENT_SOUND_MAP[instrumentId] || "harp"); }
 // 预览播放器
-let previewContext = null, previewNotes = [], previewSongLength = 0, previewInterval = null, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 1, previewSpeed = 1.0, activeSources = [], isPlaying = false, cachedOctaveShift = 0;
+let previewContext = null, previewNotes = [], previewSongLength = 0, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 1, previewSpeed = 1.0, activeSources = [], isPlaying = false, cachedOctaveShift = 0;
 let masterGain = null;
 let limiterNode = null;
 let softClipper = null;
@@ -2280,7 +2280,6 @@ function renderResults(notes, songLength, songName, octaveShift, harpOnly, timeP
     const instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
     cachedOctaveShift = octaveShift || 0;
     document.getElementById('stats').innerHTML = `<span class="success">${ICON_SUCCESS} 解析成功 | ${songName||''} | 音符:${notes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${octaveShift}</span>`;
-    const usedSounds = [...new Set(notes.map(n => getSoundFileName(n.instrument, harpOnly)))];
     ensureAudioChain();
     if (typeof initWaterfall === 'function') {
         initWaterfall(notes, songLength);
@@ -2490,15 +2489,12 @@ let waterfallWidth = 0;
 let waterfallHeight = WF_BASE_HEIGHT;
 let waterfallRafId = null;
 let waterfallAllNotes = [];
-let waterfallTotalNotes = 0;
 let waterfallWindowTicks = 10;
 let lastTickTime = 0;
 let resizeObserver = null;
 let waterfallMinKey = 0;
 let waterfallMaxKey = 127;
 let waterfallBuckets = new Map();
-let waterfallMinTick = 0;
-let waterfallMaxTick = 0;
 let waterfallNeedsDraw = false;
 let waterfallDisplayTick = null;
 let lowPerformanceMode = false;
@@ -2514,22 +2510,14 @@ function initWaterfall(notes, songLength) {
     waterfallCtx = canvas.getContext('2d');
     waterfallHeight = WF_BASE_HEIGHT;
     waterfallAllNotes = notes || [];
-    waterfallTotalNotes = waterfallAllNotes.length;
     waterfallBuckets = new Map();
-    waterfallMinTick = 0;
-    waterfallMaxTick = 0;
     if (waterfallAllNotes.length > 0) {
-        let mn = Infinity, mx = -Infinity;
         for (let i = 0; i < waterfallAllNotes.length; i++) {
             const n = waterfallAllNotes[i];
             let arr = waterfallBuckets.get(n.tick);
             if (!arr) { arr = []; waterfallBuckets.set(n.tick, arr); }
             arr.push(n);
-            if (n.tick < mn) mn = n.tick;
-            if (n.tick > mx) mx = n.tick;
         }
-        waterfallMinTick = mn;
-        waterfallMaxTick = mx;
     }
     if (waterfallAllNotes.length > 0) {
         let minKey = Infinity, maxKey = -Infinity;
@@ -2604,7 +2592,6 @@ function drawWaterfall() {
     const gridColor = rootStyles.getPropertyValue('--border-waterfall-grid').trim() || '#1a2a32';
     const currentLineColor = rootStyles.getPropertyValue('--border-waterfall-current').trim() || '#57b984';
     const noteStrokeColor = rootStyles.getPropertyValue('--waterfall-note-stroke').trim() || '#ffffff';
-    const textColor = rootStyles.getPropertyValue('--text-muted').trim() || '#5f8b78';
     const progressTrackColor = rootStyles.getPropertyValue('--bg-progress-track').trim() || '#2a3d3f';
     const VISUAL_DELAY_TICKS = 0.5;
     const DRAG_SMOOTH_K = 0.25;
@@ -3008,7 +2995,6 @@ function parseCBND(arrayBuffer) {
     let isEnd = false;
     while (!isEnd) {
         const instrId = reader.readBits(4);
-        const instrName = CBND_INSTRUMENT_ORDER[instrId] || 'harp';
         const key = reader.readBits(7);
         let tVal;
         while (true) {
