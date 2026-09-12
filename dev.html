@@ -12,7 +12,8 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 	<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABUklEQVR42n2TT0vDQBDF8z1EibFgkqZaaQIWShWVCnopBalYoTc/gRdvoh68Cnryw475jZ3tZvvnMLxMdt/svLezUdZK5KRIG1EdtzXKo7yRh3GYxBLx8XJ3Ke/TC/mYDBSJ53F/Jew/CIfiWuDzcSTj3r68TfsOZ6epfM+vZD4o5PfpVpF8VrU0h6MFep1cXidDGWV78vMwlOt8dy2y/nV/7pBuyyL774C2/NPtVHJD7ao+Xbuou0MG3Ig2KKCndWLdAEI8y3Zcbkgh/sNpeGAafc0NTxbabR2OdoAO9IQaQ0+2ekA1vzqn+V7YjYC2z92CeWDawJtusqIZpBvzpuEBjob3vmkuDOFoAXQwB+u0bpsHOBs9CO/fR5vG5S3UD8bmAO0QDdEK2hyYF+YBXPeY/EdDdSL8RrflcLSD9CBWLURVB2+DsG9bKxd5t73cg4l/FJHaEezZJsMAAAAASUVORK5CYII=">
     <title>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</title>
     <style>
@@ -66,6 +67,9 @@
             --waterfall-note-stroke: #ffffff;
             --scrollbar-color: #3e8e62 #0a151a;
             --shadow-modal: 0 10px 40px #00000099;
+            --bg-playlist-item: #12222b;
+            --border-playlist: #2d5f55;
+            --bg-playlist-hover: #2e5f4b;
         }
         [data-theme="dark-yellow"] {
             --bg-body: #0d0d0d;
@@ -117,6 +121,9 @@
             --waterfall-note-stroke: #ffffff;
             --scrollbar-color: #d4a020 #1a1a1a;
             --shadow-modal: 0 10px 40px #000000cc;
+            --bg-playlist-item: #222222;
+            --border-playlist: #8a7a40;
+            --bg-playlist-hover: #3a3a2a;
         }
         [data-theme="light-blue"] {
             --bg-body: #eef3f7;
@@ -168,6 +175,9 @@
             --waterfall-note-stroke: #ffffff;
             --scrollbar-color: #2c6fb0 #d0d8e0;
             --shadow-modal: 0 10px 40px #00000044;
+            --bg-playlist-item: #f0f4f8;
+            --border-playlist: #c0d0e0;
+            --bg-playlist-hover: #e0eaf5;
         }
         body {
             background: var(--bg-body);
@@ -642,15 +652,26 @@
             padding: 10px;
             border: 0;
             margin-bottom: 15px;
-            transition: background 0.3s ease;
-        }
-        .snap-control label {
-            color: var(--text-primary);
-            font-size: 13px;
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: background 0.3s ease;
+        }
+        .snap-control .snap-prefix {
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: default;
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+        .snap-control .snap-suffix {
+            color: var(--text-primary);
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
+            user-select: none;
             transition: color 0.3s ease;
         }
         .snap-control input[type="checkbox"] {
@@ -690,8 +711,24 @@
             outline: none;
             box-shadow: 0 0 0 2px var(--border-input-focus);
         }
-        .snap-control label:has(input:disabled) {
+        .snap-control .snap-suffix:has(input:disabled) {
             cursor: not-allowed;
+        }
+        .shift-control {
+            background: var(--bg-mode);
+            padding: 10px;
+            border: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s ease;
+        }
+        .shift-control label {
+            color: var(--text-primary);
+            font-size: 13px;
+            user-select: none;
+            transition: color 0.3s ease;
         }
         .playlist-quick {
             background: var(--bg-mode);
@@ -924,8 +961,10 @@
             <span class="speed-value" id="speedValue">1.00x</span>
         </div>
         <div class="snap-control">
-            <label>
-                MIDI优化: <input type="checkbox" id="enableSnap" checked> 自动对齐 20 tick/s
+            <span class="snap-prefix">MIDI优化:</span>
+            <label class="snap-suffix">
+                <input type="checkbox" id="enableSnap" checked>
+                <span>自动对齐 20 tick/s</span>
             </label>
         </div>
         <div class="mode-control">
@@ -1069,6 +1108,7 @@ class midiParser {
             tracks.push(events);
             offset = end;
         }
+        tempoEvents.sort((a, b) => a.tick - b.tick);
         return { format, trackCount, timeDivision, tracks, tempoEvents };
     }
     static _readVarInt(u8, offset) {
@@ -1124,8 +1164,7 @@ function computeBestTempo(secondsArray) {
 }
 function processMidi(arrayBuffer, enableSnap) {
     var result = parseMIDI(arrayBuffer, enableSnap);
-    var tempo = result.tempo || 20;
-    result.timePerTick = 1000 / tempo;
+    result.timePerTick = 50;
     result.songName = result.songName || 'MIDI导入';
     currentNotes = result.notes;
     currentSongName = result.songName;
@@ -1667,7 +1706,7 @@ async function loadSample(soundName) {
 }
 function getSoundFileName(instrumentId, harpOnly) { return (harpOnly && !PERCUSSION_INSTRUMENTS.includes(instrumentId)) ? "harp" : (INSTRUMENT_SOUND_MAP[instrumentId] || "harp"); }
 // 预览播放器
-let previewContext = null, previewNotes = [], previewSongLength = 0, previewInterval = null, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 1, previewSpeed = 1.0, activeSources = [], isPlaying = false;
+let previewContext = null, previewNotes = [], previewSongLength = 0, previewInterval = null, previewCurrentTick = 0, previewHarpOnly = false, previewVolume = 1, previewSpeed = 1.0, activeSources = [], isPlaying = false, cachedOctaveShift = 0;
 let masterGain = null;
 let limiterNode = null;
 let softClipper = null;
@@ -1707,8 +1746,7 @@ function ensureAudioChain() {
 }
 async function playNoteSynthesizer(note) {
     const soundName = getSoundFileName(note.instrument, previewHarpOnly);
-    const octaveShift = parseInt(document.getElementById('octaveShift').value) || 0;
-    const shiftedKey = note.key + (octaveShift * 12);
+    const shiftedKey = note.key + (cachedOctaveShift * 12);
     const baseMidi = 54;
     const playbackRate = Math.pow(2, (shiftedKey - baseMidi) / 12);
     const volume = previewVolume * (note.velocity / 100);
@@ -1759,6 +1797,16 @@ function playNoteAtTick(tick){
     highlightPlayingCommand(tick);
 }
 function highlightPlayingCommand(tick){
+    if (lowPerformanceMode) {
+        if (window._lastHighlighted) {
+            for (const idx of window._lastHighlighted) {
+                const el = document.getElementById(`cmd-block-${idx}`);
+                if (el) el.classList.remove('playing');
+            }
+            window._lastHighlighted = null;
+        }
+        return;
+    }
     if (window._lastHighlighted) {
         for (const idx of window._lastHighlighted) {
             const el = document.getElementById(`cmd-block-${idx}`);
@@ -1792,9 +1840,8 @@ function seekToTick(newTick) {
     playbackStartTime = performance.now() - previewCurrentTick * tickDuration;
     lastTickTime = performance.now();
     updateProgressVisual(previewCurrentTick);
-    requestWaterfallDraw();
-    playNoteAtTick(previewCurrentTick);
     if (wasPlaying && previewCurrentTick < previewSongLength) {
+        playNoteAtTick(previewCurrentTick);
         isPlaying = true;
         scheduleNextTick();
     } else if (previewCurrentTick >= previewSongLength) {
@@ -1918,6 +1965,10 @@ function startPreview() {
     document.getElementById('stopBtn').disabled = false;
     const tickDuration = previewTimePerTick / previewSpeed;
     playbackStartTime = performance.now() - previewCurrentTick * tickDuration;
+    if (dropStatEnabled) {
+        dropStatAccum = 0;
+        dropStatLastCheck = 0;
+    }
     lastTickTime = performance.now();
     playNoteAtTick(previewCurrentTick);
     scheduleNextTick();
@@ -1943,10 +1994,37 @@ function performTick() {
         document.getElementById('progressFill').style.width = '0%';
         return;
     }
-    previewCurrentTick++;
+    const tickDuration = previewTimePerTick / previewSpeed;
+    const realTickFloat = (performance.now() - playbackStartTime) / tickDuration;
+    const realTickInt = Math.floor(realTickFloat);
+    let nextTick = previewCurrentTick + 1;
+    if (realTickInt > nextTick) {
+        if (dropStatEnabled) {
+            dropStatAccum += (realTickInt - nextTick);
+        }
+        nextTick = realTickInt;
+    }
+    if (nextTick > previewSongLength) nextTick = previewSongLength;
+    previewCurrentTick = nextTick;
     lastTickTime = performance.now();
     updateProgressVisual(previewCurrentTick);
-    playNoteAtTick(previewCurrentTick);
+    if (previewCurrentTick < previewSongLength) {
+        playNoteAtTick(previewCurrentTick);
+    }
+    if (dropStatEnabled) {
+        const now = performance.now();
+        if (dropStatLastCheck === 0) {
+            dropStatLastCheck = now;
+        } else if (now - dropStatLastCheck >= LOW_PERF_CHECK_INTERVAL) {
+            const ratio = LOW_PERF_CHECK_INTERVAL / (now - dropStatLastCheck);
+            const dropPerSec = dropStatAccum * ratio;
+            if (dropPerSec >= LOW_PERF_DROP_THRESHOLD) {
+                enterLowPerformanceMode();
+            }
+            dropStatAccum = 0;
+            dropStatLastCheck = now;
+        }
+    }
     scheduleNextTick();
 }
 function scheduleNextTick() {
@@ -1962,8 +2040,6 @@ function scheduleNextTick() {
     previewTimer = setTimeout(performTick, delay);
 }
 function stopPreviewClean() {
-    activeSources.forEach(s => { try { s.stop(); } catch(e) {} });
-    activeSources = [];
     isPlaying = false;
     if (previewTimer) {
         clearTimeout(previewTimer);
@@ -2023,12 +2099,51 @@ function groupNotesByInstrumentAndPitch(notes){
     for(const data of map.values()){ const uniqueTicks=[...new Set(data.ticks)].sort((a,b)=>a-b); result.push({...data,ticks:uniqueTicks,noteName:getNoteName(data.key),tickCount:uniqueTicks.length}); }
     return result.sort((a,b)=>a.instrument-b.instrument||a.key-b.key);
 }
-function escapeHtml(str){ return str.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-function copyToClipboard(text,btn,block){
-    navigator.clipboard.writeText(text).then(()=>{
-        if(btn && !btn.classList.contains('copied')){ btn.classList.add('copied'); btn.innerHTML = `${ICON_CHECK} 已复制`; }
-        if(block && !block.classList.contains('copied')) block.classList.add('copied');
-    }).catch(()=>alert('复制失败'));
+function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[m]));
+}
+function copyToClipboard(text, btn, block) {
+    const done = () => {
+        if (btn && !btn.classList.contains('copied')) {
+            btn.classList.add('copied');
+            btn.innerHTML = `${ICON_CHECK} 已复制`;
+        }
+        if (block && !block.classList.contains('copied')) block.classList.add('copied');
+    };
+    const fail = () => alert('复制失败');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => {
+            if (fallbackCopy(text)) done();
+            else fail();
+        });
+    } else {
+        if (fallbackCopy(text)) done();
+        else fail();
+    }
+}
+function fallbackCopy(text) {
+    try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-9999px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+    } catch (e) {
+        return false;
+    }
 }
 function generateCommands(groups, octaveShift, harpOnly, customSoundKey){
     const cycleCmd = `scoreboard players add @a t 1`;
@@ -2163,6 +2278,7 @@ function renderResults(notes, songLength, songName, octaveShift, harpOnly, timeP
     const durationSec=(songLength/20).toFixed(1);
     const uniqueInstruments=[...new Set(notes.map(n=>n.instrument))];
     const instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
+    cachedOctaveShift = octaveShift || 0;
     document.getElementById('stats').innerHTML = `<span class="success">${ICON_SUCCESS} 解析成功 | ${songName||''} | 音符:${notes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${octaveShift}</span>`;
     const usedSounds = [...new Set(notes.map(n => getSoundFileName(n.instrument, harpOnly)))];
     ensureAudioChain();
@@ -2177,42 +2293,47 @@ let currentNotes=[];
 let previewNotesByTick = new Map();
 let chainCmdByTick = new Map();
 function handleFile(arrayBuffer, fileType) {
-    if (isPlaying) stopPreview();
-    currentFileArrayBuffer = arrayBuffer;
-    currentFileType = fileType;
-    var enableSnap = document.getElementById('enableSnap');
-    if (fileType === 'midi') {
-        enableSnap.disabled = false;
-        processMidi(arrayBuffer, enableSnap.checked);
-    } else {
-        enableSnap.disabled = true;
-        var result;
-        if (fileType === 'nbs') {
-            result = parseNBS(arrayBuffer);
-            result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
-            result.songName = result.songName || '';
-        } else if (fileType === 'cbnd') {
-            result = parseCBND(arrayBuffer);
-            result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
-            result.songName = 'CBND导入';
+    try {
+        if (isPlaying) stopPreview();
+        currentFileArrayBuffer = arrayBuffer;
+        currentFileType = fileType;
+        var enableSnap = document.getElementById('enableSnap');
+        if (fileType === 'midi') {
+            enableSnap.disabled = false;
+            processMidi(arrayBuffer, enableSnap.checked);
         } else {
-            document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 未知文件类型</span>';
-            return;
+            enableSnap.disabled = true;
+            var result;
+            if (fileType === 'nbs') {
+                result = parseNBS(arrayBuffer);
+                result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
+                result.songName = result.songName || '';
+            } else if (fileType === 'cbnd') {
+                result = parseCBND(arrayBuffer);
+                result.timePerTick = (result.tempo > 0) ? 1000 / result.tempo : 50;
+                result.songName = 'CBND导入';
+            } else {
+                document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 未知文件类型</span>';
+                return;
+            }
+            if (!result || !result.notes || result.notes.length === 0) {
+                document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: 未提取到任何音符</span>';
+                return;
+            }
+            currentNotes = result.notes;
+            currentSongName = result.songName || '';
+            var octaveShift = parseInt(document.getElementById('octaveShift').value);
+            var mode = document.querySelector('input[name="soundMode"]:checked').value;
+            var isHarpOrCustom = (mode === 'harp' || mode === 'custom');
+            var customSoundKey = null;
+            if (mode === 'custom') {
+                customSoundKey = sanitizeCustomSound(document.getElementById('customSoundInput').value);
+            }
+            renderResults(result.notes, result.songLength, currentSongName, octaveShift, isHarpOrCustom, result.timePerTick, customSoundKey);
         }
-        if (!result || !result.notes || result.notes.length === 0) {
-            document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: 未提取到任何音符</span>';
-            return;
-        }
-        currentNotes = result.notes;
-        currentSongName = result.songName || '';
-        var octaveShift = parseInt(document.getElementById('octaveShift').value);
-        var mode = document.querySelector('input[name="soundMode"]:checked').value;
-        var isHarpOrCustom = (mode === 'harp' || mode === 'custom');
-        var customSoundKey = null;
-        if (mode === 'custom') {
-            customSoundKey = sanitizeCustomSound(document.getElementById('customSoundInput').value);
-        }
-        renderResults(result.notes, result.songLength, currentSongName, octaveShift, isHarpOrCustom, result.timePerTick, customSoundKey);
+    } catch (e) {
+        console.error('解析文件出错:', e);
+        document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: ' + (e && e.message ? e.message : e) + '</span>';
     }
 }
 function sanitizeCustomSound(value) {
@@ -2274,7 +2395,10 @@ document.getElementById('playBtn').addEventListener('click', function() {
 });
 document.getElementById('stopBtn').addEventListener('click',stopPreview);
 document.getElementById('previewSpeed').addEventListener('input',updateSpeed);
-document.getElementById('octaveShift').addEventListener('change', updateRenderAndRestoreState);
+document.getElementById('octaveShift').addEventListener('change', function() {
+    cachedOctaveShift = parseInt(this.value) || 0;
+    updateRenderAndRestoreState();
+});
 document.querySelectorAll('input[name="soundMode"]').forEach(radio => {
     radio.addEventListener('change', function() {
         const customInput = document.getElementById('customSoundInput');
@@ -2338,9 +2462,15 @@ window.addEventListener('DOMContentLoaded', function() {
         modal.classList.add('hidden');
         document.body.style.overflow = '';
     });
+    cachedOctaveShift = parseInt(document.getElementById('octaveShift').value) || 0;
     preloadAllSamples();
     initProgressBar();
     initWaterfall(null, 0);
+    document.getElementById('waterfallCanvas').addEventListener('click', function() {
+        if (lowPerformanceMode) {
+            exitLowPerformanceMode();
+        }
+    });
     loadPlaylist();
     initPlaylistEvents();
 });
@@ -2360,6 +2490,7 @@ let waterfallWidth = 0;
 let waterfallHeight = WF_BASE_HEIGHT;
 let waterfallRafId = null;
 let waterfallAllNotes = [];
+let waterfallTotalNotes = 0;
 let waterfallWindowTicks = 10;
 let lastTickTime = 0;
 let resizeObserver = null;
@@ -2369,6 +2500,13 @@ let waterfallBuckets = new Map();
 let waterfallMinTick = 0;
 let waterfallMaxTick = 0;
 let waterfallNeedsDraw = false;
+let waterfallDisplayTick = null;
+let lowPerformanceMode = false;
+let dropStatEnabled = true;
+let dropStatAccum = 0;
+let dropStatLastCheck = 0;
+const LOW_PERF_DROP_THRESHOLD = 5;
+const LOW_PERF_CHECK_INTERVAL = 1000;
 function initWaterfall(notes, songLength) {
     const canvas = document.getElementById('waterfallCanvas');
     if (!canvas) return;
@@ -2454,6 +2592,10 @@ function initWaterfall(notes, songLength) {
     requestWaterfallDraw();
 }
 function drawWaterfall() {
+    if (lowPerformanceMode) {
+        drawLowPerfMessage();
+        return;
+    }
     const ctx = waterfallCtx;
     const canvas = waterfallCanvas;
     if (!ctx || !canvas) return;
@@ -2465,16 +2607,36 @@ function drawWaterfall() {
     const textColor = rootStyles.getPropertyValue('--text-muted').trim() || '#5f8b78';
     const progressTrackColor = rootStyles.getPropertyValue('--bg-progress-track').trim() || '#2a3d3f';
     const VISUAL_DELAY_TICKS = 0.5;
-    let displayTick;
+    const DRAG_SMOOTH_K = 0.25;
+    const DRAG_SNAP_THRESHOLD = 60;
+    let targetTick;
+    let useSmooth = false;
     if (isDraggingProgress && dragTargetTick !== undefined) {
-        displayTick = dragTargetTick - VISUAL_DELAY_TICKS;
+        targetTick = dragTargetTick - VISUAL_DELAY_TICKS;
+        useSmooth = true;
     } else if (isPlaying) {
         const tickDuration = previewTimePerTick / previewSpeed;
-        displayTick = (performance.now() - playbackStartTime) / tickDuration - VISUAL_DELAY_TICKS;
+        targetTick = (performance.now() - playbackStartTime) / tickDuration - VISUAL_DELAY_TICKS;
     } else {
-        displayTick = previewCurrentTick - VISUAL_DELAY_TICKS;
+        targetTick = previewCurrentTick - VISUAL_DELAY_TICKS;
     }
-    if (displayTick > previewSongLength) displayTick = previewSongLength;
+    if (targetTick > previewSongLength) targetTick = previewSongLength;
+    if (!useSmooth) {
+        waterfallDisplayTick = targetTick;
+    } else if (waterfallDisplayTick === null) {
+        waterfallDisplayTick = targetTick;
+    } else {
+        const diff = targetTick - waterfallDisplayTick;
+        if (Math.abs(diff) > DRAG_SNAP_THRESHOLD) {
+            waterfallDisplayTick = targetTick;
+        } else {
+            waterfallDisplayTick += diff * DRAG_SMOOTH_K;
+            if (Math.abs(targetTick - waterfallDisplayTick) < 0.01) {
+                waterfallDisplayTick = targetTick;
+            }
+        }
+    }
+    const displayTick = waterfallDisplayTick;
     const displayWidth = waterfallWidth;
     const displayHeight = waterfallHeight;
     const dpr = window.devicePixelRatio || 1;
@@ -2513,7 +2675,7 @@ function drawWaterfall() {
     const TOP_BUFFER_TICKS = 3;
     const drawStart = Math.floor(displayTick);
     const drawEnd = Math.ceil(displayTick + windowTicks + TOP_BUFFER_TICKS);
-    const FADE_COLOR = '#88888855';
+    const FADE_COLOR = '#cccccc';
     for (let t = drawStart; t <= drawEnd; t++) {
         const arr = waterfallBuckets.get(t);
         if (!arr) continue;
@@ -2573,6 +2735,50 @@ function drawWaterfall() {
         }
     }
 }
+function drawLowPerfMessage() {
+    const ctx = waterfallCtx;
+    const canvas = waterfallCanvas;
+    if (!ctx || !canvas) return;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const bgColor = rootStyles.getPropertyValue('--bg-waterfall').trim() || '#0a151a';
+    const textColor = rootStyles.getPropertyValue('--text-primary').trim() || '#ffffff';
+    const accentColor = rootStyles.getPropertyValue('--border-waterfall-current').trim() || '#57b984';
+    const displayWidth = waterfallWidth;
+    const displayHeight = waterfallHeight;
+    const dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, displayWidth, displayHeight);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '14px monospace';
+    ctx.fillStyle = textColor;
+    ctx.fillText('由于浏览器性能过低,已停止渲染动态效果', displayWidth / 2, displayHeight / 2 - 14);
+    ctx.fillStyle = accentColor;
+    ctx.fillText('单击此处恢复渲染(不推荐)', displayWidth / 2, displayHeight / 2 + 14);
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
+}
+function enterLowPerformanceMode() {
+    if (lowPerformanceMode) return;
+    lowPerformanceMode = true;
+    dropStatEnabled = false;
+    dropStatAccum = 0;
+    document.querySelectorAll('.cmd-block.playing').forEach(el => el.classList.remove('playing'));
+    window._lastHighlighted = null;
+    if (waterfallRafId) {
+        cancelAnimationFrame(waterfallRafId);
+        waterfallRafId = null;
+    }
+    drawWaterfall();
+}
+function exitLowPerformanceMode() {
+    if (!lowPerformanceMode) return;
+    lowPerformanceMode = false;
+    ensureWaterfallRunning();
+}
 function drawStripedRect(ctx, x, y, w, h, colors) {
     const n = colors.length;
     if (n === 1) {
@@ -2609,13 +2815,16 @@ function waterfallLoop(timestamp) {
         waterfallRafId = null;
         return;
     }
+    drawWaterfall();
+    if (lowPerformanceMode) {
+        waterfallRafId = null;
+        return;
+    }
     if (isPlaying || isDraggingProgress) {
-        drawWaterfall();
         waterfallRafId = requestAnimationFrame(waterfallLoop);
     } else if (waterfallNeedsDraw) {
-        drawWaterfall();
         waterfallNeedsDraw = false;
-        waterfallRafId = null;
+        waterfallRafId = requestAnimationFrame(waterfallLoop);
     } else {
         waterfallRafId = null;
     }
@@ -2886,9 +3095,9 @@ function renderLatestSongs(songs) {
         return;
     }
     container.innerHTML = songs.map(song => `
-        <span class="playlist-item" data-file="${song.file}" data-type="${song.type}">
-            ${song.name}
-            <span class="badge">${song.type}</span>
+        <span class="playlist-item" data-file="${escapeHtml(song.file)}" data-type="${escapeHtml(song.type)}">
+            ${escapeHtml(song.name)}
+            <span class="badge">${escapeHtml(song.type)}</span>
         </span>
     `).join('');
     container.querySelectorAll('.playlist-item').forEach(el => {
@@ -2911,11 +3120,11 @@ function renderPlaylistPage(page) {
         listEl.innerHTML = '<div style="color:var(--text-muted); padding:20px; text-align:center;">没有匹配的歌曲</div>';
     } else {
         listEl.innerHTML = pageItems.map(song => `
-            <div class="playlist-item" data-file="${song.file}" data-type="${song.type}">
+            <div class="playlist-item" data-file="${escapeHtml(song.file)}" data-type="${escapeHtml(song.type)}">
                 <span class="info">
-                    <span>${song.name}</span>
+                    <span>${escapeHtml(song.name)}</span>
                 </span>
-                <span class="badge">${song.type}</span>
+                <span class="badge">${escapeHtml(song.type)}</span>
             </div>
         `).join('');
         listEl.querySelectorAll('.playlist-item').forEach(el => {
@@ -2956,12 +3165,13 @@ async function loadSongFromPlaylist(filePath, type) {
     }
 }
 function loadAndParseBuffer(arrayBuffer, fileType, fileName) {
-    if (isPlaying) stopPreview();
-    currentFileArrayBuffer = arrayBuffer;
-    currentFileType = fileType;
-    originalFileName = fileName.replace(/\.[^.]+$/, '') || 'song';
-    var enableSnap = document.getElementById('enableSnap');
     try {
+        if (isPlaying) stopPreview();
+        currentFileArrayBuffer = arrayBuffer;
+        currentFileType = fileType;
+        const pureName = String(fileName).split('/').pop().split('\\').pop();
+        originalFileName = pureName.replace(/\.[^.]+$/, '') || 'song';
+        var enableSnap = document.getElementById('enableSnap');
         if (fileType === 'midi') {
             enableSnap.disabled = false;
             processMidi(arrayBuffer, enableSnap.checked);
@@ -3001,7 +3211,8 @@ function loadAndParseBuffer(arrayBuffer, fileType, fileName) {
             }, 100);
         }
     } catch (e) {
-        document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: ' + e.message;
+        console.error('加载歌单歌曲出错:', e);
+        document.getElementById('stats').innerHTML = '<span class="error">' + ICON_ERROR + ' 解析失败: ' + (e && e.message ? e.message : e) + '</span>';
     }
 }
 function initPlaylistEvents() {
@@ -3047,6 +3258,40 @@ function initPlaylistEvents() {
         if (e.key === 'Enter') document.getElementById('playlistJumpBtn').click();
     });
 }
+(function installDialogGuards() {
+    const nativeAlert   = window.alert.bind(window);
+    const nativeConfirm = window.confirm.bind(window);
+    const nativePrompt  = window.prompt.bind(window);
+    let inDialog = false;
+    function wrap(fn) {
+        return function(message, defaultValue) {
+            if (inDialog) {
+                return fn(message, defaultValue);
+            }
+            inDialog = true;
+            const wasPlaying = isPlaying;
+            const savedTick = previewCurrentTick;
+            if (wasPlaying) {
+                pausePreview();
+            }
+            let result;
+            try {
+                result = fn(message, defaultValue);
+            } finally {
+                inDialog = false;
+                if (wasPlaying && previewNotes && previewNotes.length > 0) {
+                    if (savedTick < previewSongLength) {
+                        startPreview();
+                    }
+                }
+            }
+            return result;
+        };
+    }
+    window.alert   = wrap(nativeAlert);
+    window.confirm = wrap(nativeConfirm);
+    window.prompt  = wrap(nativePrompt);
+})();
 console.warn(`\n  _____ _____  ____    ___  \n |__  /| ____||  _ \\  / _ \\ \n   / / |  _|  | |_) || | | |\n  / /_ | |___ |  _ < | |_| |\n /____||_____||_| \\_\\ \\___/ \n   ____         _  _          _ \n |  _ \\  __ _ | || |_  __ _ | |\n | |_) |/ _' || || __|/ _' || |\n |  _ < ||_| || || |_ ||_| || |\n |_| \\_\\\\__,_||_| \\__|\\__,_||_|\n\n`);
 </script>
 </html>
