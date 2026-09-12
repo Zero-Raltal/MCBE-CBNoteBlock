@@ -15,7 +15,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 	<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABUklEQVR42n2TT0vDQBDF8z1EibFgkqZaaQIWShWVCnopBalYoTc/gRdvoh68Cnryw475jZ3tZvvnMLxMdt/svLezUdZK5KRIG1EdtzXKo7yRh3GYxBLx8XJ3Ke/TC/mYDBSJ53F/Jew/CIfiWuDzcSTj3r68TfsOZ6epfM+vZD4o5PfpVpF8VrU0h6MFep1cXidDGWV78vMwlOt8dy2y/nV/7pBuyyL774C2/NPtVHJD7ao+Xbuou0MG3Ig2KKCndWLdAEI8y3Zcbkgh/sNpeGAafc0NTxbabR2OdoAO9IQaQ0+2ekA1vzqn+V7YjYC2z92CeWDawJtusqIZpBvzpuEBjob3vmkuDOFoAXQwB+u0bpsHOBs9CO/fR5vG5S3UD8bmAO0QDdEK2hyYF+YBXPeY/EdDdSL8RrflcLSD9CBWLURVB2+DsG9bKxd5t73cg4l/FJHaEezZJsMAAAAASUVORK5CYII=">
-    <title>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</title>
+    <title>Minecraft 音乐命令方块生成器 by-ZeroRaltal</title>
     <style>
         :root{--bg-body:#1a2a32;--bg-box:#1e2f38;--bg-pre:#021016;--bg-stats:#071016;--bg-mode:#0a151a;--bg-waterfall:#0a151a;--bg-waterfall-label:#071016;--bg-progress-track:#2a3d3f;--bg-input:#2a3d3f;--bg-select:#2a3d3f;--bg-option:#1a2a32;--bg-cmd-playing:#1a3a2a;--bg-cmd-copied:#555555;--bg-btn-copy:#2d5f55;--bg-btn-primary:#3e8e62;--bg-btn-primary-hover:#4fa573;--bg-btn-preview:#3e5f6b;--bg-btn-preview-running:#8a4f3c;--bg-btn-close:#3e8e62;--bg-btn-close-hover:#57b984;--bg-modal:#1e2f38;--bg-overlay:#000000b3;--bg-scrollbar-track:#0a151a;--bg-scrollbar-thumb:#3e8e62;--bg-scrollbar-thumb-hover:#57b984;--text-primary:#ffffff;--text-secondary:#8abf9a;--text-muted:#5f8b78;--text-error:#ff6655;--text-success:#57b984;--text-modal-title:#ffff30;--text-update-green:#72ff30;--text-warning-red:#ff3030;--text-tick:#8abf9a;--border-accent:#57b984;--border-cmd-playing:#ffaa44;--border-cmd-copied:#666666;--border-input:#5f8b78;--border-input-focus:#57b984;--border-select-hover:#57b984;--border-waterfall-grid:#1a2a32;--border-waterfall-current:#57b984;--btn-text:#ffffff;--progress-fill:#57b984;--seq-bg:#2e5f4b;--seq-text:#ffffff;--waterfall-note-stroke:#ffffff;--scrollbar-color:#3e8e62 #0a151a;--shadow-modal:0 10px 40px #00000099;--bg-playlist-item:#12222b;--border-playlist:#2d5f55;--bg-playlist-hover:#2e5f4b}
         [data-theme="dark-yellow"]{--bg-body:#0d0d0d;--bg-box:#1a1a1a;--bg-pre:#111111;--bg-stats:#0d0d0d;--bg-mode:#1a1a1a;--bg-waterfall:#0d0d0d;--bg-waterfall-label:#111111;--bg-progress-track:#2a2a2a;--bg-input:#2a2a2a;--bg-select:#2a2a2a;--bg-option:#1a1a1a;--bg-cmd-playing:#2a2a1a;--bg-cmd-copied:#666666;--bg-btn-copy:#d4a020;--bg-btn-primary:#d4a020;--bg-btn-primary-hover:#ffe100;--bg-btn-preview:#d4a020;--bg-btn-preview-running:#772a21;--bg-btn-close:#d4a020;--bg-btn-close-hover:#f0c040;--bg-modal:#1a1a1a;--bg-overlay:#000000cc;--bg-scrollbar-track:#1a1a1a;--bg-scrollbar-thumb:#d4a020;--bg-scrollbar-thumb-hover:#f0c040;--text-primary:#ffffff;--text-secondary:#f0d060;--text-muted:#a09050;--text-error:#ff6655;--text-success:#f0c040;--text-modal-title:#ffd700;--text-update-green:#b0ff50;--text-warning-red:#ff5050;--text-tick:#f0d060;--border-accent:#f0c040;--border-cmd-playing:#fffebd;--border-cmd-copied:#888888;--border-input:#8a7a40;--border-input-focus:#f0c040;--border-select-hover:#f0c040;--border-waterfall-grid:#2a2a2a;--border-waterfall-current:#f0c040;--btn-text:#ffffff;--progress-fill:#f0c040;--seq-bg:#d4a020;--seq-text:#ffffff;--waterfall-note-stroke:#ffffff;--scrollbar-color:#d4a020 #1a1a1a;--shadow-modal:0 10px 40px #000000cc;--bg-playlist-item:#222222;--border-playlist:#8a7a40;--bg-playlist-hover:#3a3a2a}
@@ -28,6 +28,7 @@
         pre{background:var(--bg-pre);padding:10px;overflow-x:auto;font-size:12px;white-space:pre-wrap;word-break:break-all;color:var(--text-primary);border-radius:4px;transition:background 0.3s ease,color 0.3s ease}
         .cmd-block{background:var(--bg-pre);border-left:4px solid var(--border-accent);margin:8px 0;padding:8px;font-size:12px;border-radius:4px;transition:border-left-color 0.2s ease,background 0.3s ease}
         .cmd-block.copied{border-left-color:var(--border-cmd-copied)}
+        .cmd-block.copied .seq-num{background:var(--bg-cmd-copied)}
         .cmd-block.playing{background:var(--bg-cmd-playing);border-left-color:var(--border-cmd-playing)}
         .stats{background:var(--bg-stats);padding:8px;margin-top:10px;font-size:12px;color:var(--text-primary);border-radius:4px;transition:background 0.3s ease,color 0.3s ease}
         .note-grid{max-height:400px;overflow-y:auto}
@@ -135,6 +136,14 @@
             .mode-control input[type="radio"]:hover{border-color:var(--border-select-hover)}
             .copy-btn:hover{background:var(--bg-btn-primary-hover)}
         }
+        .import-modal-box{position:relative;width:fit-content;max-width:calc(100vw - 40px);padding:50px 20px 20px;text-align:center}
+        .import-close-btn{position:absolute;top:10px;right:10px;width:36px;height:36px;padding:0;margin:0;font-size:16px;line-height:1;background:var(--bg-btn-close);color:var(--btn-text);border:0;border-radius:4px;cursor:pointer}
+        .import-close-btn:hover{background:var(--bg-btn-close-hover)}
+        #importCanvas{display:block;width:min(70vw,280px);height:min(70vw,280px);margin:0 auto 20px;cursor:pointer;border-radius:4px;touch-action:manipulation}
+        .import-nav{display:flex;gap:10px;justify-content:center}
+        .import-nav-btn{flex:0 0 auto;min-width:90px;padding:8px 20px;margin:0;font-size:14px;font-family:monospace;background:var(--bg-btn-preview);color:#fff;border:0;border-radius:4px;cursor:pointer}
+        .import-nav-btn:hover:not(:disabled){background:var(--bg-btn-preview-running)}
+        .import-nav-btn:disabled{opacity:0.4;cursor:not-allowed}
     </style>
 </head>
 <body class="loading">
@@ -148,6 +157,10 @@
         <h1>公告</h1>
 		<h2>遇到BUG及时反馈,我会在周末尽快修</h2>
         <button class="modal-close-btn" id="modalCloseBtn">确定</button>
+        <br>
+        <h3>2026.9.13 更新日志:</h3>
+        <h3 style="color:#72ff30">1.支持Java版！！！！！！！！！！！！！！！</h3>
+        <h3>2.新增了一个更方便的复制器</h3>
         <br>
         <h3>2026.9.12 更新日志:</h3>
         <h3 style="color:#72ff30">1.预览音量提升，通过限制器和软削波保证不破音</h3>
@@ -266,8 +279,18 @@
         </div>
     </div>
 </div>
+<div id="importModal" class="modal-overlay hidden">
+    <div class="modal-box import-modal-box">
+        <button id="importCloseBtn" class="import-close-btn" aria-label="关闭">✕</button>
+        <canvas id="importCanvas" width="280" height="280"></canvas>
+        <div class="import-nav">
+            <button id="importPrevBtn" class="import-nav-btn">-1</button>
+            <button id="importNextBtn" class="import-nav-btn">+1</button>
+        </div>
+    </div>
+</div>
 <div style="max-width:1400px;margin:0 auto">
-    <h1>Minecraft BE1.19+ 音乐命令方块生成器 by-ZeroRaltal</h1>
+    <h1>Minecraft 音乐命令方块生成器 by-ZeroRaltal</h1>
 	<h3 style="color:#ff3030">转载/二改请保留MIT声明，感谢理解!</h3>
     <div class="theme-control">
         <label>主题配色: </label>
@@ -344,6 +367,11 @@
         </div>
         <div class="stats" id="stats">等待上传文件...</div>
     </div>
+    <div class="mode-control">
+        <label>目标平台: </label>
+        <label><input type="radio" name="targetPlatform" value="bedrock" checked> 基岩版 (1.19+)</label>
+        <label><input type="radio" name="targetPlatform" value="java"> Java 版 (1.13+)</label>
+    </div>
     <div class="box">
         <h4>1.聊天栏输入</h4>
 		<pre>/scoreboard objectives add t dummy</pre>
@@ -355,6 +383,7 @@
         <h4>4.连锁命令方块</h4>
         <div id="chainList" class="note-grid"><pre>尚未解析</pre></div>
         <button id="exportCBND">导出为CBND序列</button>
+        <button id="importToGameBtn">导入到游戏</button>
         <button id="copyCycle">复制循环指令</button>
         <button id="copyAll">复制全部连锁指令</button>
         <button id="download">导出为文本文件</button>
@@ -366,7 +395,7 @@
 // A.1 文件与播放状态
 var currentFileArrayBuffer=null;
 var currentFileType=null;
-let originalFileName='',currentSongName='',previewTimePerTick=50,previewTimer=null,playbackStartTime=0,isDragging=false,dragTargetTick=0,isDraggingProgress=false,wasPlayingBeforeDrag=false;
+let originalFileName='',currentSongName='',previewTimePerTick=50,previewTimer=null,playbackStartTime=0,isDragging=false,dragTargetTick=0,isDraggingProgress=false,wasPlayingBeforeDrag=false,importSeq=1,importCopiedSet=new Set(),importCanvas=null,importCtx=null,importFlashUntil=0;
 // A.2 SVG 图标常量
 const ICON_PLAY=`<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle"><polygon points="5,3 19,12 5,21"/></svg>`;
 const ICON_PAUSE=`<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
@@ -767,6 +796,9 @@ const DRUM_TO_MINECRAFT={24:13,25:3,26:4,27:3,28:3,29:4,30:4,31:4,32:4,33:4,34:8
 const DRUM_PITCH_OFFSET={24:39,25:8,26:25,27:18,28:27,29:16,30:13,31:9,32:6,33:2,34:17,35:10,36:6,37:6,38:8,39:6,40:4,41:6,42:22,43:13,44:22,45:15,46:18,47:20,48:23,49:17,50:23,51:24,52:8,53:13,54:18,55:18,56:5,57:13,58:2,59:13,60:9,61:2,62:8,63:22,64:15,65:13,66:8,67:12,68:5,69:20,70:23,71:34,72:33,73:17,74:11,75:18,76:10,77:5,78:25,79:26,80:16,81:19,82:22,83:6,84:15,85:21,86:14,87:7};
 const INSTRUMENT_SOUND_MAP={0:"harp",1:"bass",2:"bd",3:"snare",4:"hat",5:"guitar",6:"flute",7:"bell",8:"chime",9:"xylophone",10:"iron_xylophone",11:"cow_bell",12:"didgeridoo",13:"bit",14:"banjo",15:"pling"};
 const PERCUSSION_INSTRUMENTS=[2,3,4];
+const JAVA_SOUND_MAP={0:"harp",1:"bass",2:"basedrum",3:"snare",4:"hat",5:"guitar",6:"flute",7:"bell",8:"chime",9:"xylophone",10:"iron_xylophone",11:"cow_bell",12:"didgeridoo",13:"bit",14:"banjo",15:"pling"};
+const JAVA_KEY_MIN=42;
+const JAVA_KEY_MAX=66;
 // E 音频采样与 Base91 解码
 // E.1 音频采样数据
  const SAMPLE_BASE91 = {
@@ -1210,13 +1242,101 @@ function generateCommands(groups,octaveShift,harpOnly,customSoundKey){
     }
     return{cycleCmd,chainCmds};
 }
+function buildJavaCommand(ticks,sound,pitch){
+    const sorted=ticks;
+    if(sorted.length===1){
+        return `execute as @a[scores={t=${sorted[0]}}] at @s run playsound ${sound} record @s ~ ~ ~ 1 ${pitch}`;
+    }
+    const min=sorted[0],max=sorted[sorted.length-1];
+    let continuous=true;
+    for(let i=1;i<sorted.length;i++){
+        if(sorted[i]!==sorted[i-1]+1){continuous=false;break;}
+    }
+    if(continuous){
+        return `execute as @a[scores={t=${min}..${max}}] at @s run playsound ${sound} record @s ~ ~ ~ 1 ${pitch}`;
+    }
+    const gaps=[];
+    for(let i=0;i<sorted.length-1;i++){
+        const gs=sorted[i]+1,ge=sorted[i+1]-1;
+        if(gs<=ge)gaps.push(gs===ge?`unless score @s t matches ${gs}`:`unless score @s t matches ${gs}..${ge}`);
+    }
+    return `execute as @a[scores={t=${min}..${max}}] at @s ${gaps.join(' ')} run playsound ${sound} record @s ~ ~ ~ 1 ${pitch}`;
+}
+function generateJavaCommands(groups,octaveShift,harpOnly){
+    const MAX_LEN=8000;
+    const intermediate=[];
+    for(const g of groups){
+        const isPerc=PERCUSSION_INSTRUMENTS.includes(g.instrument);
+        const effectiveInstrument=(harpOnly&&!isPerc)?0:g.instrument;
+        const rawKey=g.key+octaveShift*12;
+        let k=rawKey;
+        while(k<JAVA_KEY_MIN)k+=12;
+        while(k>JAVA_KEY_MAX)k-=12;
+        intermediate.push({instrument:effectiveInstrument,adjustedKey:k,ticks:g.ticks});
+    }
+    const mergedMap=new Map();
+    for(const g of intermediate){
+        const mapKey=`${g.instrument}_${g.adjustedKey}`;
+        if(!mergedMap.has(mapKey))mergedMap.set(mapKey,{instrument:g.instrument,key:g.adjustedKey,ticks:[]});
+        mergedMap.get(mapKey).ticks.push(...g.ticks);
+    }
+    const chainCmds=[];
+    for(const data of mergedMap.values()){
+        const uniqueTicks=[...new Set(data.ticks)].sort((a,b)=>a-b);
+        const soundName=JAVA_SOUND_MAP[data.instrument]||'harp';
+        const sound=`minecraft:block.note_block.${soundName}`;
+        const pitch=Math.pow(2,(data.key-54)/12).toFixed(6);
+        let i=0;
+        while(i<uniqueTicks.length){
+            let j=i,bestJ=i;
+            while(j<uniqueTicks.length){
+                const seg=uniqueTicks.slice(i,j+1);
+                const cmd=buildJavaCommand(seg,sound,pitch);
+                if(cmd.length>MAX_LEN&&j>i)break;
+                bestJ=j;j++;
+            }
+            const segTicks=uniqueTicks.slice(i,bestJ+1);
+            const cmd=buildJavaCommand(segTicks,sound,pitch);
+            chainCmds.push({
+                seq:0,
+                noteName:getNoteName(data.key),
+                shiftedNoteName:getNoteName(data.key),
+                instrument:data.instrument,
+                instrumentName:soundName,
+                key:data.key,
+                pitch:pitch,
+                sound:sound,
+                ticks:segTicks,
+                tickCount:segTicks.length,
+                cmd:cmd
+            });
+            i=bestJ+1;
+        }
+    }
+    chainCmds.sort((a,b)=>{
+        if(a.instrument===b.instrument)return a.key-b.key;
+        const aIsPerc=PERCUSSION_INSTRUMENTS.includes(a.instrument);
+        const bIsPerc=PERCUSSION_INSTRUMENTS.includes(b.instrument);
+        if(aIsPerc&&!bIsPerc)return 1;
+        if(!aIsPerc&&bIsPerc)return -1;
+        return a.instrument-b.instrument;
+    });
+    chainCmds.forEach((c,i)=>c.seq=i+1);
+    return {cycleCmd:`scoreboard players add @a t 1`,chainCmds};
+}
 // H.2 渲染结果
 let lastChainCmds=[];
 function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTick,customSoundKey){
     if(!notes||notes.length===0)return false;
     const groups=groupNotesByInstrumentAndPitch(notes);
     const effectiveCustomKey=(harpOnly&&customSoundKey&&customSoundKey.trim()!=='')?customSoundKey.trim():null;
-    const{cycleCmd,chainCmds}=generateCommands(groups,octaveShift,harpOnly,effectiveCustomKey);
+    const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
+    let cycleCmd,chainCmds;
+    if(platform==='java'){
+        ({cycleCmd,chainCmds}=generateJavaCommands(groups,octaveShift,harpOnly));
+    }else{
+        ({cycleCmd,chainCmds}=generateCommands(groups,octaveShift,harpOnly,effectiveCustomKey));
+    }
     document.getElementById('cycleCmd').innerHTML=`<pre>${escapeHtml(cycleCmd)}</pre>`;
     lastChainCmds=chainCmds;
     buildPreviewIndexes(notes,chainCmds);
@@ -1237,7 +1357,9 @@ function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTic
                 <div style="font-size:11px;color:var(--text-secondary)">时间点: ${timePreview}</div>
             </div>`;
         }
-        document.getElementById('chainList').innerHTML=html;
+        const chainListEl=document.getElementById('chainList');
+        chainListEl.innerHTML=html;
+        chainListEl.scrollTop=0;
         document.querySelectorAll('.copy-btn').forEach(btn=>{
             btn.addEventListener('click',()=>{
                 const idx=parseInt(btn.dataset.idx);
@@ -1260,9 +1382,14 @@ function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTic
     const uniqueInstruments=[...new Set(notes.map(n=>n.instrument))];
     const instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
     cachedOctaveShift=octaveShift||0;
-    document.getElementById('stats').innerHTML=`<span class="success">${ICON_SUCCESS} 解析成功 | ${songName||''} | 音符:${notes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${octaveShift}</span>`;
+    const platformTag=platform==='java'?'[Java版]':'[基岩版]';
+    document.getElementById('stats').innerHTML=`<span class="success">${ICON_SUCCESS} 解析成功 ${platformTag} | ${songName||''} | 音符:${notes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${octaveShift}</span>`;
     ensureAudioChain();
     if(typeof initWaterfall==='function'){initWaterfall(notes,songLength);requestWaterfallDraw();}
+    importSeq=1;
+    importCopiedSet.clear();
+    if(typeof drawImportCanvas==='function')drawImportCanvas();
+    if(typeof updateImportNav==='function')updateImportNav();
     return true;
 }
 // I 文件处理
@@ -1381,6 +1508,35 @@ document.getElementById('customSoundInput').addEventListener('blur',function(){
         updateRenderAndRestoreState();
     }
 });
+document.querySelectorAll('input[name="targetPlatform"]').forEach(radio=>{
+    radio.addEventListener('change',function(){
+        const platform=this.value;
+        const exportBtn=document.getElementById('exportCBND');
+        if(platform==='java'){
+            exportBtn.disabled=true;
+            exportBtn.title='Java 版不支持导出 CBND';
+            const customRadio=document.querySelector('input[name="soundMode"][value="custom"]');
+            customRadio.disabled=true;
+            if(document.querySelector('input[name="soundMode"]:checked').value==='custom'){
+                document.querySelector('input[name="soundMode"][value="multi"]').checked=true;
+                document.getElementById('customSoundInput').style.display='none';
+                document.getElementById('customSoundInput').disabled=true;
+            }
+        }else{
+            exportBtn.disabled=false;
+            exportBtn.title='';
+            document.querySelector('input[name="soundMode"][value="custom"]').disabled=false;
+        }
+        updateRenderAndRestoreState();
+    });
+});
+(function initPlatformUI(){
+    const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
+    if(platform==='java'){
+        document.getElementById('exportCBND').disabled=true;
+        document.getElementById('exportCBND').title='Java 版不支持导出 CBND';
+    }
+})();
 // J.4 复制与导出
 document.getElementById('copyCycle').addEventListener('click',()=>{
     const cmd=document.querySelector('#cycleCmd pre')?.innerText||'';
@@ -1393,8 +1549,14 @@ document.getElementById('copyAll').addEventListener('click',()=>{
 });
 document.getElementById('download').addEventListener('click',()=>{
     if(!lastChainCmds.length){alert('没有可导出的内容');return;}
+    const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
     const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
-    let content=`【命令导出】\n\n【导出时间: ${new Date().toLocaleString()}】\n\n【模式: ${harpOnly?'Harp Only':'乐器映射'}】\n\n【工具作者: ZeroRaltal】\n\n【Github: https://github.com/Zero-Raltal/MCBE-CBNoteBlock/】\n\n【聊天栏】\n/scoreboard objectives add t dummy\n/scoreboard players set @a t 0\n\n【循环命令方块】\nscoreboard players add @a t 1\n\n【连锁命令方块】\n`;
+    let content;
+    if(platform==='java'){
+        content=`【Java版命令导出】\n\n【导出时间: ${new Date().toLocaleString()}】\n\n【模式: ${harpOnly?'Harp Only':'乐器映射'}】\n\n【工具作者: ZeroRaltal】\n\n【Github: https://github.com/Zero-Raltal/MCBE-CBNoteBlock/】\n\n【聊天栏】\n/scoreboard objectives add t dummy\n/scoreboard players set @a t 0\n\n【脉冲方块】\nscoreboard players set @a t 0\n\n【循环方块（无条件、保持开启）】\nscoreboard players add @a t 1\n\n【连锁方块（无条件、保持开启）】\n`;
+    }else{
+        content=`【基岩版命令导出】\n\n【导出时间: ${new Date().toLocaleString()}】\n\n【模式: ${harpOnly?'Harp Only':'乐器映射'}】\n\n【工具作者: ZeroRaltal】\n\n【Github: https://github.com/Zero-Raltal/MCBE-CBNoteBlock/】\n\n【聊天栏】\n/scoreboard objectives add t dummy\n/scoreboard players set @a t 0\n\n【循环命令方块】\nscoreboard players add @a t 1\n\n【连锁命令方块】\n`;
+    }
     for(let i=0;i<lastChainCmds.length;i++){const c=lastChainCmds[i];content+=`${c.cmd}\n\n`;}
     const blob=new Blob([content],{type:'text/plain'});
     const a=document.createElement('a');
@@ -1430,6 +1592,7 @@ window.addEventListener('DOMContentLoaded',function(){
     });
     loadPlaylist();
     initPlaylistEvents();
+    initImportCanvas();
     const loadingEl=document.getElementById('loadingOverlay');
     if(loadingEl){
         requestAnimationFrame(()=>{
@@ -1734,6 +1897,7 @@ function resizeWaterfall(){
         else{root.setAttribute('data-theme',theme);select.value=theme;}
         try{localStorage.setItem(STORAGE_KEY,select.value);}catch(_){}
         if(typeof requestWaterfallDraw==='function')requestWaterfallDraw();
+        if(typeof drawImportCanvas==='function')drawImportCanvas();
     }
     function loadTheme(){
         let saved;
@@ -1793,6 +1957,8 @@ function downloadCBND(binaryData,filename='song.cbnd'){
     URL.revokeObjectURL(url);
 }
 document.getElementById('exportCBND').addEventListener('click',function(){
+    const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
+    if(platform==='java'){alert('Java 版不支持导出 CBND，请切换到基岩版再试。');return;}
     if(!lastChainCmds||lastChainCmds.length===0){alert('没有可导出的指令数据，请先解析文件。');return;}
     const tempo=Math.min(255,Math.round(1000/previewTimePerTick));
     const binary=exportToCBND(lastChainCmds,tempo);
@@ -2072,8 +2238,165 @@ function initPlaylistEvents(){
     });
     document.getElementById('playlistJump').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('playlistJumpBtn').click();});
 }
-// P 交互反馈与弹窗保护
-// P.1 按钮按压反馈
+// P 复制弹窗
+function initImportCanvas(){
+    importCanvas=document.getElementById('importCanvas');
+    if(!importCanvas)return;
+    importCtx=importCanvas.getContext('2d');
+    importCanvas.addEventListener('click',()=>{
+        if(!lastChainCmds||lastChainCmds.length===0)return;
+        if(importCopiedSet.size>=lastChainCmds.length){
+            importCopiedSet.clear();
+            importSeq=1;
+            importFlashUntil=performance.now()+150;
+            drawImportCanvas();
+            setTimeout(drawImportCanvas,160);
+            updateImportNav();
+            return;
+        }
+        const idx=importSeq-1;
+        copyToClipboard(lastChainCmds[idx].cmd,null,null);
+        importCopiedSet.add(importSeq);
+        importFlashUntil=performance.now()+150;
+        drawImportCanvas();
+        setTimeout(drawImportCanvas,160);
+        importSeq++;
+        if(importSeq>lastChainCmds.length)importSeq=1;
+        updateImportNav();
+    });
+    resizeImportCanvas();
+    window.addEventListener('resize',resizeImportCanvas);
+}
+function resizeImportCanvas(){
+    if(!importCanvas)return;
+    const dpr=window.devicePixelRatio||1;
+    const rect=importCanvas.getBoundingClientRect();
+    const w=rect.width||200;
+    const h=rect.height||200;
+    importCanvas.width=Math.round(w*dpr);
+    importCanvas.height=Math.round(h*dpr);
+    drawImportCanvas();
+}
+function drawImportCanvas(){
+    if(!importCanvas||!importCtx)return;
+    const dpr=window.devicePixelRatio||1;
+    const w=importCanvas.width/dpr;
+    const h=importCanvas.height/dpr;
+    const ctx=importCtx;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,importCanvas.width,importCanvas.height);
+    ctx.scale(dpr,dpr);
+    const rootStyles=getComputedStyle(document.documentElement);
+    const bgColor=rootStyles.getPropertyValue('--bg-mode').trim()||'#0a151a';
+    const flashColor=rootStyles.getPropertyValue('--border-accent').trim()||'#57b984';
+    const accentColor=rootStyles.getPropertyValue('--border-accent').trim()||'#57b984';
+    const textColor=rootStyles.getPropertyValue('--text-primary').trim()||'#ffffff';
+    const mutedColor=rootStyles.getPropertyValue('--text-muted').trim()||'#5f8b78';
+    const doneColor=rootStyles.getPropertyValue('--bg-cmd-copied').trim()||'#555555';
+    const isFlashing=performance.now()<importFlashUntil;
+    ctx.fillStyle=bgColor;
+    ctx.fillRect(0,0,w,h);
+    if(isFlashing){
+        ctx.globalAlpha=0.18;
+        ctx.fillStyle=flashColor;
+        ctx.fillRect(0,0,w,h);
+        ctx.globalAlpha=1.0;
+    }
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    const total=lastChainCmds?lastChainCmds.length:0;
+    if(total===0){
+        ctx.fillStyle=mutedColor;
+        ctx.font='16px monospace';
+        ctx.fillText('暂无指令',w/2,h/2);
+        return;
+    }
+    const cx=w/2;
+    const cy=h/2-10;
+    const radius=Math.min(w,h)*0.30;
+    const lineWidth=Math.max(8,Math.min(w,h)*0.05);
+    const allCopied=importCopiedSet.size>=total;
+    const isCurrentCopied=importCopiedSet.has(importSeq);
+    const greyed=allCopied||isCurrentCopied;
+    const ringColor=greyed?doneColor:accentColor;
+    const numColor=greyed?doneColor:textColor;
+    const countColor=greyed?doneColor:mutedColor;
+    const hintColor=greyed?doneColor:accentColor;
+    ctx.beginPath();
+    ctx.arc(cx,cy,radius,0,Math.PI*2);
+    ctx.strokeStyle='rgba(128,128,128,0.25)';
+    ctx.lineWidth=lineWidth;
+    ctx.stroke();
+    const progress=importCopiedSet.size/total;
+    if(progress>0){
+        ctx.beginPath();
+        ctx.arc(cx,cy,radius,-Math.PI/2,-Math.PI/2+Math.PI*2*progress);
+        ctx.strokeStyle=ringColor;
+        ctx.lineWidth=lineWidth;
+        ctx.lineCap='round';
+        ctx.stroke();
+    }
+    ctx.fillStyle=numColor;
+    ctx.font='bold '+Math.round(Math.min(w,h)*0.18)+'px monospace';
+    ctx.fillText('#'+importSeq,cx,cy-4);
+    ctx.fillStyle=countColor;
+    ctx.font=Math.round(Math.min(w,h)*0.055)+'px monospace';
+    ctx.fillText(`已复制 ${importCopiedSet.size}/${total}`,cx,cy+Math.round(Math.min(w,h)*0.13));
+    let hintText;
+    if(allCopied)hintText='已全部复制，点击清空进度';
+    else if(isCurrentCopied)hintText='再次点击可重新复制';
+    else hintText='点击复制 #'+importSeq;
+    ctx.fillStyle=hintColor;
+    ctx.font=Math.round(Math.min(w,h)*0.055)+'px monospace';
+    ctx.fillText(hintText,cx,h-Math.round(Math.min(w,h)*0.08));
+}
+function updateImportNav(){
+    const prev=document.getElementById('importPrevBtn');
+    const next=document.getElementById('importNextBtn');
+    if(!lastChainCmds||lastChainCmds.length===0){
+        prev.disabled=true;
+        next.disabled=true;
+        drawImportCanvas();
+        return;
+    }
+    if(importSeq<1)importSeq=1;
+    if(importSeq>lastChainCmds.length)importSeq=lastChainCmds.length;
+    prev.disabled=(importSeq<=1);
+    next.disabled=(importSeq>=lastChainCmds.length);
+    drawImportCanvas();
+}
+function updateImportBtn(){updateImportNav();}
+document.getElementById('importToGameBtn').addEventListener('click',()=>{
+    if(!lastChainCmds||lastChainCmds.length===0){alert('没有可导入的指令，请先上传文件');return;}
+    const modal=document.getElementById('importModal');
+    modal.classList.remove('hidden');
+    document.body.style.overflow='hidden';
+    requestAnimationFrame(()=>{resizeImportCanvas();updateImportNav();});
+});
+document.getElementById('importCloseBtn').addEventListener('click',()=>{
+    document.getElementById('importModal').classList.add('hidden');
+    document.body.style.overflow='';
+});
+document.getElementById('importModal').addEventListener('click',function(e){
+    if(e.target===this){
+        this.classList.add('hidden');
+        document.body.style.overflow='';
+    }
+});
+document.getElementById('importPrevBtn').addEventListener('click',()=>{
+    if(!lastChainCmds||lastChainCmds.length===0)return;
+    if(importSeq>1)importSeq--;
+    else importSeq=lastChainCmds.length;
+    updateImportNav();
+});
+document.getElementById('importNextBtn').addEventListener('click',()=>{
+    if(!lastChainCmds||lastChainCmds.length===0)return;
+    if(importSeq<lastChainCmds.length)importSeq++;
+    else importSeq=1;
+    updateImportNav();
+});
+// Q 交互反馈与弹窗保护
+// Q.1 按钮按压反馈
 document.addEventListener('pointerdown',function(e){
     const btn=e.target.closest('button,.playlist-item');
     if(!btn)return;
@@ -2082,7 +2405,7 @@ document.addEventListener('pointerdown',function(e){
     btn.classList.add('pressed');
     btn._pressedTimer=setTimeout(function(){btn.classList.remove('pressed');},250);
 },true);
-// P.2 alert/confirm/prompt 播放保护
+// Q.2 alert/confirm/prompt 播放保护
 (function installDialogGuards(){
     const nativeAlert=window.alert.bind(window);
     const nativeConfirm=window.confirm.bind(window);
@@ -2110,7 +2433,7 @@ document.addEventListener('pointerdown',function(e){
     window.confirm=wrap(nativeConfirm);
     window.prompt=wrap(nativePrompt);
 })();
-// Q 控制台签名
+// R 控制台签名
 console.warn(`\n  _____ _____  ____    ___  \n |__  /| ____||  _ \\  / _ \\ \n   / / |  _|  | |_) || | | |\n  / /_ | |___ |  _ < | |_| |\n /____||_____||_| \\_\\ \\___/ \n   ____         _  _          _ \n |  _ \\  __ _ | || |_  __ _ | |\n | |_) |/ _' || || __|/ _' || |\n |  _ < ||_| || || |_ ||_| || |\n |_| \\_\\\\__,_||_| \\__|\\__,_||_|\n\n`);
 </script>
 </html>
