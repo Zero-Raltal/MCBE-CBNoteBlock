@@ -351,6 +351,11 @@
             <label><input type="radio" name="soundMode" value="custom"> 自定义音色 </label>
             <input type="text" id="customSoundInput" value="note.pling" maxlength="64" disabled style="width:150px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
         </div>
+        <div class="mode-control">
+            <label>平台: </label>
+            <label><input type="radio" name="targetPlatform" value="bedrock" checked> BE 1.19+</label>
+            <label><input type="radio" name="targetPlatform" value="java"> JE 1.13+</label>
+        </div>
         <div class="shift-control">
             <label>八度移调: </label>
             <select id="octaveShift">
@@ -367,11 +372,6 @@
         </div>
         <div class="stats" id="stats">等待上传文件...</div>
     </div>
-    <div class="mode-control">
-        <label>目标平台: </label>
-        <label><input type="radio" name="targetPlatform" value="bedrock" checked> 基岩版 (1.19+)</label>
-        <label><input type="radio" name="targetPlatform" value="java"> Java 版 (1.13+)</label>
-    </div>
     <div class="box">
         <h4>1.聊天栏输入</h4>
 		<pre>/scoreboard objectives add t dummy</pre>
@@ -384,6 +384,7 @@
         <div id="chainList" class="note-grid"><pre>尚未解析</pre></div>
         <button id="exportCBND">导出为CBND序列</button>
         <button id="importToGameBtn">导入到游戏</button>
+        <button id="exportNBT">导出为NBT结构</button>
         <button id="copyCycle">复制循环指令</button>
         <button id="copyAll">复制全部连锁指令</button>
         <button id="download">导出为文本文件</button>
@@ -1263,7 +1264,7 @@ function buildJavaCommand(ticks,sound,pitch){
     return `execute as @a[scores={t=${min}..${max}}] at @s ${gaps.join(' ')} run playsound ${sound} record @s ~ ~ ~ 1 ${pitch}`;
 }
 function generateJavaCommands(groups,octaveShift,harpOnly){
-    const MAX_LEN=8000;
+    const MAX_LEN=31520;
     const intermediate=[];
     for(const g of groups){
         const isPerc=PERCUSSION_INSTRUMENTS.includes(g.instrument);
@@ -1328,18 +1329,31 @@ function generateJavaCommands(groups,octaveShift,harpOnly){
 let lastChainCmds=[];
 function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTick,customSoundKey){
     if(!notes||notes.length===0)return false;
-    const groups=groupNotesByInstrumentAndPitch(notes);
-    const effectiveCustomKey=(harpOnly&&customSoundKey&&customSoundKey.trim()!=='')?customSoundKey.trim():null;
     const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
+    const displayOctaveShift=octaveShift;
+    let renderNotes=notes;
+    let effectiveOctaveShift=octaveShift;
+    if(platform==='java'){
+        renderNotes=notes.map(n=>{
+            const rawKey=n.key+octaveShift*12;
+            let k=rawKey;
+            while(k<JAVA_KEY_MIN)k+=12;
+            while(k>JAVA_KEY_MAX)k-=12;
+            return{tick:n.tick,instrument:n.instrument,key:k,velocity:n.velocity,panning:n.panning,pitch:n.pitch};
+        });
+        effectiveOctaveShift=0;
+    }
+    const groups=groupNotesByInstrumentAndPitch(renderNotes);
+    const effectiveCustomKey=(harpOnly&&customSoundKey&&customSoundKey.trim()!=='')?customSoundKey.trim():null;
     let cycleCmd,chainCmds;
     if(platform==='java'){
-        ({cycleCmd,chainCmds}=generateJavaCommands(groups,octaveShift,harpOnly));
+        ({cycleCmd,chainCmds}=generateJavaCommands(groups,effectiveOctaveShift,harpOnly));
     }else{
-        ({cycleCmd,chainCmds}=generateCommands(groups,octaveShift,harpOnly,effectiveCustomKey));
+        ({cycleCmd,chainCmds}=generateCommands(groups,effectiveOctaveShift,harpOnly,effectiveCustomKey));
     }
     document.getElementById('cycleCmd').innerHTML=`<pre>${escapeHtml(cycleCmd)}</pre>`;
     lastChainCmds=chainCmds;
-    buildPreviewIndexes(notes,chainCmds);
+    buildPreviewIndexes(renderNotes,chainCmds);
     if(chainCmds.length===0)document.getElementById('chainList').innerHTML='<div class="cmd-block">无音符数据</div>';
     else{
         let html='';
@@ -1357,9 +1371,7 @@ function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTic
                 <div style="font-size:11px;color:var(--text-secondary)">时间点: ${timePreview}</div>
             </div>`;
         }
-        const chainListEl=document.getElementById('chainList');
-        chainListEl.innerHTML=html;
-        chainListEl.scrollTop=0;
+        document.getElementById('chainList').innerHTML=html;
         document.querySelectorAll('.copy-btn').forEach(btn=>{
             btn.addEventListener('click',()=>{
                 const idx=parseInt(btn.dataset.idx);
@@ -1368,7 +1380,7 @@ function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTic
             });
         });
     }
-    previewNotes=notes;
+    previewNotes=renderNotes;
     previewSongLength=songLength;
     previewHarpOnly=harpOnly;
     previewCurrentTick=0;
@@ -1379,13 +1391,14 @@ function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTic
     document.getElementById('tickDisplay').innerText=`Tick: 0 / ${songLength}`;
     document.getElementById('progressFill').style.width='0%';
     const durationSec=(songLength/20).toFixed(1);
-    const uniqueInstruments=[...new Set(notes.map(n=>n.instrument))];
+    const uniqueInstruments=[...new Set(renderNotes.map(n=>n.instrument))];
     const instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
-    cachedOctaveShift=octaveShift||0;
+    cachedOctaveShift=effectiveOctaveShift;
     const platformTag=platform==='java'?'[Java版]':'[基岩版]';
-    document.getElementById('stats').innerHTML=`<span class="success">${ICON_SUCCESS} 解析成功 ${platformTag} | ${songName||''} | 音符:${notes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${octaveShift}</span>`;
+    const octaveNote=platform==='java'?'（已修正）':'';
+    document.getElementById('stats').innerHTML=`<span class="success">${ICON_SUCCESS} 解析成功 ${platformTag} | ${songName||''} | 音符:${renderNotes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${displayOctaveShift}${octaveNote}</span>`;
     ensureAudioChain();
-    if(typeof initWaterfall==='function'){initWaterfall(notes,songLength);requestWaterfallDraw();}
+    if(typeof initWaterfall==='function'){initWaterfall(renderNotes,songLength);requestWaterfallDraw();}
     importSeq=1;
     importCopiedSet.clear();
     if(typeof drawImportCanvas==='function')drawImportCanvas();
@@ -1512,6 +1525,9 @@ document.querySelectorAll('input[name="targetPlatform"]').forEach(radio=>{
     radio.addEventListener('change',function(){
         const platform=this.value;
         const exportBtn=document.getElementById('exportCBND');
+        const nbtBtn=document.getElementById('exportNBT');
+        if(platform==='java'){nbtBtn.disabled=false;nbtBtn.title='';}
+        else{nbtBtn.disabled=true;nbtBtn.title='仅 Java 版可用';}
         if(platform==='java'){
             exportBtn.disabled=true;
             exportBtn.title='Java 版不支持导出 CBND';
@@ -1532,6 +1548,9 @@ document.querySelectorAll('input[name="targetPlatform"]').forEach(radio=>{
 });
 (function initPlatformUI(){
     const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
+    const nbtBtn=document.getElementById('exportNBT');
+    if(platform==='java'){nbtBtn.disabled=false;}
+    else{nbtBtn.disabled=true;nbtBtn.title='仅 Java 版可用';}
     if(platform==='java'){
         document.getElementById('exportCBND').disabled=true;
         document.getElementById('exportCBND').title='Java 版不支持导出 CBND';
@@ -2395,8 +2414,166 @@ document.getElementById('importNextBtn').addEventListener('click',()=>{
     else importSeq=1;
     updateImportNav();
 });
-// Q 交互反馈与弹窗保护
-// Q.1 按钮按压反馈
+// Q NBT结构导出
+const NBT_TYPE={End:0,Byte:1,Short:2,Int:3,Long:4,Float:5,Double:6,ByteArray:7,String:8,List:9,Compound:10,IntArray:11};
+function nbPutByte(a,v){a.push(v&0xFF);}
+function nbPutShort(a,v){a.push((v>>8)&0xFF,v&0xFF);}
+function nbPutInt(a,v){a.push((v>>>24)&0xFF,(v>>>16)&0xFF,(v>>>8)&0xFF,v&0xFF);}
+function nbPutString(a,s){const b=new TextEncoder().encode(s);nbPutShort(a,b.length);for(let i=0;i<b.length;i++)a.push(b[i]);}
+function nbPutTag(a,type,name,value){a.push(type);if(type===NBT_TYPE.End)return;nbPutString(a,name);nbPutValue(a,type,value);}
+function nbPutValue(a,type,value){
+    switch(type){
+        case NBT_TYPE.Byte:nbPutByte(a,value);break;
+        case NBT_TYPE.Short:nbPutShort(a,value);break;
+        case NBT_TYPE.Int:nbPutInt(a,value);break;
+        case NBT_TYPE.Long:{const dv=new DataView(new ArrayBuffer(8));dv.setBigInt64(0,BigInt(value),false);const u=new Uint8Array(dv.buffer);for(let i=0;i<8;i++)a.push(u[i]);break;}
+        case NBT_TYPE.Float:{const dv=new DataView(new ArrayBuffer(4));dv.setFloat32(0,value,false);const u=new Uint8Array(dv.buffer);for(let i=0;i<4;i++)a.push(u[i]);break;}
+        case NBT_TYPE.Double:{const dv=new DataView(new ArrayBuffer(8));dv.setFloat64(0,value,false);const u=new Uint8Array(dv.buffer);for(let i=0;i<8;i++)a.push(u[i]);break;}
+        case NBT_TYPE.ByteArray:nbPutInt(a,value.length);for(let i=0;i<value.length;i++)a.push(value[i]&0xFF);break;
+        case NBT_TYPE.String:nbPutString(a,value);break;
+        case NBT_TYPE.List:a.push(value.itemType);nbPutInt(a,value.items.length);for(const it of value.items)nbPutValue(a,value.itemType,it);break;
+        case NBT_TYPE.Compound:for(const t of value)nbPutTag(a,t.type,t.name,t.value);a.push(NBT_TYPE.End);break;
+        case NBT_TYPE.IntArray:nbPutInt(a,value.length);for(const v of value)nbPutInt(a,v);break;
+    }
+}
+function serializeNBTCompound(tags){const a=[];nbPutTag(a,NBT_TYPE.Compound,'',tags);return new Uint8Array(a);}
+async function gzipBytes(u8){
+    if(typeof CompressionStream==='undefined')throw new Error('当前浏览器不支持 gzip 压缩，请使用 Chrome/Edge/Firefox 新版本');
+    const cs=new CompressionStream('gzip');const w=cs.writable.getWriter();w.write(u8);w.close();
+    const ab=await new Response(cs.readable).arrayBuffer();return new Uint8Array(ab);
+}
+function buildStructureNBT(size,palette,blocks){
+    const root=[];
+    root.push({name:'DataVersion',type:NBT_TYPE.Int,value:3120});
+    root.push({name:'author',type:NBT_TYPE.String,value:'CBND Converter'});
+    root.push({name:'size',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Int,items:size}});
+    const paletteItems=palette.map(e=>{
+        const c=[];
+        c.push({name:'Name',type:NBT_TYPE.String,value:e.Name});
+        if(e.Properties){
+            const props=[];
+            for(const[k,v]of Object.entries(e.Properties))props.push({name:k,type:NBT_TYPE.String,value:v});
+            c.push({name:'Properties',type:NBT_TYPE.Compound,value:props});
+        }
+        return c;
+    });
+    root.push({name:'palette',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:paletteItems}});
+    const blockItems=blocks.map(b=>{
+        const c=[];
+        c.push({name:'pos',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Int,items:b.pos}});
+        c.push({name:'state',type:NBT_TYPE.Int,value:b.state});
+        const nbt=[];
+        for(const[k,v]of Object.entries(b.nbt)){
+            let type,val;
+            if(typeof v==='string'){type=NBT_TYPE.String;val=v;}
+            else{type=NBT_TYPE.Byte;val=v;}
+            nbt.push({name:k,type,value:val});
+        }
+        c.push({name:'nbt',type:NBT_TYPE.Compound,value:nbt});
+        return c;
+    });
+    root.push({name:'blocks',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:blockItems}});
+    root.push({name:'entities',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:[]}});
+    return root;
+}
+// Q.1 NBT生成器
+async function exportJavaNBTStructure(){
+    if(!lastChainCmds||lastChainCmds.length===0){alert('没有可导出的指令，请先解析文件');return;}
+    const LAYER_W=8,LAYER_D=8;
+    const PER_LAYER=LAYER_W*LAYER_D;
+    const HEAD=2;
+    const total=HEAD+lastChainCmds.length;
+    const layers=Math.ceil(total/PER_LAYER);
+    function posOf(idx){
+        const layer=Math.floor(idx/PER_LAYER);
+        const within=idx%PER_LAYER;
+        const row=Math.floor(within/LAYER_W);
+        const col=within%LAYER_W;
+        const reverse=(layer%2===1);
+        let z,x;
+        if(!reverse){
+            z=row;
+            x=(row%2===0)?col:(LAYER_W-1-col);
+        }else{
+            z=LAYER_D-1-row;
+            x=(row%2===0)?col:(LAYER_W-1-col);
+        }
+        return {x,y:layer,z};
+    }
+    function facingOf(a,b){
+        if(b.y>a.y)return 'up';
+        if(b.y<a.y)return 'down';
+        if(b.x>a.x)return 'east';
+        if(b.x<a.x)return 'west';
+        if(b.z>a.z)return 'south';
+        if(b.z<a.z)return 'north';
+        return 'up';
+    }
+    const paletteMap=new Map();
+    const palette=[{Name:'minecraft:air'}];
+    function getStateIdx(name,props){
+        const k=name+'|'+JSON.stringify(props);
+        if(paletteMap.has(k))return paletteMap.get(k);
+        palette.push({Name:name,Properties:props});
+        const i=palette.length-1;
+        paletteMap.set(k,i);
+        return i;
+    }
+    const blocks=[];
+    for(let i=0;i<total;i++){
+        const p=posOf(i);
+        const within=i%PER_LAYER;
+        const isLastOfLayer=(within===PER_LAYER-1);
+        let facing;
+        if(isLastOfLayer){
+            facing='up';
+        }else if(i===total-1){
+            facing='east';
+        }else{
+            facing=facingOf(p,posOf(i+1));
+        }
+        let name,cmd,auto;
+        if(i===0){
+            name='minecraft:command_block';
+            cmd='scoreboard players set @a t 0';
+            auto=0;
+        }else if(i===1){
+            name='minecraft:repeating_command_block';
+            cmd='scoreboard players add @a t 1';
+            auto=0;
+        }else{
+            name='minecraft:chain_command_block';
+            cmd=lastChainCmds[i-HEAD].cmd;
+            auto=1;
+        }
+
+        const props={facing,conditional:'false'};
+        const stateIdx=getStateIdx(name,props);
+        blocks.push({
+            pos:[p.x,p.y,p.z],
+            state:stateIdx,
+            nbt:{Command:cmd,auto:auto,conditionMet:0,Powered:0}
+        });
+    }
+    const size=[LAYER_W,layers,LAYER_D];
+    const root=buildStructureNBT(size,palette,blocks);
+    const nbtBytes=serializeNBTCompound(root);
+    const gz=await gzipBytes(nbtBytes);
+    const blob=new Blob([gz],{type:'application/octet-stream'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`${originalFileName||'structure'}_java.nbt`;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+document.getElementById('exportNBT').addEventListener('click',()=>{
+    const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
+    if(platform!=='java'){alert('NBT 结构导出仅支持 Java 版');return;}
+    exportJavaNBTStructure().catch(e=>{console.error(e);alert('导出失败：'+e.message);});
+});
+// R 交互反馈与弹窗保护
+// R.1 按钮按压反馈
 document.addEventListener('pointerdown',function(e){
     const btn=e.target.closest('button,.playlist-item');
     if(!btn)return;
@@ -2405,7 +2582,7 @@ document.addEventListener('pointerdown',function(e){
     btn.classList.add('pressed');
     btn._pressedTimer=setTimeout(function(){btn.classList.remove('pressed');},250);
 },true);
-// Q.2 alert/confirm/prompt 播放保护
+// R.2 alert/confirm/prompt 播放保护
 (function installDialogGuards(){
     const nativeAlert=window.alert.bind(window);
     const nativeConfirm=window.confirm.bind(window);
@@ -2433,7 +2610,7 @@ document.addEventListener('pointerdown',function(e){
     window.confirm=wrap(nativeConfirm);
     window.prompt=wrap(nativePrompt);
 })();
-// R 控制台签名
+// T 控制台签名
 console.warn(`\n  _____ _____  ____    ___  \n |__  /| ____||  _ \\  / _ \\ \n   / / |  _|  | |_) || | | |\n  / /_ | |___ |  _ < | |_| |\n /____||_____||_| \\_\\ \\___/ \n   ____         _  _          _ \n |  _ \\  __ _ | || |_  __ _ | |\n | |_) |/ _' || || __|/ _' || |\n |  _ < ||_| || || |_ ||_| || |\n |_| \\_\\\\__,_||_| \\__|\\__,_||_|\n\n`);
 </script>
 </html>
