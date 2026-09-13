@@ -2563,8 +2563,11 @@ async function exportJavaNBTStructure(){
     const blob=new Blob([gz],{type:'application/octet-stream'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
+    const chars='abcdefghijklmnopqrstuvwxyz0123456789';
+    let randomname='';
+    for(let i=0;i<4;i++)randomname+=chars[Math.floor(Math.random()*chars.length)];
     a.href=url;
-    a.download=`${originalFileName||'structure'}_java.nbt`;
+    a.download=randomname+'.nbt';
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
