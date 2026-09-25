@@ -2816,7 +2816,7 @@ class McwZipBuilder {
     }
 }
 
-// ---------- CRC32C ----------
+// ---------- CRC32C（LevelDB 用 Castagnoli） ----------
 const MCW_CRC32C_TABLE = (() => {
     const t = new Int32Array(256);
     for (let i = 0; i < 256; i++) {
@@ -2842,24 +2842,28 @@ function mcwWriteVarInt(buf, value) {
     buf.push(value & 0x7F);
 }
 
-// ---------- 位打包（每 32-bit 字独立打包） ----------
+// ---------- 位打包（连续，跨字节安全） ----------
 function mcwPackBits(buf, index, value, bits) {
-    const perWord = Math.floor(32 / bits);
-    const wordIdx = Math.floor(index / perWord);
-    const posInWord = index % perWord;
-    const bitOff = posInWord * bits;
-    const byteOff = wordIdx * 4;
-    let word = (buf[byteOff] | (buf[byteOff+1] << 8) | (buf[byteOff+2] << 16) | (buf[byteOff+3] << 24)) >>> 0;
-    const mask = ~(((1 << bits) - 1) << bitOff) >>> 0;
-    word = ((word & mask) | ((value & ((1 << bits) - 1)) << bitOff)) >>> 0;
-    buf[byteOff]   = word & 0xFF;
-    buf[byteOff+1] = (word >>> 8) & 0xFF;
-    buf[byteOff+2] = (word >>> 16) & 0xFF;
-    buf[byteOff+3] = (word >>> 24) & 0xFF;
+    const totalBit = index * bits;
+    let byteIdx = totalBit >> 3;
+    let bitOff = totalBit & 7;
+    let remaining = bits;
+    let v = value;
+    while (remaining > 0) {
+        const bitsAvailable = 8 - bitOff;
+        const bitsToWrite = Math.min(bitsAvailable, remaining);
+        const mask = ((1 << bitsToWrite) - 1) << bitOff;
+        const bitsValue = (v & ((1 << bitsToWrite) - 1)) << bitOff;
+        buf[byteIdx] = (buf[byteIdx] & ~mask) | bitsValue;
+        v >>>= bitsToWrite;
+        remaining -= bitsToWrite;
+        byteIdx++;
+        bitOff = 0;
+    }
 }
 
 // ---------- level.dat ----------
-function mcwBuildLevelDat() {
+function mcwBuildLevelDat(worldName) {
     const flatLayersJson = JSON.stringify({
         biome_id: 1,
         block_layers: [
@@ -2873,7 +2877,7 @@ function mcwBuildLevelDat() {
     }) + "\n";
 
     const root = [
-        { name: 'LevelName', type: 8, value: (currentSongName || 'Command Block Music') },
+        { name: 'LevelName', type: 8, value: worldName || 'Command Block Music' },
         { name: 'GameType', type: 3, value: 1 },
         { name: 'Difficulty', type: 3, value: 0 },
         { name: 'RandomSeed', type: 4, value: 12345 },
@@ -2913,30 +2917,39 @@ function mcwBuildPaletteEntry(name, states) {
 }
 
 // ---------- 子区块 Version 9 ----------
-function mcwBuildSubChunk(paletteEntries, subChunkBlocks) {
-    const BITS = 4; // 4 位，每 32-bit 字正好 8 个方块
-    const indexBytes = new Uint8Array(4096 * BITS / 8); // 2048
+function mcwBuildSubChunk(paletteEntries, subChunkBlocks, subY) {
+    const pc = paletteEntries.length;
+    let BITS;
+    if (pc <= 4) BITS = 2;
+    else if (pc <= 16) BITS = 4;
+    else if (pc <= 256) BITS = 8;
+    else throw new Error('SubChunk palette 太大: ' + pc + ' 项');
 
-    // XZY 顺序：index = x*256 + z*16 + y
+    const indexByteCount = (4096 * BITS) >> 3;
+    const indexBytes = new Uint8Array(indexByteCount);
+
     for (const b of subChunkBlocks) {
         const idx = b.x * 256 + b.z * 16 + b.y;
         mcwPackBits(indexBytes, idx, b.paletteIdx, BITS);
     }
 
     const buf = [];
-    buf.push(9);                    // version = 9
-    buf.push(1);                    // layerCount = 1
-    buf.push(0xFC);                 // subChunkY = -4
-    buf.push((BITS << 1) | 0);      // storageFormat = 8
-    buf.push(...indexBytes);
-
-    // 调色板条目数（uint32 LE）
-    const pc = paletteEntries.length;
+    buf.push(9);
+    buf.push(1);
+    buf.push(subY & 0xFF);         // 子区块 Y（有符号字节）
+    buf.push((BITS << 1) | 0);
+    for (let i = 0; i < indexBytes.length; i++) buf.push(indexBytes[i]);
     buf.push(pc & 0xFF, (pc >> 8) & 0xFF, (pc >> 16) & 0xFF, (pc >> 24) & 0xFF);
     for (const entry of paletteEntries) {
-        buf.push(...entry);
+        for (let i = 0; i < entry.length; i++) buf.push(entry[i]);
     }
-    return new Uint8Array(buf);
+
+    return {
+        bytes: new Uint8Array(buf),
+        bits: BITS,
+        paletteSize: pc,
+        indexBytes: indexByteCount
+    };
 }
 
 // ---------- 命令方块 NBT ----------
@@ -2949,7 +2962,7 @@ function mcwBuildCommandBlockNbt(cmd, x, y, z, auto) {
         { name: 'LPCommandMode', type: 3, value: 0 },
         { name: 'LPCondionalMode', type: 1, value: 0 },
         { name: 'LPRedstoneMode', type: 1, value: 0 },
-        { name: 'LastExecution', type: 4, value: 0 },   // ← 从 -1 改成 0
+        { name: 'LastExecution', type: 4, value: 0 },
         { name: 'LastOutput', type: 8, value: '' },
         { name: 'LastOutputParams', type: 9, value: { itemType: 0, items: [] } },
         { name: 'SuccessCount', type: 3, value: 0 },
@@ -2965,7 +2978,78 @@ function mcwBuildCommandBlockNbt(cmd, x, y, z, auto) {
         { name: 'z', type: 3, value: z },
     ]);
 }
+// 生成告示牌 BlockEntity NBT
+function mcwBuildSignBlockEntityNbt(frontText, x, y, z) {
+    const makeTextBlock = (text, ignoreLighting) => [
+        { name: 'FilteredText', type: 8, value: '' },
+        { name: 'HideGlowOutline', type: 1, value: 0 },
+        { name: 'IgnoreLighting', type: 1, value: ignoreLighting ? 1 : 0 },
+        { name: 'PersistFormatting', type: 1, value: 1 },
+        { name: 'SignTextColor', type: 3, value: -16777216 },
+        { name: 'Text', type: 8, value: text },
+        { name: 'TextOwner', type: 8, value: '' }
+    ];
+    return bSerializeBE([
+        { name: 'BackText', type: 10, value: makeTextBlock('', false) },
+        { name: 'BlockEntityVersion', type: 3, value: 0 },
+        { name: 'FrontText', type: 10, value: makeTextBlock(frontText, true) },
+        { name: 'IsWaxed', type: 1, value: 1 },
+        { name: 'id', type: 8, value: 'Sign' },
+        { name: 'x', type: 3, value: x },
+        { name: 'y', type: 3, value: y },
+        { name: 'z', type: 3, value: z }
+    ]);
+}
 
+// 生成 world_icon.jpeg (800x450, 黑底)
+function generateWorldIcon(songName, durationStr, instrumentCount) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 450;
+    const ctx = canvas.getContext('2d');
+
+    // 黑底
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, 800, 450);
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // 顶部副标题
+    ctx.fillStyle = '#57b984';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText('Minecraft 音乐命令方块', 400, 70);
+
+    // 主歌名（自适应缩放）
+    ctx.fillStyle = '#FFFFFF';
+    let fontSize = 56;
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    while (ctx.measureText(songName).width > 720 && fontSize > 20) {
+        fontSize -= 2;
+        ctx.font = `bold ${fontSize}px sans-serif`;
+    }
+    ctx.fillText(songName, 400, 190);
+
+    // 信息行
+    ctx.font = '26px monospace';
+    ctx.fillStyle = '#CCCCCC';
+    ctx.fillText(`时长: ${durationStr}`, 400, 285);
+    ctx.fillText(`乐器数: ${instrumentCount}`, 400, 330);
+
+    // 右下角水印
+    ctx.font = '16px monospace';
+    ctx.fillStyle = '#888888';
+    ctx.textAlign = 'right';
+    ctx.fillText('@ZeroRaltal', 780, 430);
+
+    // 转成 JPEG 字节
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    const base64 = dataUrl.split(',')[1];
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+}
 // ---------- 简单 chunk 键 ----------
 function mcwMakeSimpleKey(tag, subY) {
     const len = subY !== undefined ? 10 : 9;
@@ -2974,18 +3058,19 @@ function mcwMakeSimpleKey(tag, subY) {
     dv.setInt32(0, 0, true);
     dv.setInt32(4, 0, true);
     k[8] = tag;
-    if (subY !== undefined) k[9] = subY;
+    if (subY !== undefined) k[9] = subY & 0xFF;
     return k;
 }
 
-// ---------- LevelDB 日志记录 ----------
-function mcwBuildLogRecord(data) {
+// ---------- LevelDB 日志记录（仅用于 MANIFEST） ----------
+function mcwBuildLogRecord(data, type) {
+    if (type === undefined) type = 1;
     const header = new Uint8Array(7);
     const dv = new DataView(header.buffer);
     dv.setUint16(4, data.length, true);
-    header[6] = 1;
+    header[6] = type;
     const crcRange = new Uint8Array(1 + data.length);
-    crcRange[0] = header[6];
+    crcRange[0] = type;
     crcRange.set(data, 1);
     dv.setUint32(0, mcwMaskedCRC32C(crcRange), true);
     const result = new Uint8Array(7 + data.length);
@@ -2994,31 +3079,176 @@ function mcwBuildLogRecord(data) {
     return result;
 }
 
-function mcwBuildWriteBatch(entries) {
-    const buf = [];
-    for (let i = 0; i < 8; i++) buf.push(0);
-    buf[0] = 1;
-    buf.push(entries.length & 0xFF, (entries.length >> 8) & 0xFF, 0, 0);
-    for (const { key, value } of entries) {
-        buf.push(1);
-        mcwWriteVarInt(buf, key.length);
-        buf.push(...key);
-        mcwWriteVarInt(buf, value.length);
-        buf.push(...value);
+function mcwBuildSSTable(entries) {
+    // 按 user key 字节序排序
+    const sorted = [...entries].sort((a, b) => {
+        const n = Math.min(a.key.length, b.key.length);
+        for (let i = 0; i < n; i++) if (a.key[i] !== b.key[i]) return a.key[i] - b.key[i];
+        return a.key.length - b.key.length;
+    });
+
+    // 把 user key 转成 internal key：
+    //   internal_key = user_key + [value_type=1] + [seq_num(7 bytes LE)=0]
+    function makeInternalKey(userKey) {
+        const ik = new Uint8Array(userKey.length + 8);
+        ik.set(userKey, 0);
+        ik[userKey.length] = 1;  // value_type = 1 (value)
+        // sequence number 7 bytes = 0
+        return ik;
     }
-    return new Uint8Array(buf);
+
+    // 给 block 内容加 5 字节 trailer：1 字节 compression type + 4 字节 masked CRC32C
+    function blockWithTrailer(blockBytes) {
+        const crcInput = new Uint8Array(blockBytes.length + 1);
+        crcInput.set(blockBytes, 0);
+        crcInput[blockBytes.length] = 0;
+        const crc = mcwMaskedCRC32C(crcInput);
+        const result = new Uint8Array(blockBytes.length + 5);
+        result.set(blockBytes, 0);
+        result[blockBytes.length]     = 0;
+        result[blockBytes.length + 1] = crc & 0xFF;
+        result[blockBytes.length + 2] = (crc >>> 8) & 0xFF;
+        result[blockBytes.length + 3] = (crc >>> 16) & 0xFF;
+        result[blockBytes.length + 4] = (crc >>> 24) & 0xFF;
+        return result;
+    }
+
+    function encodeHandle(offset, size) {
+        const buf = [];
+        mcwWriteVarInt(buf, offset);
+        mcwWriteVarInt(buf, size);
+        return new Uint8Array(buf);
+    }
+
+    // 构建一个 block 内容（entry + restart 数组 + num_restarts）
+    // 每个 entry 都是 restart point（restart interval = 1），shared = 0
+    function buildBlock(blockEntries) {
+        const blockData = [];
+        const restarts = [];
+        for (const { key, value } of blockEntries) {
+            restarts.push(blockData.length);
+            mcwWriteVarInt(blockData, 0);            // shared key len = 0
+            mcwWriteVarInt(blockData, key.length);   // non-shared key len（internal key 长度）
+            mcwWriteVarInt(blockData, value.length); // value 长度
+            for (let i = 0; i < key.length; i++) blockData.push(key[i]);
+            for (let i = 0; i < value.length; i++) blockData.push(value[i]);
+        }
+        for (const r of restarts) {
+            blockData.push(r & 0xFF, (r >>> 8) & 0xFF, (r >>> 16) & 0xFF, (r >>> 24) & 0xFF);
+        }
+        blockData.push(
+            restarts.length & 0xFF,
+            (restarts.length >>> 8) & 0xFF,
+            (restarts.length >>> 16) & 0xFF,
+            (restarts.length >>> 24) & 0xFF
+        );
+        return new Uint8Array(blockData);
+    }
+
+    // 1) 切分 data block（每块约 4KB）
+    const BLOCK_TARGET = 4096;
+    const groups = [];
+    let current = [];
+    let currentSize = 0;
+    for (const entry of sorted) {
+        const ik = makeInternalKey(entry.key);
+        const est = 15 + ik.length + entry.value.length;
+        if (currentSize + est > BLOCK_TARGET && current.length > 0) {
+            groups.push(current);
+            current = [];
+            currentSize = 0;
+        }
+        current.push({ key: ik, value: entry.value });
+        currentSize += est;
+    }
+    if (current.length > 0) groups.push(current);
+
+    // 2) 序列化每个 data block
+    const dataBlocks = [];
+    for (const group of groups) {
+        dataBlocks.push({
+            bytes: buildBlock(group),
+            lastKey: group[group.length - 1].key  // 已经是 internal key
+        });
+    }
+
+    // 3) 计算各 data block 的 offset
+    const dataBlockOffsets = [];
+    let offset = 0;
+    for (const b of dataBlocks) {
+        dataBlockOffsets.push(offset);
+        offset += b.bytes.length + 5;
+    }
+
+    // 4) metaindex block（空 block，内容是 4 字节 [0,0,0,0] 表示 num_restarts = 0）
+    const metaIndexBlockBytes = buildBlock([]);
+    const metaIndexBlockWithTrailer = blockWithTrailer(metaIndexBlockBytes);
+
+    // 5) index block：每个 data block 一条记录，key 是 last internal key
+    const indexEntries = [];
+    for (let i = 0; i < dataBlocks.length; i++) {
+        const handle = encodeHandle(dataBlockOffsets[i], dataBlocks[i].bytes.length);
+        indexEntries.push({ key: dataBlocks[i].lastKey, value: handle });
+    }
+    const indexBlockBytes = buildBlock(indexEntries);
+    const indexBlockWithTrailer = blockWithTrailer(indexBlockBytes);
+
+    const metaIndexBlockOffset = offset;
+    const indexBlockOffset = metaIndexBlockOffset + metaIndexBlockWithTrailer.length;
+
+    // 6) Footer（48 字节）
+    const footerBuf = [];
+    mcwWriteVarInt(footerBuf, metaIndexBlockOffset);
+    mcwWriteVarInt(footerBuf, metaIndexBlockBytes.length);
+    mcwWriteVarInt(footerBuf, indexBlockOffset);
+    mcwWriteVarInt(footerBuf, indexBlockBytes.length);
+    while (footerBuf.length < 40) footerBuf.push(0);
+    footerBuf.push(0x57, 0xfb, 0x80, 0x8b, 0x24, 0x75, 0x47, 0xdb);
+
+    // 7) 拼接：[data][metaindex+tr][index+tr][footer]
+    const pieces = [];
+    for (const b of dataBlocks) pieces.push(blockWithTrailer(b.bytes));
+    pieces.push(metaIndexBlockWithTrailer);
+    pieces.push(indexBlockWithTrailer);
+    pieces.push(new Uint8Array(footerBuf));
+
+    let total = 0;
+    for (const p of pieces) total += p.length;
+    const result = new Uint8Array(total);
+    let off = 0;
+    for (const p of pieces) { result.set(p, off); off += p.length; }
+    return result;
 }
 
-function mcwBuildManifest() {
+// ---------- MANIFEST（带 .ldb 文件记录，修正版） ----------
+function mcwBuildManifestWithLdb(logNumber, fileNumber, fileSize, smallestKey, largestKey) {
     const m = [];
+    // tag=1: kComparator
     mcwWriteVarInt(m, 1);
     const cmp = 'leveldb.BytewiseComparator';
     mcwWriteVarInt(m, cmp.length);
     for (let i = 0; i < cmp.length; i++) m.push(cmp.charCodeAt(i));
-    mcwWriteVarInt(m, 2); mcwWriteVarInt(m, 3);
+
+    // tag=2: kLogNumber
+    mcwWriteVarInt(m, 2); mcwWriteVarInt(m, logNumber);
+
+    // tag=7: kNewFile (level, file_number, file_size, smallest, largest)
+    mcwWriteVarInt(m, 7);
+    mcwWriteVarInt(m, 0);  // level = 0
+    mcwWriteVarInt(m, fileNumber);
+    mcwWriteVarInt(m, fileSize);
+    mcwWriteVarInt(m, smallestKey.length);
+    for (let i = 0; i < smallestKey.length; i++) m.push(smallestKey[i]);
+    mcwWriteVarInt(m, largestKey.length);
+    for (let i = 0; i < largestKey.length; i++) m.push(largestKey[i]);
+
+    // tag=6: kLastSequence
     mcwWriteVarInt(m, 6); mcwWriteVarInt(m, 2);
-    mcwWriteVarInt(m, 7); mcwWriteVarInt(m, 4);
-    return mcwBuildLogRecord(new Uint8Array(m));
+
+    // tag=3: kNextFileNumber
+    mcwWriteVarInt(m, 3); mcwWriteVarInt(m, fileNumber + 1);
+
+    return mcwBuildLogRecord(new Uint8Array(m), 1);
 }
 
 // ---------- 主流程 ----------
@@ -3028,20 +3258,43 @@ async function exportMcWorld() {
         return;
     }
 
-    const LAYER_W = 8, LAYER_D = 8;
-    const PER_LAYER = LAYER_W * LAYER_D;  // 64
-    const HEAD = 2;                        // 脉冲 + 循环
+    const worldName = (originalFileName || currentSongName || 'CommandBlockMusic').trim() || 'CommandBlockMusic';
+
+    // 导出时间
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const signText = `§l§d@ZeroRaltal\n§b导出时间:\n§r§o§7:${dateStr}\n${timeStr}`;
+
+    // 歌曲信息
+    let maxTick = 0;
+    for (const c of lastChainCmds) {
+        for (const t of c.ticks) if (t > maxTick) maxTick = t;
+    }
+    const durationSec = Math.round(maxTick / 20);
+    const durationStr = `${Math.floor(durationSec / 60)}:${pad(durationSec % 60)}`;
+    const instrumentCount = new Set(lastChainCmds.map(c => c.instrument)).size;
+
+    const LAYER_W = 16, LAYER_D = 16;
+    const PER_LAYER = LAYER_W * LAYER_D;
+    const HEAD = 2;
     const total = HEAD + lastChainCmds.length;
     const layers = Math.ceil(total / PER_LAYER);
 
-    if (layers > 12) {
-        alert(`命令方块数量过多（${total} 个），需要 ${layers} 层，超过单区块上限 12 层。\n建议减少音符数量，或改用结构文件形式导入。`);
+    const START_Y = -60;        // 第一个命令方块的世界 Y
+    const MAX_WORLD_Y = 319;    // 世界最高方块 Y
+
+    const maxWorldY = START_Y + layers - 1;
+    if (maxWorldY > MAX_WORLD_Y) {
+        alert(
+            `命令方块过多（${total} 个，${layers} 层）\n` +
+            `最高方块到达 Y=${maxWorldY}，超过世界高度上限 Y=${MAX_WORLD_Y}。\n\n` +
+            `请减少音符数量，或改用结构文件形式导入。`
+        );
         return;
     }
 
-    const BASE_Y = -60;
-
-    // 蛇形布局（与你现有结构文件的 posOf 完全一致）
     function posOf(idx) {
         const layer = Math.floor(idx / PER_LAYER);
         const within = idx % PER_LAYER;
@@ -3059,7 +3312,6 @@ async function exportMcWorld() {
         return { x, y: layer, z };
     }
 
-    // 基岩版 facing_direction: 0=下 1=上 2=北 3=南 4=西 5=东
     function facingOf(a, b) {
         if (b.y > a.y) return 1;
         if (b.y < a.y) return 0;
@@ -3070,7 +3322,7 @@ async function exportMcWorld() {
         return 1;
     }
 
-    // 1) 计算所有命令方块的世界坐标和朝向
+    // 1) 计算命令方块列表（世界坐标）
     const cmdBlocks = [];
     for (let i = 0; i < total; i++) {
         const p = posOf(i);
@@ -3097,7 +3349,7 @@ async function exportMcWorld() {
         }
         cmdBlocks.push({
             worldX: p.x,
-            worldY: BASE_Y + p.y,
+            worldY: START_Y + p.y,
             worldZ: p.z,
             blockName,
             facing,
@@ -3106,120 +3358,231 @@ async function exportMcWorld() {
         });
     }
 
-    // 2) 构建调色板
-    const paletteEntries = [];
-    const paletteKeys = new Map();
-    function addPaletteEntry(name, states) {
-        const key = name + '|' + JSON.stringify(states);
-        if (paletteKeys.has(key)) return paletteKeys.get(key);
-        paletteEntries.push(mcwBuildPaletteEntry(name, states));
-        const idx = paletteEntries.length - 1;
-        paletteKeys.set(key, idx);
+    // 2) 按子区块 Y 分组
+    const subChunkMap = new Map();
+    for (const b of cmdBlocks) {
+        const subY = Math.floor(b.worldY / 16);
+        if (!subChunkMap.has(subY)) subChunkMap.set(subY, []);
+        subChunkMap.get(subY).push(b);
+    }
+    const subChunkYs = Array.from(subChunkMap.keys()).sort((a, b) => a - b);
+
+    // 3) 逐个子区块构建
+    const subChunkDataList = [];
+    for (const subY of subChunkYs) {
+        const blocksInSubChunk = subChunkMap.get(subY);
+
+        // 该子区块的调色板
+        const palette = [];
+        const paletteKeys = new Map();
+        function addLocal(name, states, version) {
+            const v = version || 17825808;
+            const key = name + '|' + JSON.stringify(states) + '|' + v;
+            if (paletteKeys.has(key)) return paletteKeys.get(key);
+            palette.push(bSerializeBE([
+                { name: 'name', type: 8, value: name },
+                { name: 'states', type: 10, value: states },
+                { name: 'version', type: 3, value: v }
+            ]));
+            const idx = palette.length - 1;
+            paletteKeys.set(key, idx);
+            return idx;
+        }
+
+        // 先加空气，确保索引 0 = 空气
+        addLocal('minecraft:air', []);
+
+        const blocks = [];
+
+        // 只有起始子区块才有地面
+        const includeGround = (subY === Math.floor(START_Y / 16));
+        if (includeGround) {
+            const BEDROCK_IDX = addLocal('minecraft:bedrock', [{ name: 'infiniburn_bit', type: 3, value: 0 }]);
+            const DIRT_IDX = addLocal('minecraft:dirt', []);
+            const GRASS_IDX = addLocal('minecraft:grass_block', []);
+            for (let x = 0; x < 16; x++) {
+                for (let z = 0; z < 16; z++) {
+                    blocks.push({ x, y: 0, z, paletteIdx: BEDROCK_IDX });
+                    blocks.push({ x, y: 1, z, paletteIdx: DIRT_IDX });
+                    blocks.push({ x, y: 2, z, paletteIdx: DIRT_IDX });
+                    blocks.push({ x, y: 3, z, paletteIdx: GRASS_IDX });
+                }
+            }
+        }
+
+        // 命令方块
+        for (const b of blocksInSubChunk) {
+            const idx = addLocal(b.blockName, [
+                { name: 'facing_direction', type: 3, value: b.facing },
+                { name: 'conditional_bit', type: 1, value: 0 }
+            ]);
+            const localY = b.worldY - subY * 16;
+            blocks.push({ x: b.worldX, y: localY, z: b.worldZ, paletteIdx: idx });
+        }
+
+        const subChunkBytes = mcwBuildSubChunk(palette, blocks, subY);
+
+        // 该子区块的 BlockEntity NBT
+        const nbtList = [];
+        for (const b of blocksInSubChunk) {
+            nbtList.push(mcwBuildCommandBlockNbt(b.cmd, b.worldX, b.worldY, b.worldZ, b.auto));
+        }
+        let totalNbtLen = 0;
+        for (const n of nbtList) totalNbtLen += n.length;
+        const combinedNbt = new Uint8Array(totalNbtLen);
+        let nbtOff = 0;
+        for (const n of nbtList) { combinedNbt.set(n, nbtOff); nbtOff += n.length; }
+
+        subChunkDataList.push({
+            subY,
+            bytes: subChunkBytes.bytes,
+            paletteSize: subChunkBytes.paletteSize,
+            bits: subChunkBytes.bits,
+            nbt: combinedNbt,
+            blockCount: blocksInSubChunk.length,
+            includeGround
+        });
+    }
+
+    // 4) chunk(-1, 0)：拉杆 + 告示牌
+    const m1_0_palette = [];
+    const m1_0_paletteKeys = new Map();
+    function addM10(name, states, version) {
+        const v = version || 17825808;
+        const key = name + '|' + JSON.stringify(states) + '|' + v;
+        if (m1_0_paletteKeys.has(key)) return m1_0_paletteKeys.get(key);
+        m1_0_palette.push(bSerializeBE([
+            { name: 'name', type: 8, value: name },
+            { name: 'states', type: 10, value: states },
+            { name: 'version', type: 3, value: v }
+        ]));
+        const idx = m1_0_palette.length - 1;
+        m1_0_paletteKeys.set(key, idx);
         return idx;
     }
 
-    const AIR_IDX     = addPaletteEntry('minecraft:air', []);
-    const BEDROCK_IDX = addPaletteEntry('minecraft:bedrock', [
-        { name: 'infiniburn_bit', type: 3, value: 0 }
-    ]);
-    const DIRT_IDX    = addPaletteEntry('minecraft:dirt', []);
-    const GRASS_IDX   = addPaletteEntry('minecraft:grass_block', []);
-
-    // 3) 构建子区块方块列表
-    // 子区块 Y=-4 覆盖世界 y=-64..-49，局部 y = 世界 y + 64
-    const subChunkBlocks = [];
-
-    // 超平坦地层：局部 y=0(bedrock) 1..2(dirt) 3(grass)
+    addM10('minecraft:air', []);
+    const BEDROCK_IDX_M10 = addM10('minecraft:bedrock', [{ name: 'infiniburn_bit', type: 3, value: 0 }]);
+    const DIRT_IDX_M10 = addM10('minecraft:dirt', []);
+    const GRASS_IDX_M10 = addM10('minecraft:grass_block', []);
+    const m1_0_blocks = [];
     for (let x = 0; x < 16; x++) {
         for (let z = 0; z < 16; z++) {
-            subChunkBlocks.push({ x, y: 0, z, paletteIdx: BEDROCK_IDX });
-            subChunkBlocks.push({ x, y: 1, z, paletteIdx: DIRT_IDX });
-            subChunkBlocks.push({ x, y: 2, z, paletteIdx: DIRT_IDX });
-            subChunkBlocks.push({ x, y: 3, z, paletteIdx: GRASS_IDX });
+            m1_0_blocks.push({ x, y: 0, z, paletteIdx: BEDROCK_IDX_M10 });
+            m1_0_blocks.push({ x, y: 1, z, paletteIdx: DIRT_IDX_M10 });
+            m1_0_blocks.push({ x, y: 2, z, paletteIdx: DIRT_IDX_M10 });
+            m1_0_blocks.push({ x, y: 3, z, paletteIdx: GRASS_IDX_M10 });
         }
     }
+    const LEVER_IDX = addM10('minecraft:lever', [
+        { name: 'facing_direction', type: 3, value: 4 },
+        { name: 'open_bit', type: 1, value: 0 },
+        { name: 'lever_direction', type: 8, value: 'west' }
+    ]);
+    m1_0_blocks.push({ x: 15, y: 4, z: 0, paletteIdx: LEVER_IDX });
+    const SIGN_IDX = addM10('minecraft:standing_sign', [
+        { name: 'ground_sign_direction', type: 3, value: 4 }
+    ], 18168865);
+    m1_0_blocks.push({ x: 15, y: 4, z: 1, paletteIdx: SIGN_IDX });
 
-    // 命令方块：世界 y=-60 → 局部 y=4
-    for (const b of cmdBlocks) {
-        const localY = b.worldY + 64;
-        const idx = addPaletteEntry(b.blockName, [
-            { name: 'facing_direction', type: 3, value: b.facing },
-            { name: 'conditional_bit', type: 1, value: 0 }
-        ]);
-        subChunkBlocks.push({ x: b.worldX, y: localY, z: b.worldZ, paletteIdx: idx });
+    const m1_0_subChunk = mcwBuildSubChunk(m1_0_palette, m1_0_blocks, -4);
+    const m1_0_nbt = mcwBuildSignBlockEntityNbt(signText, -1, -60, 1);
+
+    // 5) 构建 db 条目
+    function makeKey(chunkX, chunkZ, tag, subY) {
+        const len = subY !== undefined ? 10 : 9;
+        const k = new Uint8Array(len);
+        const dv = new DataView(k.buffer);
+        dv.setInt32(0, chunkX, true);
+        dv.setInt32(4, chunkZ, true);
+        k[8] = tag;
+        if (subY !== undefined) k[9] = subY & 0xFF;
+        return k;
     }
 
-    // 4) 构建子区块
-    const subChunkBytes = mcwBuildSubChunk(paletteEntries, subChunkBlocks);
-
-    // 5) 构建所有 BlockEntity NBT，拼接成一条
-    const nbtList = [];
-    for (const b of cmdBlocks) {
-        nbtList.push(mcwBuildCommandBlockNbt(b.cmd, b.worldX, b.worldY, b.worldZ, b.auto));
-    }
-    let totalNbtLen = 0;
-    for (const n of nbtList) totalNbtLen += n.length;
-    const combinedNbt = new Uint8Array(totalNbtLen);
-    let nbtOff = 0;
-    for (const n of nbtList) { combinedNbt.set(n, nbtOff); nbtOff += n.length; }
-
-    // 6) 构建 db 条目
     const entries = [];
-
-    // 0x2b —— 540 字节 04 00 pattern
     const v2b = new Uint8Array(540);
     for (let i = 0; i < 270; i++) v2b[i * 2] = 0x04;
-    entries.push({ key: mcwMakeSimpleKey(0x2b), value: v2b });
+    const tag2c = new Uint8Array([0x2a]);
+    const tag36 = new Uint8Array([2, 0, 0, 0]);
+    const tag3f = new Uint8Array([0xb5, 0x60, 0x75, 0xfd, 0x69, 0x2a, 0x3c, 0x93]);
+    const tag40 = new Uint8Array([0x00, 0x0a]);
+    const tag41 = new Uint8Array([0x00]);
+    const tag77 = new Uint8Array(0);
 
-    // 0x2c —— chunk 版本
-    entries.push({ key: mcwMakeSimpleKey(0x2c), value: new Uint8Array([0x2a]) });
+    // chunk(0, 0)：每个子区块一条 0x2f；BlockEntity 汇总到一条 0x31
+    let allNbt_0_0 = 0;
+    for (const sc of subChunkDataList) allNbt_0_0 += sc.nbt.length;
+    const combinedNbt_0_0 = new Uint8Array(allNbt_0_0);
+    let off_0_0 = 0;
+    for (const sc of subChunkDataList) { combinedNbt_0_0.set(sc.nbt, off_0_0); off_0_0 += sc.nbt.length; }
 
-    // 0x2f —— 子区块
-    entries.push({ key: mcwMakeSimpleKey(0x2f, 0xFC), value: subChunkBytes });
+    entries.push({ key: makeKey(0, 0, 0x2b), value: v2b });
+    entries.push({ key: makeKey(0, 0, 0x2c), value: tag2c });
+    for (const sc of subChunkDataList) {
+        entries.push({ key: makeKey(0, 0, 0x2f, sc.subY & 0xFF), value: sc.bytes });
+    }
+    entries.push({ key: makeKey(0, 0, 0x31), value: combinedNbt_0_0 });
+    entries.push({ key: makeKey(0, 0, 0x36), value: tag36 });
+    entries.push({ key: makeKey(0, 0, 0x3f), value: tag3f });
+    entries.push({ key: makeKey(0, 0, 0x40), value: tag40 });
+    entries.push({ key: makeKey(0, 0, 0x41), value: tag41 });
+    entries.push({ key: makeKey(0, 0, 0x77), value: tag77 });
 
-    // 0x31 —— 所有 BlockEntity
-    entries.push({ key: mcwMakeSimpleKey(0x31), value: combinedNbt });
+    // chunk(-1, 0)
+    entries.push({ key: makeKey(-1, 0, 0x2b), value: v2b });
+    entries.push({ key: makeKey(-1, 0, 0x2c), value: tag2c });
+    entries.push({ key: makeKey(-1, 0, 0x2f, 0xFC), value: m1_0_subChunk.bytes });
+    entries.push({ key: makeKey(-1, 0, 0x31), value: m1_0_nbt });
+    entries.push({ key: makeKey(-1, 0, 0x36), value: tag36 });
+    entries.push({ key: makeKey(-1, 0, 0x3f), value: tag3f });
+    entries.push({ key: makeKey(-1, 0, 0x40), value: tag40 });
+    entries.push({ key: makeKey(-1, 0, 0x41), value: tag41 });
+    entries.push({ key: makeKey(-1, 0, 0x77), value: tag77 });
 
-    // 其他 chunk 元数据
-    entries.push({ key: mcwMakeSimpleKey(0x36), value: new Uint8Array([2, 0, 0, 0]) });
-    entries.push({ key: mcwMakeSimpleKey(0x3f), value: new Uint8Array([0xb5, 0x60, 0x75, 0xfd, 0x69, 0x2a, 0x3c, 0x93]) });
-    entries.push({ key: mcwMakeSimpleKey(0x40), value: new Uint8Array([0x00, 0x0a]) });
-    entries.push({ key: mcwMakeSimpleKey(0x41), value: new Uint8Array([0x00]) });
-    entries.push({ key: mcwMakeSimpleKey(0x77), value: new Uint8Array(0) });
-
-    // 计分板 —— 预创建 t 计分板（criteria = dummy）
-    // 键是 ASCII 字符串 "scoreboard"（不是 chunk 键）
-/*
-    const scoreboardNbt = bSerializeBE([
-        { name: 'Criteria', type: 9, value: { itemType: 8, items: ['dummy'] } },
-        { name: 'DisplayObjectives', type: 9, value: { itemType: 10, items: [] } },
-        { name: 'Entries', type: 9, value: { itemType: 10, items: [] } },
-        { name: 'LastUniqueID', type: 4, value: 0 },
-        { name: 'Objectives', type: 9, value: { itemType: 10, items: [
-            [
-                { name: 'Criteria', type: 8, value: 'dummy' },
-                { name: 'DisplayName', type: 8, value: 't' },
-                { name: 'Name', type: 8, value: 't' },
-                { name: 'SortOrder', type: 3, value: 0 },
-            ]
-        ] } },
+    // scoreboard
+    const scoreboardBytes = new Uint8Array([
+        0x0a, 0x00, 0x00, 0x09, 0x08, 0x00, 0x43, 0x72, 0x69, 0x74, 0x65, 0x72, 0x69, 0x61, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x09, 0x11, 0x00, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x4f, 0x62, 0x6a,
+        0x65, 0x63, 0x74, 0x69, 0x76, 0x65, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x07, 0x00, 0x45,
+        0x6e, 0x74, 0x72, 0x69, 0x65, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x0c, 0x00, 0x4c, 0x61,
+        0x73, 0x74, 0x55, 0x6e, 0x69, 0x71, 0x75, 0x65, 0x49, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x09, 0x0a, 0x00, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x69, 0x76, 0x65, 0x73, 0x0a,
+        0x01, 0x00, 0x00, 0x00, 0x08, 0x08, 0x00, 0x43, 0x72, 0x69, 0x74, 0x65, 0x72, 0x69, 0x61, 0x05,
+        0x00, 0x64, 0x75, 0x6d, 0x6d, 0x79, 0x08, 0x0b, 0x00, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79,
+        0x4e, 0x61, 0x6d, 0x65, 0x01, 0x00, 0x74, 0x08, 0x04, 0x00, 0x4e, 0x61, 0x6d, 0x65, 0x01, 0x00,
+        0x74, 0x09, 0x06, 0x00, 0x53, 0x63, 0x6f, 0x72, 0x65, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00
     ]);
-    entries.push({ key: new TextEncoder().encode('scoreboard'), value: scoreboardNbt });
-*/
-    // 7) 打包 db 文件
-    const logData = mcwBuildLogRecord(mcwBuildWriteBatch(entries));
-    const currentBytes = new TextEncoder().encode('MANIFEST-000001\n');
-    const manifestBytes = mcwBuildManifest();
+    entries.push({ key: new TextEncoder().encode('scoreboard'), value: scoreboardBytes });
+
+    // 6) .ldb
+    const LDB_FILE_NUMBER = 5;
+    const ldbBytes = mcwBuildSSTable(entries);
+    const sortedKeys = entries.map(e => e.key).sort((a, b) => {
+        const n = Math.min(a.length, b.length);
+        for (let i = 0; i < n; i++) if (a[i] !== b[i]) return a[i] - b[i];
+        return a.length - b.length;
+    });
+    const smallestKey = sortedKeys[0];
+    const largestKey = sortedKeys[sortedKeys.length - 1];
+
+    const manifestBytes = mcwBuildManifestWithLdb(0, LDB_FILE_NUMBER, ldbBytes.length, smallestKey, largestKey);
+    const currentBytes = new TextEncoder().encode('MANIFEST-000004\n');
+
+    // 7) world_icon
+    const iconBytes = generateWorldIcon(worldName, durationStr, instrumentCount);
 
     // 8) 打包 ZIP
     const zip = new McwZipBuilder();
-    zip.addFile('level.dat', mcwBuildLevelDat());
-    zip.addFile('db/000003.log', logData);
+    zip.addFile('level.dat', mcwBuildLevelDat(worldName));
+    zip.addFile(`db/00000${LDB_FILE_NUMBER}.ldb`, ldbBytes);
     zip.addFile('db/CURRENT', currentBytes);
-    zip.addFile('db/MANIFEST-000001', manifestBytes);
-    zip.addFile('levelname.txt', new TextEncoder().encode(currentSongName || 'Command Block Music'));
+    zip.addFile('db/MANIFEST-000004', manifestBytes);
+    zip.addFile('levelname.txt', new TextEncoder().encode(worldName));
     zip.addFile('world_behavior_packs.json', new TextEncoder().encode('[]'));
     zip.addFile('world_resource_packs.json', new TextEncoder().encode('[]'));
+    zip.addFile('world_icon.jpeg', iconBytes);
 
     const zipBytes = zip.build();
 
@@ -3228,17 +3591,39 @@ async function exportMcWorld() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const baseName = originalFileName || 'CommandBlockMusic';
-    a.download = `${baseName}.mcworld`;
+    a.download = `${worldName}.mcworld`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log(`导出成功：共 ${cmdBlocks.length} 个命令方块，${layers} 层，ZIP ${zipBytes.length} 字节`);
+    // 10) 调试
+    console.log('════════════════ 导出详情 ════════════════');
+    console.log('  文件名:        ', originalFileName);
+    console.log('  世界名:        ', worldName);
+    console.log('  命令方块数:    ', cmdBlocks.length);
+    console.log('  层数:          ', layers);
+    console.log('  子区块数量:    ', subChunkDataList.length);
+    for (const sc of subChunkDataList) {
+        console.log(`  ─── 子区块 Y=${sc.subY} ───`);
+        console.log(`    命令方块数:  ${sc.blockCount}`);
+        console.log(`    有地面:      ${sc.includeGround}`);
+        console.log(`    调色板:      ${sc.paletteSize} 项`);
+        console.log(`    BITS:        ${sc.bits}`);
+        console.log(`    子区块大小:  ${sc.bytes.length} 字节`);
+        console.log(`    BlockEntity: ${sc.nbt.length} 字节`);
+    }
+    console.log('  ─── BlockEntity 总计 ───');
+    console.log('    chunk(0,0):  ', combinedNbt_0_0.length, '字节');
+    console.log('    chunk(-1,0): ', m1_0_nbt.length, '字节');
+    console.log('  ─── .ldb ───');
+    console.log('    大小:        ', ldbBytes.length, '字节');
+    console.log('    条目数:      ', entries.length);
+    console.log('  ─── ZIP ───');
+    console.log('    ZIP:         ', zipBytes.length, '字节');
+    console.log('══════════════════════════════════════════');
 }
 
-// ---------- 绑定按钮 ----------
 document.getElementById('exportMcWorld').addEventListener('click', exportMcWorld);
 // R 交互反馈与弹窗保护
 // R.1 按钮按压反馈
