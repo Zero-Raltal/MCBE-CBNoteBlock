@@ -158,6 +158,10 @@
 		<h2>遇到BUG及时反馈,我会在周末尽快修</h2>
         <button class="modal-close-btn" id="modalCloseBtn">确定</button>
         <br>
+        <h3>2026.9.27 更新日志:</h3>
+        <h3>1.生成命令时支持保留音符力度，但是会增加命令方块数量</h3>
+        <h3>2.对基岩版指令的压缩做了一点优化</h3>
+        <br>
         <h3>2026.9.26 更新日志:</h3>
         <h3 style="color:#72ff30">1.新增基岩版存档导出(.mcworld)，打开就是搭好的命令方块</h3>
         <h3>2.导出功能整合为下拉菜单</h3>
@@ -360,6 +364,13 @@
             <label><input type="radio" name="soundMode" value="harp"> Harp Only </label>
             <label><input type="radio" name="soundMode" value="custom"> 自定义音色 </label>
             <input type="text" id="customSoundInput" value="note.pling" maxlength="64" disabled style="width:150px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+        </div>
+        <div class="snap-control">
+            <span class="snap-prefix">音符力度: </span>
+            <label class="snap-suffix">
+                <input type="checkbox" id="enableVelocity">
+                <span>启用力度</span>
+            </label>
         </div>
         <div class="mode-control">
             <label>平台: </label>
@@ -1171,13 +1182,16 @@ function groupNotesByInstrumentAndPitch(notes){
     const map=new Map();
     for(const note of notes){
         const key=`${note.instrument}_${note.key}`;
-        if(!map.has(key))map.set(key,{instrument:note.instrument,key:note.key,ticks:[]});
-        map.get(key).ticks.push(note.tick);
+        if(!map.has(key))map.set(key,{instrument:note.instrument,key:note.key,ticks:[],entries:[]});
+        const g=map.get(key);g.ticks.push(note.tick);g.entries.push({tick:note.tick,velocity:note.velocity||100});
     }
     const result=[];
     for(const data of map.values()){
-        const uniqueTicks=[...new Set(data.ticks)].sort((a,b)=>a-b);
-        result.push({...data,ticks:uniqueTicks,noteName:getNoteName(data.key),tickCount:uniqueTicks.length});
+        const seen=new Set(),uniqEntries=[];
+        for(const e of data.entries){const k=`${e.tick}_${e.velocity}`;if(!seen.has(k)){seen.add(k);uniqEntries.push(e);}}
+        uniqEntries.sort((a,b)=>a.tick-b.tick);
+        const uniqueTicks=[...new Set(uniqEntries.map(e=>e.tick))].sort((a,b)=>a-b);
+        result.push({instrument:data.instrument,key:data.key,entries:uniqEntries,ticks:uniqueTicks,noteName:getNoteName(data.key),tickCount:uniqueTicks.length});
     }
     return result.sort((a,b)=>a.instrument-b.instrument||a.key-b.key);
 }
@@ -1210,163 +1224,148 @@ function fallbackCopy(text){
     }catch(e){return false;}
 }
 // H 指令生成与渲染
+function splitGroupByVelocity(group,enableVelocity){
+    if(!enableVelocity)return[{instrument:group.instrument,key:group.key,ticks:group.ticks,volumeScale:1.0}];
+    const buckets=new Map();
+    for(const e of group.entries){
+        const v=Math.max(1,Math.min(127,e.velocity||100)),bucket=Math.max(1,Math.min(8,Math.round(v/16)));
+        if(!buckets.has(bucket))buckets.set(bucket,{ticks:[],scale:bucket/8});
+        const b=buckets.get(bucket);if(b.ticks.indexOf(e.tick)===-1)b.ticks.push(e.tick);
+    }
+    const out=[];
+    for(const data of buckets.values()){data.ticks.sort((a,b)=>a-b);out.push({instrument:group.instrument,key:group.key,ticks:data.ticks,volumeScale:data.scale});}
+    return out;
+}
 // H.1 生成循环与连锁指令
-function generateCommands(groups,octaveShift,harpOnly,customSoundKey){
+function generateCommands(groups,octaveShift,harpOnly,customSoundKey,enableVelocity){
     const cycleCmd=`scoreboard players add @a t 1`;
     let chainCmds=[];
+    function pushCmds(sg,sound,pitch,isCustomSound){
+        const isPerc=PERCUSSION_INSTRUMENTS.includes(sg.instrument),volume=parseFloat(sg.volumeScale.toFixed(2)).toString(),pitchStr=parseFloat(pitch).toString();
+        const instrName=isPerc?(INSTRUMENT_SOUND_MAP[sg.instrument]||'harp'):(isCustomSound?sound:(INSTRUMENT_SOUND_MAP[sg.instrument]||'harp'));
+        const shifted=sg.ticks.map(t=>t+1);
+        let cmd;
+        if(shifted.length===1)cmd=`execute as @a[scores={t=${shifted[0]}}] at @s run playsound ${sound} @s ~ ~ ~ ${volume} ${pitchStr}`;
+        else{
+            const ranges=[];let s=shifted[0],p=shifted[0];
+            for(let i=1;i<shifted.length;i++){
+                if(shifted[i]===p+1){p=shifted[i];continue;}
+                ranges.push(s===p?`t=!${s}`:`t=!${s}..${p}`);
+                s=p=shifted[i];
+            }
+            ranges.push(s===p?`t=!${s}`:`t=!${s}..${p}`);
+            cmd=`execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${ranges.join(',')}}] run playsound ${sound} @s ~ ~ ~ ${volume} ${pitchStr}`;
+        }
+        chainCmds.push({seq:0,noteName:getNoteName(sg.key),shiftedNoteName:getShiftedNoteName(sg.key,octaveShift),instrument:sg.instrument,instrumentName:instrName,key:sg.key,pitch:pitch,sound:sound,ticks:sg.ticks,tickCount:sg.ticks.length,cmd:cmd});
+    }
     if(harpOnly){
         const pitchMap=new Map();
         for(const group of groups){
-            const isPercussion=PERCUSSION_INSTRUMENTS.includes(group.instrument);
-            const effectiveInstrument=isPercussion?group.instrument:0;
-            const mapKey=`${effectiveInstrument}_${group.key}`;
-            if(!pitchMap.has(mapKey)){
-                pitchMap.set(mapKey,{instrument:effectiveInstrument,key:group.key,ticks:[],noteName:group.noteName,shiftedNoteName:getShiftedNoteName(group.key,octaveShift)});
+            const isPerc=PERCUSSION_INSTRUMENTS.includes(group.instrument),effInstr=isPerc?group.instrument:0,mapKey=`${effInstr}_${group.key}`;
+            if(!pitchMap.has(mapKey))pitchMap.set(mapKey,{instrument:effInstr,key:group.key,entries:[],ticks:[]});
+            const data=pitchMap.get(mapKey);
+            for(const e of group.entries){data.entries.push(e);if(data.ticks.indexOf(e.tick)===-1)data.ticks.push(e.tick);}
+        }
+        for(const data of pitchMap.values()){
+            data.ticks.sort((a,b)=>a-b);
+            const subGroups=splitGroupByVelocity({instrument:data.instrument,key:data.key,ticks:data.ticks,entries:data.entries},enableVelocity);
+            for(const sg of subGroups){
+                const isPerc=PERCUSSION_INSTRUMENTS.includes(sg.instrument);
+                let sound,isCustom=false;
+                if(isPerc)sound=`note.${INSTRUMENT_SOUND_MAP[sg.instrument]||'harp'}`;
+                else if(customSoundKey&&customSoundKey.trim()!==''){sound=customSoundKey.trim();isCustom=true;}
+                else sound='note.harp';
+                pushCmds(sg,sound,keyToPitch(sg.key,octaveShift),isCustom);
             }
-            pitchMap.get(mapKey).ticks.push(...group.ticks);
         }
-        for(const[mapKey,data]of pitchMap){
-            const uniqueTicks=[...new Set(data.ticks)].sort((a,b)=>a-b);
-            const excludeEntries=uniqueTicks.map(t=>`t=!${t+1}`).join(',');
-            const pitch=keyToPitch(data.key,octaveShift);
-            let instrumentName=INSTRUMENT_SOUND_MAP[data.instrument]||"harp";
-            let sound;
-            if(PERCUSSION_INSTRUMENTS.includes(data.instrument))sound=`note.${instrumentName}`;
-            else if(customSoundKey&&customSoundKey.trim()!==''){sound=customSoundKey.trim();instrumentName=sound;}
-            else{sound=`note.harp`;instrumentName='harp';}
-            const cmd=`execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound ${sound} @s ~ ~ ~ 1 ${pitch}`;
-            chainCmds.push({seq:chainCmds.length+1,noteName:getNoteName(data.key),shiftedNoteName:data.shiftedNoteName,instrument:data.instrument,instrumentName:instrumentName,key:data.key,pitch:pitch,sound:sound,ticks:uniqueTicks,tickCount:uniqueTicks.length,cmd:cmd});
-        }
-        chainCmds.sort((a,b)=>{
-            if(a.instrument===b.instrument)return a.key-b.key;
-            const aIsPerc=PERCUSSION_INSTRUMENTS.includes(a.instrument);
-            const bIsPerc=PERCUSSION_INSTRUMENTS.includes(b.instrument);
-            if(aIsPerc&&!bIsPerc)return 1;
-            if(!aIsPerc&&bIsPerc)return-1;
-            return a.instrument-b.instrument;
-        });
-        chainCmds.forEach((cmd,index)=>cmd.seq=index+1);
     }else{
-        for(let idx=0;idx<groups.length;idx++){
-            const g=groups[idx];
-            const excludeEntries=g.ticks.map(t=>`t=!${t+1}`).join(',');
-            const pitch=keyToPitch(g.key,octaveShift);
-            const shiftedNoteName=getShiftedNoteName(g.key,octaveShift);
-            const sound=`note.${INSTRUMENT_SOUND_MAP[g.instrument]||"harp"}`;
-            const cmd=`execute as @a[scores={t=-1..}] at @s unless entity @s[scores={${excludeEntries}}] run playsound ${sound} @s ~ ~ ~ 1 ${pitch}`;
-            chainCmds.push({seq:idx+1,noteName:g.noteName,shiftedNoteName:shiftedNoteName,instrument:g.instrument,instrumentName:INSTRUMENT_SOUND_MAP[g.instrument]||"harp",key:g.key,pitch:pitch,sound:sound,ticks:g.ticks,tickCount:g.tickCount,cmd:cmd});
+        for(const group of groups){
+            const subGroups=splitGroupByVelocity(group,enableVelocity);
+            for(const sg of subGroups){
+                const sound=`note.${INSTRUMENT_SOUND_MAP[sg.instrument]||'harp'}`;
+                pushCmds(sg,sound,keyToPitch(sg.key,octaveShift),false);
+            }
         }
     }
+    chainCmds.sort((a,b)=>{
+        if(a.instrument===b.instrument)return a.key-b.key;
+        const aP=PERCUSSION_INSTRUMENTS.includes(a.instrument),bP=PERCUSSION_INSTRUMENTS.includes(b.instrument);
+        if(aP&&!bP)return 1;
+        if(!aP&&bP)return -1;
+        return a.instrument-b.instrument;
+    });
+    chainCmds.forEach((cmd,i)=>cmd.seq=i+1);
     return{cycleCmd,chainCmds};
 }
-function buildJavaCommand(ticks,sound,pitch){
+function buildJavaCommand(ticks,sound,pitch,volume){
     const sorted=ticks;
-    if(sorted.length===1){
-        return `execute as @a[scores={t=${sorted[0]}}] at @s run playsound ${sound} record @s ~ ~ ~ 1 ${pitch}`;
-    }
+    if(sorted.length===1)return `execute as @a[scores={t=${sorted[0]}}] at @s run playsound ${sound} record @s ~ ~ ~ ${volume} ${pitch}`;
     const min=sorted[0],max=sorted[sorted.length-1];
     let continuous=true;
-    for(let i=1;i<sorted.length;i++){
-        if(sorted[i]!==sorted[i-1]+1){continuous=false;break;}
-    }
-    if(continuous){
-        return `execute as @a[scores={t=${min}..${max}}] at @s run playsound ${sound} record @s ~ ~ ~ 1 ${pitch}`;
-    }
+    for(let i=1;i<sorted.length;i++){if(sorted[i]!==sorted[i-1]+1){continuous=false;break;}}
+    if(continuous)return `execute as @a[scores={t=${min}..${max}}] at @s run playsound ${sound} record @s ~ ~ ~ ${volume} ${pitch}`;
     const gaps=[];
-    for(let i=0;i<sorted.length-1;i++){
-        const gs=sorted[i]+1,ge=sorted[i+1]-1;
-        if(gs<=ge)gaps.push(gs===ge?`unless score @s t matches ${gs}`:`unless score @s t matches ${gs}..${ge}`);
-    }
-    return `execute as @a[scores={t=${min}..${max}}] at @s ${gaps.join(' ')} run playsound ${sound} record @s ~ ~ ~ 1 ${pitch}`;
+    for(let i=0;i<sorted.length-1;i++){const gs=sorted[i]+1,ge=sorted[i+1]-1;if(gs<=ge)gaps.push(gs===ge?`unless score @s t matches ${gs}`:`unless score @s t matches ${gs}..${ge}`);}
+    return `execute as @a[scores={t=${min}..${max}}] at @s ${gaps.join(' ')} run playsound ${sound} record @s ~ ~ ~ ${volume} ${pitch}`;
 }
-function generateJavaCommands(groups,octaveShift,harpOnly){
-    const MAX_LEN=31520;
-    const intermediate=[];
+function generateJavaCommands(groups,octaveShift,harpOnly,enableVelocity){
+    const MAX_LEN=31520,intermediate=[];
     for(const g of groups){
-        const isPerc=PERCUSSION_INSTRUMENTS.includes(g.instrument);
-        const effectiveInstrument=(harpOnly&&!isPerc)?0:g.instrument;
-        const rawKey=g.key+octaveShift*12;
-        let k=rawKey;
+        const isPerc=PERCUSSION_INSTRUMENTS.includes(g.instrument),effectiveInstrument=(harpOnly&&!isPerc)?0:g.instrument;
+        const rawKey=g.key+octaveShift*12;let k=rawKey;
         while(k<JAVA_KEY_MIN)k+=12;
         while(k>JAVA_KEY_MAX)k-=12;
-        intermediate.push({instrument:effectiveInstrument,adjustedKey:k,ticks:g.ticks});
+        const subs=splitGroupByVelocity({instrument:effectiveInstrument,key:k,ticks:g.ticks,entries:g.entries},enableVelocity);
+        for(const sg of subs)intermediate.push({instrument:effectiveInstrument,adjustedKey:k,ticks:sg.ticks,volumeScale:sg.volumeScale});
     }
     const mergedMap=new Map();
     for(const g of intermediate){
-        const mapKey=`${g.instrument}_${g.adjustedKey}`;
-        if(!mergedMap.has(mapKey))mergedMap.set(mapKey,{instrument:g.instrument,key:g.adjustedKey,ticks:[]});
+        const mapKey=`${g.instrument}_${g.adjustedKey}_${g.volumeScale.toFixed(3)}`;
+        if(!mergedMap.has(mapKey))mergedMap.set(mapKey,{instrument:g.instrument,key:g.adjustedKey,ticks:[],volumeScale:g.volumeScale});
         mergedMap.get(mapKey).ticks.push(...g.ticks);
     }
     const chainCmds=[];
     for(const data of mergedMap.values()){
         const uniqueTicks=[...new Set(data.ticks)].sort((a,b)=>a-b);
-        const soundName=JAVA_SOUND_MAP[data.instrument]||'harp';
-        const sound=`minecraft:block.note_block.${soundName}`;
-        const pitch=Math.pow(2,(data.key-54)/12).toFixed(6);
+        const soundName=JAVA_SOUND_MAP[data.instrument]||'harp',sound=`minecraft:block.note_block.${soundName}`,pitch=Math.pow(2,(data.key-54)/12).toFixed(6),volume=data.volumeScale.toFixed(2);
         let i=0;
         while(i<uniqueTicks.length){
             let j=i,bestJ=i;
             while(j<uniqueTicks.length){
-                const seg=uniqueTicks.slice(i,j+1);
-                const cmd=buildJavaCommand(seg,sound,pitch);
+                const seg=uniqueTicks.slice(i,j+1),cmd=buildJavaCommand(seg,sound,pitch,volume);
                 if(cmd.length>MAX_LEN&&j>i)break;
                 bestJ=j;j++;
             }
-            const segTicks=uniqueTicks.slice(i,bestJ+1);
-            const cmd=buildJavaCommand(segTicks,sound,pitch);
-            chainCmds.push({
-                seq:0,
-                noteName:getNoteName(data.key),
-                shiftedNoteName:getNoteName(data.key),
-                instrument:data.instrument,
-                instrumentName:soundName,
-                key:data.key,
-                pitch:pitch,
-                sound:sound,
-                ticks:segTicks,
-                tickCount:segTicks.length,
-                cmd:cmd
-            });
+            const segTicks=uniqueTicks.slice(i,bestJ+1),cmd=buildJavaCommand(segTicks,sound,pitch,volume);
+            chainCmds.push({seq:0,noteName:getNoteName(data.key),shiftedNoteName:getNoteName(data.key),instrument:data.instrument,instrumentName:soundName,key:data.key,pitch:pitch,sound:sound,ticks:segTicks,tickCount:segTicks.length,cmd:cmd});
             i=bestJ+1;
         }
     }
     chainCmds.sort((a,b)=>{
         if(a.instrument===b.instrument)return a.key-b.key;
-        const aIsPerc=PERCUSSION_INSTRUMENTS.includes(a.instrument);
-        const bIsPerc=PERCUSSION_INSTRUMENTS.includes(b.instrument);
-        if(aIsPerc&&!bIsPerc)return 1;
-        if(!aIsPerc&&bIsPerc)return -1;
+        const aP=PERCUSSION_INSTRUMENTS.includes(a.instrument),bP=PERCUSSION_INSTRUMENTS.includes(b.instrument);
+        if(aP&&!bP)return 1;
+        if(!aP&&bP)return -1;
         return a.instrument-b.instrument;
     });
     chainCmds.forEach((c,i)=>c.seq=i+1);
-    return {cycleCmd:`scoreboard players add @a t 1`,chainCmds};
+    return{cycleCmd:`scoreboard players add @a t 1`,chainCmds};
 }
 // H.2 渲染结果
 let lastChainCmds=[];
 function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTick,customSoundKey){
     if(!notes||notes.length===0)return false;
-    const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
-    const displayOctaveShift=octaveShift;
-    let renderNotes=notes;
-    let effectiveOctaveShift=octaveShift;
+    const platform=document.querySelector('input[name="targetPlatform"]:checked').value,displayOctaveShift=octaveShift;
+    let renderNotes=notes,effectiveOctaveShift=octaveShift;
     if(platform==='java'){
-        renderNotes=notes.map(n=>{
-            const rawKey=n.key+octaveShift*12;
-            let k=rawKey;
-            while(k<JAVA_KEY_MIN)k+=12;
-            while(k>JAVA_KEY_MAX)k-=12;
-            return{tick:n.tick,instrument:n.instrument,key:k,velocity:n.velocity,panning:n.panning,pitch:n.pitch};
-        });
+        renderNotes=notes.map(n=>{const rawKey=n.key+octaveShift*12;let k=rawKey;while(k<JAVA_KEY_MIN)k+=12;while(k>JAVA_KEY_MAX)k-=12;return{tick:n.tick,instrument:n.instrument,key:k,velocity:n.velocity,panning:n.panning,pitch:n.pitch};});
         effectiveOctaveShift=0;
     }
-    const groups=groupNotesByInstrumentAndPitch(renderNotes);
-    const effectiveCustomKey=(harpOnly&&customSoundKey&&customSoundKey.trim()!=='')?customSoundKey.trim():null;
+    const groups=groupNotesByInstrumentAndPitch(renderNotes),effectiveCustomKey=(harpOnly&&customSoundKey&&customSoundKey.trim()!=='')?customSoundKey.trim():null;
+    const enableVelocityEl=document.getElementById('enableVelocity'),enableVelocity=!!(enableVelocityEl&&enableVelocityEl.checked);
     let cycleCmd,chainCmds;
-    if(platform==='java'){
-        ({cycleCmd,chainCmds}=generateJavaCommands(groups,effectiveOctaveShift,harpOnly));
-    }else{
-        ({cycleCmd,chainCmds}=generateCommands(groups,effectiveOctaveShift,harpOnly,effectiveCustomKey));
-    }
+    if(platform==='java')({cycleCmd,chainCmds}=generateJavaCommands(groups,effectiveOctaveShift,harpOnly,enableVelocity));
+    else({cycleCmd,chainCmds}=generateCommands(groups,effectiveOctaveShift,harpOnly,effectiveCustomKey,enableVelocity));
     document.getElementById('cycleCmd').innerHTML=`<pre>${escapeHtml(cycleCmd)}</pre>`;
     lastChainCmds=chainCmds;
     buildPreviewIndexes(renderNotes,chainCmds);
@@ -1374,27 +1373,11 @@ function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTic
     else{
         let html='';
         for(let i=0;i<chainCmds.length;i++){
-            const c=chainCmds[i];
-            const timePreview=c.ticks.slice(0,20).join(', ')+(c.ticks.length>20?` ... 共${c.tickCount}个`:'');
-            html+=`<div class="cmd-block" id="cmd-block-${i}">
-                <div class="cmd-header">
-                    <span class="seq-num">#${c.seq}</span>
-                    <span><b>${ICON_NOTE} ${c.noteName} → ${c.shiftedNoteName}</b></span>
-                    <span style="color:var(--text-secondary)">| ${c.instrumentName} (ID=${c.instrument}) | pitch=${c.pitch} | ${c.tickCount}次</span>
-                    <button class="copy-btn" data-idx="${i}">${ICON_COPY} 复制</button>
-                </div>
-                <pre>${escapeHtml(c.cmd)}</pre>
-                <div style="font-size:11px;color:var(--text-secondary)">时间点: ${timePreview}</div>
-            </div>`;
+            const c=chainCmds[i],timePreview=c.ticks.slice(0,20).join(', ')+(c.ticks.length>20?` ... 共${c.tickCount}个`:'');
+            html+=`<div class="cmd-block" id="cmd-block-${i}"><div class="cmd-header"><span class="seq-num">#${c.seq}</span><span><b>${ICON_NOTE} ${c.noteName} → ${c.shiftedNoteName}</b></span><span style="color:var(--text-secondary)">| ${c.instrumentName} (ID=${c.instrument}) | pitch=${c.pitch} | ${c.tickCount}次</span><button class="copy-btn" data-idx="${i}">${ICON_COPY} 复制</button></div><pre>${escapeHtml(c.cmd)}</pre><div style="font-size:11px;color:var(--text-secondary)">时间点: ${timePreview}</div></div>`;
         }
         document.getElementById('chainList').innerHTML=html;
-        document.querySelectorAll('.copy-btn').forEach(btn=>{
-            btn.addEventListener('click',()=>{
-                const idx=parseInt(btn.dataset.idx);
-                const block=document.getElementById(`cmd-block-${idx}`);
-                copyToClipboard(lastChainCmds[idx].cmd,btn,block);
-            });
-        });
+        document.querySelectorAll('.copy-btn').forEach(btn=>{btn.addEventListener('click',()=>{const idx=parseInt(btn.dataset.idx),block=document.getElementById(`cmd-block-${idx}`);copyToClipboard(lastChainCmds[idx].cmd,btn,block);});});
     }
     previewNotes=renderNotes;
     previewSongLength=songLength;
@@ -1406,12 +1389,9 @@ function renderResults(notes,songLength,songName,octaveShift,harpOnly,timePerTic
     document.getElementById('stopBtn').disabled=true;
     document.getElementById('tickDisplay').innerText=`Tick: 0 / ${songLength}`;
     document.getElementById('progressFill').style.width='0%';
-    const durationSec=(songLength/20).toFixed(1);
-    const uniqueInstruments=[...new Set(renderNotes.map(n=>n.instrument))];
-    const instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
+    const durationSec=(songLength/20).toFixed(1),uniqueInstruments=[...new Set(renderNotes.map(n=>n.instrument))],instrumentNames=uniqueInstruments.map(id=>INSTRUMENT_SOUND_MAP[id]||id).join(', ');
     cachedOctaveShift=effectiveOctaveShift;
-    const platformTag=platform==='java'?'[Java版]':'[基岩版]';
-    const octaveNote=platform==='java'?'（已修正）':'';
+    const platformTag=platform==='java'?'[Java版]':'[基岩版]',octaveNote=platform==='java'?'（已修正）':'';
     document.getElementById('stats').innerHTML=`<span class="success">${ICON_SUCCESS} 解析成功 ${platformTag} | ${songName||''} | 音符:${renderNotes.length} | 时长:${durationSec}秒 | 乐器组:${chainCmds.length} | 乐器:${instrumentNames} | 移调:${displayOctaveShift}${octaveNote}</span>`;
     ensureAudioChain();
     if(typeof initWaterfall==='function'){initWaterfall(renderNotes,songLength);requestWaterfallDraw();}
@@ -1554,6 +1534,7 @@ document.querySelectorAll('input[name="targetPlatform"]').forEach(radio=>{
         updateRenderAndRestoreState();
     });
 });
+document.getElementById('enableVelocity').addEventListener('change',function(){updateRenderAndRestoreState();});
 // J.4 复制与导出
 document.getElementById('copyCycle').addEventListener('click',()=>{
     const cmd=document.querySelector('#cycleCmd pre')?.innerText||'';
@@ -2704,7 +2685,7 @@ async function exportBedrockNBTStructure(){
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
-    a.download=randomName()+'.mcstructure';
+    a.download=(originalFileName||'structure')+'.mcstructure';
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
@@ -3436,27 +3417,18 @@ document.addEventListener('pointerdown',function(e){
 // T.1 按目标平台在后台生成指令（不影响页面已渲染数据）
 function generateChainCmdsForPlatform(targetPlatform){
     if(!currentNotes||currentNotes.length===0)return[];
-    const octaveShift=parseInt(document.getElementById('octaveShift').value)||0;
-    const mode=document.querySelector('input[name="soundMode"]:checked').value;
-    const harpOnly=(mode==='harp'||mode==='custom');
+    const octaveShift=parseInt(document.getElementById('octaveShift').value)||0,mode=document.querySelector('input[name="soundMode"]:checked').value,harpOnly=(mode==='harp'||mode==='custom');
     let customSoundKey=null;
     if(mode==='custom')customSoundKey=sanitizeCustomSound(document.getElementById('customSoundInput').value);
     const effectiveCustomKey=(harpOnly&&customSoundKey&&customSoundKey.trim()!=='')?customSoundKey.trim():null;
-    let renderNotes=currentNotes;
-    let effectiveOctaveShift=octaveShift;
+    let renderNotes=currentNotes,effectiveOctaveShift=octaveShift;
     if(targetPlatform==='java'){
-        renderNotes=currentNotes.map(n=>{
-            const rawKey=n.key+octaveShift*12;
-            let k=rawKey;
-            while(k<JAVA_KEY_MIN)k+=12;
-            while(k>JAVA_KEY_MAX)k-=12;
-            return{tick:n.tick,instrument:n.instrument,key:k,velocity:n.velocity,panning:n.panning,pitch:n.pitch};
-        });
+        renderNotes=currentNotes.map(n=>{const rawKey=n.key+octaveShift*12;let k=rawKey;while(k<JAVA_KEY_MIN)k+=12;while(k>JAVA_KEY_MAX)k-=12;return{tick:n.tick,instrument:n.instrument,key:k,velocity:n.velocity,panning:n.panning,pitch:n.pitch};});
         effectiveOctaveShift=0;
     }
-    const groups=groupNotesByInstrumentAndPitch(renderNotes);
-    if(targetPlatform==='java')return generateJavaCommands(groups,effectiveOctaveShift,harpOnly).chainCmds;
-    return generateCommands(groups,effectiveOctaveShift,harpOnly,effectiveCustomKey).chainCmds;
+    const enableVelocityEl=document.getElementById('enableVelocity'),enableVelocity=!!(enableVelocityEl&&enableVelocityEl.checked),groups=groupNotesByInstrumentAndPitch(renderNotes);
+    if(targetPlatform==='java')return generateJavaCommands(groups,effectiveOctaveShift,harpOnly,enableVelocity).chainCmds;
+    return generateCommands(groups,effectiveOctaveShift,harpOnly,effectiveCustomKey,enableVelocity).chainCmds;
 }
 // T.2 平台感知导出包装：仅当平台不匹配时临时替换，用完立刻还原
 async function withExportData(targetPlatform,fn){
