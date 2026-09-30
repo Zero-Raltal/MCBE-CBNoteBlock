@@ -2565,7 +2565,7 @@ async function exportJavaNBTStructure(){
         if(isLastOfLayer){
             facing='up';
         }else if(i===total-1){
-            facing='east';
+            facing=(i>0)?facingOf(posOf(i-1),p):'up';
         }else{
             facing=facingOf(p,posOf(i+1));
         }
@@ -2694,7 +2694,7 @@ async function exportBedrockNBTStructure(){
         const isLastOfLayer=(within===PER_LAYER-1);
         let facingJava;
         if(isLastOfLayer)facingJava='up';
-        else if(i===total-1)facingJava='east';
+        else if(i===total-1)facingJava=(i>0)?facingOf(posOf(i-1),p):'up';
         else facingJava=facingOf(p,posOf(i+1));
         const facingDir=facingToBE(facingJava);
         let blockName,cmd,auto;
