@@ -4,7 +4,7 @@
  *  支持格式: .cbnd / .nbs / .mid / .midi
  *  依赖: stb_vorbis.c, samples.h
  *  编译:
- *      gcc -O2 -o minecraft_music_player.exe minecraft_music_player.c app.res -lcomctl32 -lcomdlg32 -lshell32 -lwinhttp -lwinmm -lgdi32 -luser32 -lm -mwindows  
+ *      gcc -O2 -s -ffunction-sections -fdata-sections "-Wl,--gc-sections" -o minecraft_music_player.exe minecraft_music_player.c app.res -lcomctl32 -lcomdlg32 -lshell32 -lwinhttp -lwinmm -lgdi32 -luser32 -lm -mwindows
  * ========================================================================== */
 
 #define UNICODE
