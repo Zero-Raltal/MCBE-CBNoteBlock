@@ -15,7 +15,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 	<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABUklEQVR42n2TT0vDQBDF8z1EibFgkqZaaQIWShWVCnopBalYoTc/gRdvoh68Cnryw475jZ3tZvvnMLxMdt/svLezUdZK5KRIG1EdtzXKo7yRh3GYxBLx8XJ3Ke/TC/mYDBSJ53F/Jew/CIfiWuDzcSTj3r68TfsOZ6epfM+vZD4o5PfpVpF8VrU0h6MFep1cXidDGWV78vMwlOt8dy2y/nV/7pBuyyL774C2/NPtVHJD7ao+Xbuou0MG3Ig2KKCndWLdAEI8y3Zcbkgh/sNpeGAafc0NTxbabR2OdoAO9IQaQ0+2ekA1vzqn+V7YjYC2z92CeWDawJtusqIZpBvzpuEBjob3vmkuDOFoAXQwB+u0bpsHOBs9CO/fR5vG5S3UD8bmAO0QDdEK2hyYF+YBXPeY/EdDdSL8RrflcLSD9CBWLURVB2+DsG9bKxd5t73cg4l/FJHaEezZJsMAAAAASUVORK5CYII=">
-    <title>Minecraft 音乐命令方块生成器 by-ZeroRaltal</title>
+    <title>Minecraft 音乐生成器 by-ZeroRaltal</title>
     <style>
         :root{--bg-body:#1a2a32;--bg-box:#1e2f38;--bg-pre:#021016;--bg-stats:#071016;--bg-mode:#0a151a;--bg-waterfall:#0a151a;--bg-waterfall-label:#071016;--bg-progress-track:#2a3d3f;--bg-input:#2a3d3f;--bg-select:#2a3d3f;--bg-option:#1a2a32;--bg-cmd-playing:#1a3a2a;--bg-cmd-copied:#555555;--bg-btn-copy:#2d5f55;--bg-btn-primary:#3e8e62;--bg-btn-primary-hover:#4fa573;--bg-btn-preview:#3e5f6b;--bg-btn-preview-running:#8a4f3c;--bg-btn-close:#3e8e62;--bg-btn-close-hover:#57b984;--bg-modal:#1e2f38;--bg-overlay:#000000b3;--bg-scrollbar-track:#0a151a;--bg-scrollbar-thumb:#3e8e62;--bg-scrollbar-thumb-hover:#57b984;--text-primary:#ffffff;--text-secondary:#8abf9a;--text-muted:#5f8b78;--text-error:#ff6655;--text-success:#57b984;--text-modal-title:#ffff30;--text-update-green:#72ff30;--text-warning-red:#ff3030;--text-tick:#8abf9a;--border-accent:#57b984;--border-cmd-playing:#ffaa44;--border-cmd-copied:#666666;--border-input:#5f8b78;--border-input-focus:#57b984;--border-select-hover:#57b984;--border-waterfall-grid:#1a2a32;--border-waterfall-current:#57b984;--btn-text:#ffffff;--progress-fill:#57b984;--seq-bg:#2e5f4b;--seq-text:#ffffff;--waterfall-note-stroke:#ffffff;--scrollbar-color:#3e8e62 #0a151a;--shadow-modal:0 10px 40px #00000099;--bg-playlist-item:#12222b;--border-playlist:#2d5f55;--bg-playlist-hover:#2e5f4b}
         [data-theme="dark-yellow"]{--bg-body:#0d0d0d;--bg-box:#1a1a1a;--bg-pre:#111111;--bg-stats:#0d0d0d;--bg-mode:#1a1a1a;--bg-waterfall:#0d0d0d;--bg-waterfall-label:#111111;--bg-progress-track:#2a2a2a;--bg-input:#2a2a2a;--bg-select:#2a2a2a;--bg-option:#1a1a1a;--bg-cmd-playing:#2a2a1a;--bg-cmd-copied:#666666;--bg-btn-copy:#d4a020;--bg-btn-primary:#d4a020;--bg-btn-primary-hover:#ffe100;--bg-btn-preview:#d4a020;--bg-btn-preview-running:#772a21;--bg-btn-close:#d4a020;--bg-btn-close-hover:#f0c040;--bg-modal:#1a1a1a;--bg-overlay:#000000cc;--bg-scrollbar-track:#1a1a1a;--bg-scrollbar-thumb:#d4a020;--bg-scrollbar-thumb-hover:#f0c040;--text-primary:#ffffff;--text-secondary:#f0d060;--text-muted:#a09050;--text-error:#ff6655;--text-success:#f0c040;--text-modal-title:#ffd700;--text-update-green:#b0ff50;--text-warning-red:#ff5050;--text-tick:#f0d060;--border-accent:#f0c040;--border-cmd-playing:#fffebd;--border-cmd-copied:#888888;--border-input:#8a7a40;--border-input-focus:#f0c040;--border-select-hover:#f0c040;--border-waterfall-grid:#2a2a2a;--border-waterfall-current:#f0c040;--btn-text:#ffffff;--progress-fill:#f0c040;--seq-bg:#d4a020;--seq-text:#ffffff;--waterfall-note-stroke:#ffffff;--scrollbar-color:#d4a020 #1a1a1a;--shadow-modal:0 10px 40px #000000cc;--bg-playlist-item:#222222;--border-playlist:#8a7a40;--bg-playlist-hover:#3a3a2a}
@@ -98,6 +98,9 @@
         .snap-control input[type="checkbox"]:focus{outline:none;box-shadow:0 0 0 2px var(--border-input-focus)}
         .snap-control .snap-suffix:has(input:disabled){cursor:not-allowed}
         .shift-control{background:var(--bg-mode);padding:10px;border:0;margin-bottom:15px;display:flex;align-items:center;gap:8px;border-radius:4px;transition:background 0.3s ease}
+        .rs-control{background:var(--bg-mode);padding:10px;border:0;margin-top:12px;display:flex;align-items:center;flex-wrap:wrap;gap:14px;border-radius:4px;transition:background 0.3s ease}
+        .rs-control .snap-prefix{color:var(--text-primary);font-size:13px;user-select:none}
+        .rs-control .snap-suffix{color:var(--text-primary);font-size:13px;display:inline-flex;align-items:center;gap:6px;user-select:none}
         .shift-control label{color:var(--text-primary);font-size:13px;user-select:none;transition:color 0.3s ease}
         .playlist-quick{background:var(--bg-mode);padding:12px 16px;margin:12px 0;border:0;border-radius:4px;transition:background 0.3s ease}
         .playlist-item{background:var(--bg-playlist-item);padding:6px 14px;border-radius:4px;cursor:pointer;border:1px solid var(--border-playlist);font-size:13px;color:var(--text-primary);transition:background 0.2s,border-color 0.2s;display:inline-flex;align-items:center;gap:6px}
@@ -158,10 +161,14 @@
 		<h2>遇到BUG及时反馈,我会在周末尽快修</h2>
         <button class="modal-close-btn" id="modalCloseBtn">确定</button>
         <br>
-        <h3>2026.10.6 更新日志:</h3>
-        <h3>1.增加了一些棍母</h3>
-        <h3>2.优化了大部分棍母功能</h3>
-        <h3 style="font-size:72px;color:#72ff30">67</h3>
+        <h3>2026.10.12 更新日志:</h3>
+        <h3 style="color:#72ff30">1.新增红石音乐导出：不用命令方块，改用中继器延时线把节奏编码进红石电路，导入即可直接播放</h3>
+        <h3 style="color:#72ff30">2.红石音乐支持三种导出：基岩版结构(.mcstructure)、Java版结构(.nbt)、基岩版存档(.mcworld)</h3>
+        <h3>3.音高存在音符盒自身的 note 状态里，不占额外空间；音色由音符盒正下方的方块决定</h3>
+        <h3>4.红石设置可调「每行跨度」与「电路方块ID」，行宽不足、音符超限都会明确提示，不会悄悄丢音符</h3>
+        <h3>5.每行跨度支持 16~256（16 的倍数），数值越大结构越扁长、行数越少</h3>
+        <h3>6.清理了一批死代码和只给测试用的脚手架，统一了注释风格，顺手做了一些性能优化</h3>
+        <h3>7.改注释的时候把作者以前的更新日志全看了一遍，饿得点了份炸鸡</h3>
         <br>
         <h3>2026.9.30 更新日志:</h3>
         <h3>1.性能优化小更新</h3>
@@ -312,7 +319,7 @@
     </div>
 </div>
 <div style="max-width:1400px;margin:0 auto">
-    <h1>Minecraft 音乐命令方块生成器 by-ZeroRaltal</h1>
+    <h1>Minecraft 音乐生成器 by-ZeroRaltal</h1>
 	<h3 style="color:#ff3030">转载/二改请保留MIT声明，感谢理解!</h3>
     <div class="theme-control">
         <label>主题配色: </label>
@@ -417,13 +424,47 @@
         <button id="importToGameBtn">手动输入指令</button>
         <select id="exportTypeSelect">
             <option value="">------请选择文件类型------</option>
+            <option value="structure_be">指令音乐-基岩版结构文件(.mcstructure)</option>
+            <option value="structure_java">指令音乐-Java版结构文件(.nbt)</option>
+            <option value="mcworld">指令音乐-基岩版存档(.mcworld)</option>
+            <option value="rs_structure_be">红石音乐-基岩版结构文件(.mcstructure)</option>
+            <option value="rs_structure_java">红石音乐-Java版结构文件(.nbt)</option>
+            <option value="rs_mcworld">红石音乐-基岩版存档(.mcworld)</option>
             <option value="cbnd">CBND序列(.cbnd)</option>
-            <option value="structure_be">基岩版结构文件(.mcstructure)</option>
-            <option value="structure_java">Java版结构文件(.nbt)</option>
-            <option value="mcworld">基岩版存档(.mcworld)</option>
             <option value="text">文本文件(.txt)</option>
         </select>
         <button id="exportBtn" disabled>导出</button>
+        <div class="rs-control" id="rsControl" style="display:none;">
+            <span class="snap-prefix">红石设置:</span>
+            <label class="snap-suffix" style="cursor:default;">
+                <span title="每行沿 Z 方向的目标长度（格）。必须是 16 的倍数，最大 256。数值越大，结构越扁长、行数越少；越小则越方正。">每行跨度</span>
+                <select id="rsRowLen" style="width:80px;background:var(--bg-select);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+                    <option value="16">16</option>
+                    <option value="32">32</option>
+                    <option value="48">48</option>
+                    <option value="64" selected>64</option>
+                    <option value="80">80</option>
+                    <option value="96">96</option>
+                    <option value="112">112</option>
+                    <option value="128">128</option>
+                    <option value="144">144</option>
+                    <option value="160">160</option>
+                    <option value="176">176</option>
+                    <option value="192">192</option>
+                    <option value="208">208</option>
+                    <option value="224">224</option>
+                    <option value="240">240</option>
+                    <option value="256">256</option>
+                </select>
+            </label>
+            <label class="snap-suffix" style="cursor:default;">
+                <span title="用来替换红石电路里石头的方块 ID，例如 minecraft:oak_planks。&#10;留空则使用默认的石头。&#10;注意：红石粉正下方那层必须是「可导电的完整方块」，否则音符盒不会被激活。">电路方块ID</span>
+                <input type="text" id="rsSupportBlock" placeholder="minecraft:stone" maxlength="64"
+                       style="width:170px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+            </label>
+            <span id="rsInfo" style="color:var(--text-muted);font-size:12px;"></span>
+            <span id="rsBlockWarn" style="display:none;color:#e0a33c;font-size:12px;flex-basis:100%;">⚠ 输入错误的ID可能会导致游戏无法识别此方块</span>
+        </div>
     </div>
 </div>
 <footer style="max-width:1400px;margin:0 auto 20px;text-align:center;font-size:12px;color:var(--text-muted);">
@@ -524,20 +565,7 @@ class midiParser{
         return{value:val,len};
     }
 }
-// B.2 MIDI tick 转秒
-function midiTickToSeconds(tick,division,tempoEvents){
-    let totalSeconds=0,prevTick=0,prevTempo=500000;
-    const teLength=tempoEvents.length;
-    for(let i=0;i<teLength;i++){
-        const te=tempoEvents[i];
-        if(te.tick>tick)break;
-        totalSeconds+=(te.tick-prevTick)*(prevTempo/1000000/division);
-        prevTick=te.tick;
-        prevTempo=te.tempo;
-    }
-    totalSeconds+=(tick-prevTick)*(prevTempo/1000000/division);
-    return totalSeconds;
-}
+// B.2 MIDI tick 转秒（预计算 tempo 段，逐音符查询用二分）
 function makeTickToSeconds(division,tempoEvents){
     const segTicks=[0],segTimes=[0],segTempos=[500000];
     let acc=0;
@@ -883,10 +911,17 @@ const JAVA_KEY_MAX=66;
 };
 // E.2 Base91 字符表与解码
 const B91_ALPH='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"';
+// 反查表：解码时每个字符查一次，避免每次都在 91 个字符里 indexOf
+const B91_LOOKUP=(function(){
+    const m=new Int8Array(128).fill(-1);
+    for(let i=0;i<B91_ALPH.length;i++)m[B91_ALPH.charCodeAt(i)]=i;
+    return m;
+})();
 function base91Decode(str){
     let v=-1,b=0,n=0,out=[];
     for(let i=0;i<str.length;i++){
-        const c=B91_ALPH.indexOf(str[i]);
+        const code=str.charCodeAt(i);
+        const c=code<128?B91_LOOKUP[code]:-1;
         if(c===-1)continue;
         if(v<0)v=c;
         else{
@@ -1608,7 +1643,6 @@ window.addEventListener('DOMContentLoaded',function(){
     const customInput=document.getElementById('customSoundInput');
     if(initialMode==='custom'){customInput.style.display='inline-block';customInput.disabled=false;}
     else{customInput.style.display='none';customInput.disabled=true;}
-    document.getElementById('customSoundInput').disabled=(initialMode!=='custom');
     modal.classList.remove('hidden');
     document.body.style.overflow='hidden';
     closeBtn.addEventListener('click',function(){
@@ -1767,6 +1801,8 @@ function drawWaterfall(){
     const minKey=waterfallMinKey;
     const maxKey=waterfallMaxKey;
     const keyRange=maxKey-minKey;
+    // 每帧复用同一个 Map，避免逐个 tick 反复新建（瀑布图每帧要跑上百个 tick）
+    const byKey=new Map();
     ctx.strokeStyle=gridColor;
     ctx.lineWidth=0.5;
     const startGrid=Math.ceil(minKey/12)*12;
@@ -1805,7 +1841,7 @@ function drawWaterfall(){
         if(noteBottom<0)continue;
         if(noteCenter>displayHeight)continue;
         const isFading=noteBottom>=displayHeight;
-        const byKey=new Map();
+        byKey.clear();
         for(let i=0;i<arr.length;i++){
             const n=arr[i];
             let group=byKey.get(n.key);
@@ -2462,19 +2498,24 @@ function randomName(){
     return s;
 }
 const NBT_TYPE={End:0,Byte:1,Short:2,Int:3,Long:4,Float:5,Double:6,ByteArray:7,String:8,List:9,Compound:10,IntArray:11};
+// 字符串编码器复用一份（NBT 写入是热路径，每个字符串都 new 一个太浪费）
+const NBT_ENCODER=new TextEncoder();
+// Long/Float/Double 的写入复用同一组临时缓冲，避免每个值都新建 DataView
+const NBT_SCRATCH=new DataView(new ArrayBuffer(8));
+const NBT_SCRATCH_U8=new Uint8Array(NBT_SCRATCH.buffer);
 function nbPutByte(a,v){a.push(v&0xFF);}
 function nbPutShort(a,v){a.push((v>>8)&0xFF,v&0xFF);}
 function nbPutInt(a,v){a.push((v>>>24)&0xFF,(v>>>16)&0xFF,(v>>>8)&0xFF,v&0xFF);}
-function nbPutString(a,s){const b=new TextEncoder().encode(s);nbPutShort(a,b.length);for(let i=0;i<b.length;i++)a.push(b[i]);}
+function nbPutString(a,s){const b=NBT_ENCODER.encode(s);nbPutShort(a,b.length);for(let i=0;i<b.length;i++)a.push(b[i]);}
 function nbPutTag(a,type,name,value){a.push(type);if(type===NBT_TYPE.End)return;nbPutString(a,name);nbPutValue(a,type,value);}
 function nbPutValue(a,type,value){
     switch(type){
         case NBT_TYPE.Byte:nbPutByte(a,value);break;
         case NBT_TYPE.Short:nbPutShort(a,value);break;
         case NBT_TYPE.Int:nbPutInt(a,value);break;
-        case NBT_TYPE.Long:{const dv=new DataView(new ArrayBuffer(8));dv.setBigInt64(0,BigInt(value),false);const u=new Uint8Array(dv.buffer);for(let i=0;i<8;i++)a.push(u[i]);break;}
-        case NBT_TYPE.Float:{const dv=new DataView(new ArrayBuffer(4));dv.setFloat32(0,value,false);const u=new Uint8Array(dv.buffer);for(let i=0;i<4;i++)a.push(u[i]);break;}
-        case NBT_TYPE.Double:{const dv=new DataView(new ArrayBuffer(8));dv.setFloat64(0,value,false);const u=new Uint8Array(dv.buffer);for(let i=0;i<8;i++)a.push(u[i]);break;}
+        case NBT_TYPE.Long:{NBT_SCRATCH.setBigInt64(0,BigInt(value),false);for(let i=0;i<8;i++)a.push(NBT_SCRATCH_U8[i]);break;}
+        case NBT_TYPE.Float:{NBT_SCRATCH.setFloat32(0,value,false);for(let i=0;i<4;i++)a.push(NBT_SCRATCH_U8[i]);break;}
+        case NBT_TYPE.Double:{NBT_SCRATCH.setFloat64(0,value,false);for(let i=0;i<8;i++)a.push(NBT_SCRATCH_U8[i]);break;}
         case NBT_TYPE.ByteArray:nbPutInt(a,value.length);for(let i=0;i<value.length;i++)a.push(value[i]&0xFF);break;
         case NBT_TYPE.String:nbPutString(a,value);break;
         case NBT_TYPE.List:a.push(value.itemType);nbPutInt(a,value.items.length);for(const it of value.items)nbPutValue(a,value.itemType,it);break;
@@ -2613,9 +2654,12 @@ async function exportJavaNBTStructure(){
     URL.revokeObjectURL(url);
 }
 // Q.2 基岩版NBT写入器
+// Long/Float/Double 同样复用临时缓冲（小端），避免逐个值新建 DataView
+const BE_SCRATCH=new DataView(new ArrayBuffer(8));
+const BE_SCRATCH_U8=new Uint8Array(BE_SCRATCH.buffer);
 function bPutU16(a,v){a.push(v&0xFF,(v>>8)&0xFF);}
 function bPutI32(a,v){a.push(v&0xFF,(v>>>8)&0xFF,(v>>>16)&0xFF,(v>>>24)&0xFF);}
-function bPutStr(a,s){const b=new TextEncoder().encode(s);bPutU16(a,b.length);for(let i=0;i<b.length;i++)a.push(b[i]);}
+function bPutStr(a,s){const b=NBT_ENCODER.encode(s);bPutU16(a,b.length);for(let i=0;i<b.length;i++)a.push(b[i]);}
 function bPutTag(a,type,name,val){
     a.push(type);
     if(type===0)return;
@@ -2627,9 +2671,9 @@ function bPutVal(a,type,val){
         case 1:a.push(val&0xFF);break;
         case 2:bPutU16(a,val);break;
         case 3:bPutI32(a,val);break;
-        case 4:{const dv=new DataView(new ArrayBuffer(8));dv.setBigInt64(0,BigInt(val),true);const u=new Uint8Array(dv.buffer);for(let i=0;i<8;i++)a.push(u[i]);break;}
-        case 5:{const dv=new DataView(new ArrayBuffer(4));dv.setFloat32(0,val,true);const u=new Uint8Array(dv.buffer);for(let i=0;i<4;i++)a.push(u[i]);break;}
-        case 6:{const dv=new DataView(new ArrayBuffer(8));dv.setFloat64(0,val,true);const u=new Uint8Array(dv.buffer);for(let i=0;i<8;i++)a.push(u[i]);break;}
+        case 4:{BE_SCRATCH.setBigInt64(0,BigInt(val),true);for(let i=0;i<8;i++)a.push(BE_SCRATCH_U8[i]);break;}
+        case 5:{BE_SCRATCH.setFloat32(0,val,true);for(let i=0;i<4;i++)a.push(BE_SCRATCH_U8[i]);break;}
+        case 6:{BE_SCRATCH.setFloat64(0,val,true);for(let i=0;i<8;i++)a.push(BE_SCRATCH_U8[i]);break;}
         case 7:bPutI32(a,val.length);for(let i=0;i<val.length;i++)a.push(val[i]&0xFF);break;
         case 8:bPutStr(a,val);break;
         case 9:a.push(val.itemType);bPutI32(a,val.items.length);for(const it of val.items)bPutVal(a,val.itemType,it);break;
@@ -2797,7 +2841,7 @@ async function deflateRaw(data){
 class McwZipBuilder{
     constructor(){this.files=[];this.centralDir=[];this.offset=0;}
     async addFile(name,data,compress=false){
-        const nameBytes=new TextEncoder().encode(name);
+        const nameBytes=NBT_ENCODER.encode(name);
         const crc=this._crc32(data);
         const uncompSize=data.length;
         let storedData=data;
@@ -2966,15 +3010,7 @@ function mcwBuildLevelDat(worldName){
     result.set(nbtBytes,8);
     return result;
 }
-// R.7 子区块调色板条目
-function mcwBuildPaletteEntry(name,states){
-    return bSerializeBE([
-        {name:'name',type:8,value:name},
-        {name:'states',type:10,value:states},
-        {name:'version',type:3,value:17825808}
-    ]);
-}
-// R.8 子区块 Version 9
+// R.7 子区块 Version 9
 function mcwBuildSubChunk(paletteEntries,subChunkBlocks,subY){
     const pc=paletteEntries.length;
     let BITS;
@@ -2998,7 +3034,7 @@ function mcwBuildSubChunk(paletteEntries,subChunkBlocks,subY){
     for(const entry of paletteEntries){for(let i=0;i<entry.length;i++)buf.push(entry[i]);}
     return {bytes:new Uint8Array(buf),bits:BITS,paletteSize:pc,indexBytes:indexByteCount};
 }
-// R.9 命令方块 NBT
+// R.8 命令方块 NBT
 function mcwBuildCommandBlockNbt(cmd,x,y,z,auto){
     return bSerializeBE([
         {name:'BlockEntityVersion',type:3,value:0},
@@ -3024,8 +3060,10 @@ function mcwBuildCommandBlockNbt(cmd,x,y,z,auto){
         {name:'z',type:3,value:z},
     ]);
 }
-// R.10 告示牌 BlockEntity NBT
-function mcwBuildSignBlockEntityNbt(frontText,x,y,z){
+// R.9 告示牌 BlockEntity NBT
+// 基岩版告示牌文字是**纯字符串**，所以 § 格式码在这里是有效的（Java 版无效）。
+// 拆成 tags 版本，方便 .mcstructure 直接复用（那里需要标签数组而非字节）。
+function mcwSignBlockEntityTags(frontText,x,y,z){
     const makeTextBlock=(text,ignoreLighting)=>[
         {name:'FilteredText',type:8,value:''},
         {name:'HideGlowOutline',type:1,value:0},
@@ -3035,7 +3073,7 @@ function mcwBuildSignBlockEntityNbt(frontText,x,y,z){
         {name:'Text',type:8,value:text},
         {name:'TextOwner',type:8,value:''}
     ];
-    return bSerializeBE([
+    return[
         {name:'BackText',type:10,value:makeTextBlock('',false)},
         {name:'BlockEntityVersion',type:3,value:0},
         {name:'FrontText',type:10,value:makeTextBlock(frontText,true)},
@@ -3044,9 +3082,12 @@ function mcwBuildSignBlockEntityNbt(frontText,x,y,z){
         {name:'x',type:3,value:x},
         {name:'y',type:3,value:y},
         {name:'z',type:3,value:z}
-    ]);
+    ];
 }
-// R.11 world_icon.jpeg
+function mcwBuildSignBlockEntityNbt(frontText,x,y,z){
+    return bSerializeBE(mcwSignBlockEntityTags(frontText,x,y,z));
+}
+// R.10 world_icon.jpeg
 function generateWorldIcon(songName,durationStr,instrumentCount){
     const canvas=document.createElement('canvas');
     canvas.width=800;
@@ -3079,18 +3120,7 @@ function generateWorldIcon(songName,durationStr,instrumentCount){
     for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
     return bytes;
 }
-// R.12 简单 chunk 键
-function mcwMakeSimpleKey(tag,subY){
-    const len=subY!==undefined?10:9;
-    const k=new Uint8Array(len);
-    const dv=new DataView(k.buffer);
-    dv.setInt32(0,0,true);
-    dv.setInt32(4,0,true);
-    k[8]=tag;
-    if(subY!==undefined)k[9]=subY&0xFF;
-    return k;
-}
-// R.13 LevelDB 日志记录
+// R.11 LevelDB 日志记录
 function mcwBuildLogRecord(data,type){
     if(type===undefined)type=1;
     const header=new Uint8Array(7);
@@ -3106,7 +3136,7 @@ function mcwBuildLogRecord(data,type){
     result.set(data,7);
     return result;
 }
-// R.14 SSTable 构建
+// R.12 SSTable 构建
 function mcwBuildSSTable(entries){
     const sorted=[...entries].sort((a,b)=>{
         const n=Math.min(a.key.length,b.key.length);
@@ -3201,7 +3231,7 @@ function mcwBuildSSTable(entries){
     for(const p of pieces){result.set(p,off);off+=p.length;}
     return result;
 }
-// R.15 MANIFEST
+// R.13 MANIFEST
 function mcwBuildManifestWithLdb(logNumber,fileNumber,fileSize,smallestKey,largestKey){
     const m=[];
     mcwWriteVarInt(m,1);
@@ -3224,7 +3254,7 @@ function mcwBuildManifestWithLdb(logNumber,fileNumber,fileSize,smallestKey,large
     mcwWriteVarInt(m,fileNumber+1);
     return mcwBuildLogRecord(new Uint8Array(m),1);
 }
-// R.16 主流程
+// R.14 主流程
 async function exportMcWorld(){
     if(!lastChainCmds||lastChainCmds.length===0){alert('没有可导出的指令，请先解析文件');return;}
     const worldName=(originalFileName||currentSongName||'CommandBlockMusic').trim()||'CommandBlockMusic';
@@ -3232,7 +3262,10 @@ async function exportMcWorld(){
     const pad=(n)=>String(n).padStart(2,'0');
     const dateStr=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
     const timeStr=`${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    const signText=`§l§d@ZeroRaltal\n§b导出时间:\n§r§o§7${dateStr}\n${timeStr}`;
+    // 告示牌文字由 getRedstoneSignLines() 统一提供（红石音乐导出用的是同一份），
+    // 这样两种导出的牌子永远一致，不会各自漂移。
+    // 基岩版牌子文字是纯字符串，§ 格式码在这里有效。
+    const signText=getRedstoneSignText();
     let maxTick=0;
     for(const c of lastChainCmds){for(const t of c.ticks)if(t>maxTick)maxTick=t;}
     const durationSec=Math.round(maxTick/20);
@@ -3433,7 +3466,7 @@ async function exportMcWorld(){
         0x74, 0x09, 0x06, 0x00, 0x53, 0x63, 0x6f, 0x72, 0x65, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00
     ]);
-    entries.push({key:new TextEncoder().encode('scoreboard'),value:scoreboardBytes});
+    entries.push({key:NBT_ENCODER.encode('scoreboard'),value:scoreboardBytes});
     const LDB_FILE_NUMBER=5;
     const ldbBytes=mcwBuildSSTable(entries);
     const sortedKeys=entries.map(e=>e.key).sort((a,b)=>{
@@ -3444,16 +3477,16 @@ async function exportMcWorld(){
     const smallestKey=sortedKeys[0];
     const largestKey=sortedKeys[sortedKeys.length-1];
     const manifestBytes=mcwBuildManifestWithLdb(0,LDB_FILE_NUMBER,ldbBytes.length,smallestKey,largestKey);
-    const currentBytes=new TextEncoder().encode('MANIFEST-000004\n');
+    const currentBytes=NBT_ENCODER.encode('MANIFEST-000004\n');
     const iconBytes=generateWorldIcon(worldName,durationStr,instrumentCount);
     const zip=new McwZipBuilder();
     await zip.addFile('level.dat',mcwBuildLevelDat(worldName),true);
     await zip.addFile(`db/00000${LDB_FILE_NUMBER}.ldb`,ldbBytes,true);
     await zip.addFile('db/CURRENT',currentBytes,true);
     await zip.addFile('db/MANIFEST-000004',manifestBytes,true);
-    await zip.addFile('levelname.txt',new TextEncoder().encode(worldName),true);
-    await zip.addFile('world_behavior_packs.json',new TextEncoder().encode('[]'),true);
-    await zip.addFile('world_resource_packs.json',new TextEncoder().encode('[]'),true);
+    await zip.addFile('levelname.txt',NBT_ENCODER.encode(worldName),true);
+    await zip.addFile('world_behavior_packs.json',NBT_ENCODER.encode('[]'),true);
+    await zip.addFile('world_resource_packs.json',NBT_ENCODER.encode('[]'),true);
     await zip.addFile('world_icon.jpeg',iconBytes,false);
     const zipBytes=zip.build();
     const blob=new Blob([zipBytes],{type:'application/octet-stream'});
@@ -3572,6 +3605,9 @@ function doExportText(){
 // T.4 下拉框与导出按钮事件
 document.getElementById('exportTypeSelect').addEventListener('change',function(){
     document.getElementById('exportBtn').disabled=!this.value;
+    var rs=document.getElementById('rsControl');
+    if(rs)rs.style.display=this.value.indexOf('rs_')===0?'flex':'none';
+    if(this.value.indexOf('rs_')===0)updateRedstoneInfo();
 });
 document.getElementById('exportBtn').addEventListener('click',async function(){
     const type=document.getElementById('exportTypeSelect').value;
@@ -3584,13 +3620,794 @@ document.getElementById('exportBtn').addEventListener('click',async function(){
             case 'structure_java':await doExportStructure('java');break;
             case 'mcworld':await doExportMcWorld();break;
             case 'text':doExportText();break;
+            case 'rs_structure_be':await doExportRedstone('bedrock_structure');break;
+            case 'rs_structure_java':await doExportRedstone('java_structure');break;
+            case 'rs_mcworld':await doExportRedstone('bedrock_world');break;
         }
     }catch(e){
         console.error(e);
         alert('导出失败：'+(e&&e.message?e.message:e));
     }
 });
+// V 红石音乐导出
+// V.1 乐器映射到音符盒下方方块
+const RS_INS_BLOCKS=[
+    {java:'minecraft:dirt',         be:'minecraft:dirt'},
+    {java:'minecraft:oak_planks',   be:'minecraft:oak_planks'},
+    {java:'minecraft:cobblestone',  be:'minecraft:cobblestone'},
+    {java:'minecraft:sand',         be:'minecraft:sand'},
+    {java:'minecraft:glass',        be:'minecraft:glass'},
+    {java:'minecraft:white_wool',   be:'minecraft:white_wool'},
+    {java:'minecraft:clay',         be:'minecraft:clay'},
+    {java:'minecraft:gold_block',   be:'minecraft:gold_block'},
+    {java:'minecraft:packed_ice',   be:'minecraft:packed_ice'},
+    {java:'minecraft:bone_block',   be:'minecraft:bone_block'},
+    {java:'minecraft:iron_block',   be:'minecraft:iron_block'},
+    {java:'minecraft:soul_sand',    be:'minecraft:soul_sand'},
+    {java:'minecraft:pumpkin',      be:'minecraft:pumpkin'},
+    {java:'minecraft:emerald_block',be:'minecraft:emerald_block'},
+    {java:'minecraft:hay_block',    be:'minecraft:hay_block'},
+    {java:'minecraft:glowstone',    be:'minecraft:glowstone'}
+];
+const RS_INS_JAVA_NAMES=['harp','bass','basedrum','snare','hat','guitar','flute','bell','chime','xylophone','iron_xylophone','cow_bell','didgeridoo','bit','banjo','pling'];
+const RS_KEY_MIN=42,RS_KEY_MAX=66;
+const RS_MAX_DELAY=4;
+const RS_ROW_STRIDE=3;
+const RS_BASE_Y=0,RS_POWER_Y=1,RS_CIRCUIT_Y=2;
+const RS_MAX_CHAIN=11;
+const RS_ROW_SPAN_MIN=16,RS_ROW_SPAN_MAX=256,RS_ROW_SPAN_STEP=16;
+const RS_SIGN_ROTATION=4;
+const RS_CHAIN_MAX_MID=15;
+const RS_CHAIN_MAX_TAIL=15-1-RS_ROW_STRIDE;
+const RS_DEFAULT_SUPPORT_BLOCK='minecraft:stone';
+function rsNormalizeBlockId(raw){
+    var s=String(raw==null?'':raw).trim().toLowerCase();
+    if(!s)return RS_DEFAULT_SUPPORT_BLOCK;
+    var br=s.indexOf('[');
+    if(br!==-1)s=s.slice(0,br);
+    s=s.replace(/[^a-z0-9_:./-]/g,'');
+    if(!s)return RS_DEFAULT_SUPPORT_BLOCK;
+    if(s.indexOf(':')===-1)s='minecraft:'+s;
+    var parts=s.split(':');
+    if(parts.length!==2||!parts[0]||!parts[1])return RS_DEFAULT_SUPPORT_BLOCK;
+    return s;
+}
+function rsNormalizeRowSpan(v){
+    var n=parseInt(v,10);
+    if(!isFinite(n)||n<=0)n=RS_ROW_SPAN_MIN;
+    n=Math.round(n/RS_ROW_SPAN_STEP)*RS_ROW_SPAN_STEP;
+    if(n<RS_ROW_SPAN_MIN)n=RS_ROW_SPAN_MIN;
+    if(n>RS_ROW_SPAN_MAX)n=RS_ROW_SPAN_MAX;
+    return n;
+}
+// V.2 主入口
+function buildRedstoneLayout(notes,options){
+    const opt=Object.assign({msPerTick:50,rowSpan:64},options||{});
+    const rowSpanTarget=rsNormalizeRowSpan(opt.rowSpan);
+    const supportBlock=rsNormalizeBlockId(opt.supportBlock);
+    // V.2.1 音高折进两个八度
+    const folded=[];
+    for(const n of notes){
+        let k=n.key|0;
+        while(k<RS_KEY_MIN)k+=12;
+        while(k>RS_KEY_MAX)k-=12;
+        if(k<RS_KEY_MIN||k>RS_KEY_MAX)continue;
+        folded.push({ins:Math.max(0,Math.min(15,n.instrument|0)),note:k-RS_KEY_MIN,tick:n.tick|0});
+    }
+    if(folded.length===0)return null;
+    // V.2.2 song tick -> 红石 tick
+    const rsPerTick=opt.msPerTick/100;
+    const byTick=new Map();
+    for(const n of folded){
+        const t=Math.max(0,Math.round(n.tick*rsPerTick));
+        let a=byTick.get(t);
+        if(!a){a=[];byTick.set(t,a);}
+        a.push(n);
+    }
+    const targets=[...byTick.keys()].sort((a,b)=>a-b);
+    let maxSim=1;
+    for(const t of targets)maxSim=Math.max(maxSim,byTick.get(t).length);
+    // V.2.3 时间轴
+    const slotsPerStep=2*RS_MAX_CHAIN;
+    const steps=[];
+    let cursor=0;
+    let droppedNotes=0;
+    for(let ti=0;ti<targets.length;ti++){
+        const t=targets[ti];
+        const group=byTick.get(t);
+        let remaining=(t+1)-cursor;
+        if(remaining<1)remaining=1;
+        for(;;){
+            const d=Math.min(RS_MAX_DELAY,remaining);
+            const isFinal=(remaining===d);
+            let mine=null,cl=0;
+            if(isFinal){
+                mine=group.slice(0,slotsPerStep);
+                if(group.length>slotsPerStep)droppedNotes+=group.length-slotsPerStep;
+                cl=Math.max(1,Math.min(RS_MAX_CHAIN,Math.ceil(mine.length/2)));
+            }
+            steps.push({delay:d,notes:mine,cl:cl});
+            cursor+=d;
+            remaining-=d;
+            if(isFinal)break;
+        }
+    }
+    // V.2.4 分行
+    const stepRow=[];
+    let rowPadShort=0;
+    {
+        const rowsIdx=[];
+        {
+            let r=0,used=0;
+            for(let i=0;i<steps.length;i++){
+                const mn=steps[i].cl+1+(steps[i].cl===0?1:0);
+                if(used>0&&used+mn>rowSpanTarget){r++;used=0;}
+                if(!rowsIdx[r])rowsIdx[r]=[];
+                rowsIdx[r].push(i);
+                used+=mn;
+            }
+        }
+        const outSteps=[];
+        for(let ri=0;ri<rowsIdx.length;ri++){
+            const mine=rowsIdx[ri].map(i=>({delay:steps[i].delay,notes:steps[i].notes,cl:steps[i].cl}));
+            const rowLen=()=>{
+                let len=0;
+                for(const s of mine)len+=s.cl+1;
+                if(mine[mine.length-1].cl===0)len+=1;
+                return len;
+            };
+            const short=()=>rowSpanTarget-rowLen();
+            const grow=(k)=>{
+                const lim=(k===mine.length-1)?RS_CHAIN_MAX_TAIL:RS_CHAIN_MAX_MID;
+                while(mine[k].cl<lim&&short()>0)mine[k].cl++;
+            };
+            const growAll=()=>{
+                for(let k=0;k<mine.length;k++)if(mine[k].cl>0)grow(k);
+                for(let k=0;k<mine.length;k++)if(mine[k].cl===0)grow(k);
+            };
+            growAll();
+            let guard=0;
+            while(short()>0&&guard++<1024){
+                const room=short();
+                let best=-1,bestAdd=0;
+                for(let k=0;k<mine.length;k++){
+                    const d=mine[k].delay;
+                    if(d<=1)continue;
+                    const add=d-1;
+                    if(add<=room&&add>bestAdd){best=k;bestAdd=add;}
+                }
+                if(best<0)break;
+                const s=mine[best],d=s.delay;
+                const subs=[];
+                for(let q=0;q<d;q++){
+                    const isLast=(q===d-1);
+                    subs.push({delay:1,notes:isLast?s.notes:null,cl:isLast?s.cl:0});
+                }
+                mine.splice(best,1,...subs);
+                growAll();
+            }
+            const isLastRow=(ri===rowsIdx.length-1);
+            if(isLastRow){
+                let guard2=0;
+                while(short()>0&&guard2++<4096){
+                    const room=short();
+                    const add=Math.min(room-1,RS_CHAIN_MAX_MID);
+                    if(add<0)break;
+                    mine.push({delay:1,notes:null,cl:add});
+                }
+            }
+            const pad=short();
+            if(pad>0)rowPadShort+=pad;
+            for(const s of mine){stepRow.push(ri);outSteps.push(s);}
+        }
+        steps.length=0;
+        for(const s of outSteps)steps.push(s);
+        cursor=0;
+        for(const s of steps)cursor+=s.delay;
+    }
+    // V.2.5 铺设几何
+    const blocks=[];
+    let rowOfPut=0, partOfPut='body';
+    const put=(x,y,z,t,extra)=>{blocks.push(Object.assign({x,y,z,t,row:rowOfPut,part:partOfPut},extra||{}));};
+    const solidAt=(x,z)=>{
+        put(x,RS_POWER_Y,z,'support',{block:supportBlock});
+        put(x,RS_BASE_Y,z,'support',{block:supportBlock});
+    };
+    let row=0,X0=1,dir=1,zR=1;
+    let lastRep=null;
+    let zChainEnd=null;
+    let curRowIdx=-1;
+    for(let si=0;si<steps.length;si++){
+        const st=steps[si];
+        const span=st.cl+1;
+        if(stepRow[si]!==curRowIdx&&curRowIdx!==-1){
+            const zConn=(zChainEnd!==null)?zChainEnd:(lastRep!==null?lastRep+dir:zR);
+            if(zChainEnd===null){
+                put(X0,RS_CIRCUIT_Y,zConn,'wire');
+                solidAt(X0,zConn);
+            }
+            const zCorner=zConn+dir;
+            partOfPut='corner';
+            for(let c=0;c<=RS_ROW_STRIDE;c++){
+                put(X0+c,RS_CIRCUIT_Y,zCorner,'wire');
+                solidAt(X0+c,zCorner);
+            }
+            partOfPut='body';
+            dir=-dir;
+            X0=X0+RS_ROW_STRIDE;
+            zR=zConn;
+            row++;
+            lastRep=null;
+            zChainEnd=null;
+        }
+        if(stepRow[si]!==curRowIdx){curRowIdx=stepRow[si];rowOfPut=curRowIdx;}
+        put(X0,RS_CIRCUIT_Y,zR,'repeater',{facing:dir>0?'north':'south',delay:st.delay});
+        solidAt(X0,zR);
+        lastRep=zR;
+        zChainEnd=null;
+        if(st.cl>0){
+            const zStart=zR+dir;
+            for(let c=0;c<st.cl;c++){
+                const zd=zStart+dir*c;
+                put(X0,RS_CIRCUIT_Y,zd,'wire');
+                solidAt(X0,zd);
+                zChainEnd=zd;
+            }
+            if(st.notes){
+                for(let k=0;k<st.notes.length;k++){
+                    const n=st.notes[k];
+                    const cell=k>>1;
+                    const zd=zStart+dir*cell;
+                    const nx=X0+((k&1)?1:-1);
+                    put(nx,RS_POWER_Y,zd,'noteblock',{ins:n.ins,note:n.note});
+                    put(nx,RS_BASE_Y,zd,'instrument',{ins:n.ins});
+                }
+            }
+        }
+        zR=zR+dir*span;
+    }
+    // V.2.6 按钮与告示牌
+    partOfPut='aux';
+    const firstRep=blocks.find(b=>b.t==='repeater');
+    if(firstRep){
+        const zIn=firstRep.z+(firstRep.facing==='north'?-1:1);
+        put(firstRep.x,RS_CIRCUIT_Y,zIn,'button');
+        solidAt(firstRep.x,zIn);
+        const sx=firstRep.x+1;
+        put(sx,RS_CIRCUIT_Y,zIn,'sign',{text:String(opt.signText||''),rot:RS_SIGN_ROTATION});
+        solidAt(sx,zIn);
+    }
+    // V.2.7 尺寸与平移
+    let minX=1e9,minY=1e9,minZ=1e9,maxX=-1e9,maxY=-1e9,maxZ=-1e9;
+    for(const b of blocks){
+        if(b.x<minX)minX=b.x;if(b.x>maxX)maxX=b.x;
+        if(b.y<minY)minY=b.y;if(b.y>maxY)maxY=b.y;
+        if(b.z<minZ)minZ=b.z;if(b.z>maxZ)maxZ=b.z;
+    }
+    for(const b of blocks){b.x-=minX;b.y-=minY;b.z-=minZ;}
+    const size=[maxX-minX+1,maxY-minY+1,maxZ-minZ+1];
+    let dustCells=0;
+    for(const b of blocks)if(b.t==='wire')dustCells++;
+    let rowWidthsOk=true;
+    {
+        const m=new Map();
+        for(const b of blocks){
+            if(b.part!=='body')continue;
+            if(b.t!=='wire'&&b.t!=='repeater')continue;
+            if(!m.has(b.row))m.set(b.row,{lo:1e9,hi:-1e9});
+            const e=m.get(b.row);
+            if(b.z<e.lo)e.lo=b.z;
+            if(b.z>e.hi)e.hi=b.z;
+        }
+        for(const e of m.values())if(e.hi-e.lo+1!==rowSpanTarget)rowWidthsOk=false;
+    }
+    return{
+        blocks,size,
+        stats:{supportBlock,slotsPerStep,maxSim,rows:row+1,steps:steps.length,
+               redstoneTicks:cursor,noteCount:folded.length,dropped:droppedNotes,
+               skipped:notes.length-folded.length,rowSpan:rowSpanTarget,
+               dustCells,rowPadShort,rowWidthsOk}
+    };
+}
+// V.3 逻辑方块 -> Java 方块状态
+function rsJavaBlock(b){
+    switch(b.t){
+        case 'support':  return{name:b.block||RS_DEFAULT_SUPPORT_BLOCK,props:{}};
+        case 'wire':     return{name:'minecraft:redstone_wire',props:{north:'side',south:'side',east:'side',west:'side',power:'0'}};
+        case 'repeater': return{name:'minecraft:repeater',props:{facing:b.facing,delay:String(b.delay),locked:'false',powered:'false'}};
+        case 'noteblock':return{name:'minecraft:note_block',props:{instrument:RS_INS_JAVA_NAMES[b.ins]||'harp',note:String(b.note),powered:'false'}};
+        case 'instrument':return{name:RS_INS_BLOCKS[b.ins].java,props:{}};
+        case 'button':   return{name:'minecraft:stone_button',props:{face:'floor',facing:'north',powered:'false'}};
+        case 'sign':     return{name:'minecraft:oak_sign',props:{rotation:String(b.rot||0),waterlogged:'false'}};
+        default:         return{name:'minecraft:air',props:{}};
+    }
+}
+// V.4 Java 版红石结构导出 (.nbt)
+function rsJavaPaletteEntry(block){
+    const j=rsJavaBlock(block);
+    const props=Object.entries(j.props);
+    return props.length?{Name:j.name,Properties:props}:{Name:j.name};
+}
+function rsJavaStructureNBT(size,blocks){
+    // blocks: [{x,y,z,state}]
+    const palette=[];
+    const palMap=new Map();
+    function palIdx(block){
+        const j=rsJavaBlock(block);
+        const key=j.name+'|'+JSON.stringify(j.props);
+        if(palMap.has(key))return palMap.get(key);
+        palette.push(rsJavaPaletteEntry(block));
+        const i=palette.length-1;
+        palMap.set(key,i);
+        return i;
+    }
+    for(const b of blocks)palIdx(b);
+    const blockItems=blocks.map(b=>{
+        const c=[];
+        c.push({name:'pos',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Int,items:[b.x,b.y,b.z]}});
+        c.push({name:'state',type:NBT_TYPE.Int,value:palIdx(b)});
+        c.push({name:'nbt',type:NBT_TYPE.Compound,value:rsJavaBlockNbt(b)});
+        return c;
+    });
+    const root=[];
+    root.push({name:'DataVersion',type:NBT_TYPE.Int,value:4325});
+    root.push({name:'author',type:NBT_TYPE.String,value:'CBND Redstone Exporter'});
+    root.push({name:'size',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Int,items:size}});
+    root.push({name:'palette',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:palette.map(e=>{
+        const c=[{name:'Name',type:NBT_TYPE.String,value:e.Name}];
+        if(e.Properties)c.push({name:'Properties',type:NBT_TYPE.Compound,value:e.Properties.map(([k,v])=>({name:k,type:NBT_TYPE.String,value:v}))});
+        return c;
+    })}});
+    root.push({name:'blocks',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:blockItems}});
+    root.push({name:'entities',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:[]}});
+    return root;
+}
+function rsJavaTextComponent(seg){
+    const c=[];
+    c.push({name:'text',type:NBT_TYPE.String,value:String(seg.text==null?'':seg.text)});
+    if(seg.color)c.push({name:'color',type:NBT_TYPE.String,value:seg.color});
+    if(seg.bold)c.push({name:'bold',type:NBT_TYPE.Byte,value:1});
+    if(seg.italic)c.push({name:'italic',type:NBT_TYPE.Byte,value:1});
+    if(seg.underlined)c.push({name:'underlined',type:NBT_TYPE.Byte,value:1});
+    if(seg.struckthrough)c.push({name:'strikethrough',type:NBT_TYPE.Byte,value:1});
+    if(seg.obfuscated)c.push({name:'obfuscated',type:NBT_TYPE.Byte,value:1});
+    return c;
+}
+function rsJavaLineComponent(lineText){
+    const segs=rsSignLegacyToSegments(lineText);
+    const real=segs.filter(s=>s&&s.text!=null&&String(s.text).length>0);
+    if(real.length===0)return rsJavaTextComponent({text:''});
+    if(real.length===1)return rsJavaTextComponent(real[0]);
+    return[
+        {name:'text',type:NBT_TYPE.String,value:''},
+        {name:'extra',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,
+            items:real.map(rsJavaTextComponent)}}
+    ];
+}
+function rsJavaBlockNbt(b){
+    if(b.t!=='sign')return[];
+    const lines=rsSignTextToBedrockLines(b.text);
+    const mk=(arr)=>[
+        {name:'has_glowing_text',type:NBT_TYPE.Byte,value:0},
+        {name:'color',type:NBT_TYPE.String,value:'black'},
+        {name:'messages',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:(()=>{
+            const out=[];
+            for(let i=0;i<4;i++)out.push(rsJavaLineComponent(arr[i]));
+            return out;
+        })()}}
+    ];
+    return[
+        {name:'id',type:NBT_TYPE.String,value:'minecraft:sign'},
+        {name:'front_text',type:NBT_TYPE.Compound,value:mk(lines)},
+        {name:'back_text',type:NBT_TYPE.Compound,value:mk([])},
+        {name:'is_waxed',type:NBT_TYPE.Byte,value:1}
+    ];
+}
+// V.5 基岩版导出
+const RS_BE_BLOCK_VERSION=17825808;
+function rsBedrockPaletteInfo(b){
+    switch(b.t){
+        case 'support':  return{name:b.block||RS_DEFAULT_SUPPORT_BLOCK,states:[]};
+        case 'wire':     return{name:'minecraft:redstone_wire',states:[{name:'redstone_signal',type:3,value:0}]};
+        case 'repeater': return{name:'minecraft:unpowered_repeater',states:[
+                            {name:'minecraft:cardinal_direction',type:8,value:b.facing},
+                            {name:'repeater_delay',type:3,value:Math.max(0,Math.min(3,b.delay-1))}]};
+        case 'noteblock':return{name:'minecraft:noteblock',states:[],be:{id:'Music',note:b.note}};
+        case 'instrument':return{name:RS_INS_BLOCKS[b.ins].be,states:RS_INS_BLOCKS[b.ins].beStates?Object.entries(RS_INS_BLOCKS[b.ins].beStates).map(([k,v])=>({name:k,type:8,value:v})):[]};
+        case 'button':   return{name:'minecraft:stone_button',states:[
+                            {name:'button_pressed_bit',type:1,value:0},
+                            {name:'facing_direction',type:3,value:1}]};
+        case 'sign':     return{name:'minecraft:standing_sign',states:[
+                            {name:'ground_sign_direction',type:3,value:b.rot||0}],sign:rsSignTextToBedrockLines(b.text)};
+        default:         return{name:'minecraft:air',states:[]};
+    }
+}
+function rsBedrockNoteBlockEntity(note,x,y,z){
+    return bSerializeBE([
+        {name:'id',type:8,value:'Music'},
+        {name:'note',type:1,value:Math.max(0,Math.min(24,note))},
+        {name:'x',type:3,value:x},
+        {name:'y',type:3,value:y},
+        {name:'z',type:3,value:z}
+    ]);
+}
+function rsBuildBedrockStructure(layout){
+    const [sx,sy,sz]=layout.size;
+    const total=sx*sy*sz;
+    const palette=[];
+    const palMap=new Map();
+    function palIdx(b){
+        const info=rsBedrockPaletteInfo(b);
+        const key=info.name+'|'+JSON.stringify(info.states);
+        if(palMap.has(key))return palMap.get(key);
+        palette.push({name:info.name,states:info.states,version:RS_BE_BLOCK_VERSION});
+        const i=palette.length-1;
+        palMap.set(key,i);
+        return i;
+    }
+    const indices=new Array(total).fill(-1);
+    const bpData=new Map();
+    for(const b of layout.blocks){
+        if(b.x<0||b.y<0||b.z<0||b.x>=sx||b.y>=sy||b.z>=sz)continue;
+        const idx=palIdx(b);
+        const flat=b.x*(sy*sz)+b.y*sz+b.z;
+        indices[flat]=idx;
+        if(b.t==='noteblock'){
+            bpData.set(String(flat),[
+                {name:'block_entity_data',type:10,value:[
+                    {name:'id',type:8,value:'Music'},
+                    {name:'note',type:1,value:Math.max(0,Math.min(24,b.note))},
+                    {name:'x',type:3,value:b.x},
+                    {name:'y',type:3,value:b.y},
+                    {name:'z',type:3,value:b.z}
+                ]}
+            ]);
+        }else if(b.t==='sign'){
+            bpData.set(String(flat),[
+                {name:'block_entity_data',type:10,
+                 value:mcwSignBlockEntityTags(String(b.text||''),b.x,b.y,b.z)}
+            ]);
+        }
+    }
+    const paletteEntries=palette.map(e=>[
+        {name:'name',type:8,value:e.name},
+        {name:'states',type:10,value:e.states},
+        {name:'version',type:3,value:e.version}
+    ]);    const bpEntries=[];
+    for(const[k,v]of bpData)bpEntries.push({name:k,type:10,value:v});
+    const root=[
+        {name:'format_version',type:3,value:1},
+        {name:'size',type:9,value:{itemType:3,items:[sx,sy,sz]}},
+        {name:'structure',type:10,value:[
+            {name:'block_indices',type:9,value:{itemType:9,items:[
+                {itemType:3,items:indices},
+                {itemType:3,items:new Array(total).fill(-1)}
+            ]}},
+            {name:'entities',type:9,value:{itemType:10,items:[]}},
+            {name:'palette',type:10,value:[
+                {name:'default',type:10,value:[
+                    {name:'block_palette',type:9,value:{itemType:10,items:paletteEntries}},
+                    {name:'block_position_data',type:10,value:bpEntries}
+                ]}
+            ]}
+        ]},
+        {name:'structure_world_origin',type:9,value:{itemType:3,items:[0,0,0]}}
+    ];
+    return{bytes:bSerializeBE(root),paletteSize:palette.length,noteEntities:bpData.size,total};
+}
+// V.6 基岩版存档导出
+const RS_WORLD_BASE_Y=-60;
+function rsChunkKey(cx,cz,tag,subY){
+    const len=subY!==undefined?10:9;
+    const k=new Uint8Array(len);
+    const dv=new DataView(k.buffer);
+    dv.setInt32(0,cx,true);
+    dv.setInt32(4,cz,true);
+    k[8]=tag;
+    if(subY!==undefined)k[9]=subY&0xFF;
+    return k;
+}
+function rsBuildRedstoneWorldEntries(layout){
+    const chunks=new Map();
+    {
+        const [sx,,sz]=layout.size;
+        const groundSubY=Math.floor((RS_WORLD_BASE_Y-4)/16);
+        const maxCX=Math.floor((sx-1)/16),maxCZ=Math.floor((sz-1)/16);
+        for(let cx=0;cx<=maxCX;cx++)for(let cz=0;cz<=maxCZ;cz++){
+            const ck=cx+','+cz;
+            if(!chunks.has(ck))chunks.set(ck,{cx,cz,subs:new Map()});
+            const ch=chunks.get(ck);
+            if(!ch.subs.has(groundSubY))ch.subs.set(groundSubY,{palette:[],palKeys:new Map(),blocks:[],entities:[]});
+            const sub=ch.subs.get(groundSubY);
+            const layers=[
+                {y:0,name:'minecraft:bedrock',states:[{name:'infiniburn_bit',type:1,value:0}]},
+                {y:1,name:'minecraft:dirt',states:[]},
+                {y:2,name:'minecraft:dirt',states:[]},
+                {y:3,name:'minecraft:grass_block',states:[]}
+            ];
+            const idxs=[];
+            for(const lay of layers){
+                const pk=lay.name+'|'+JSON.stringify(lay.states);
+                let pi;
+                if(sub.palKeys.has(pk))pi=sub.palKeys.get(pk);
+                else{
+                    sub.palette.push({name:lay.name,states:lay.states,version:RS_BE_BLOCK_VERSION});
+                    pi=sub.palette.length-1;
+                    sub.palKeys.set(pk,pi);
+                }
+                idxs.push(pi);
+            }
+            for(let lx=0;lx<16;lx++)for(let lz=0;lz<16;lz++){
+                for(let li=0;li<layers.length;li++){
+                    sub.blocks.push({x:lx,y:layers[li].y,z:lz,paletteIdx:idxs[li]});
+                }
+            }
+        }
+    }
+    for(const b of layout.blocks){
+        const wx=b.x, wy=RS_WORLD_BASE_Y+b.y, wz=b.z;
+        if(wy<-64||wy>319)continue;
+        const cx=Math.floor(wx/16), cz=Math.floor(wz/16);
+        const ck=cx+','+cz;
+        if(!chunks.has(ck))chunks.set(ck,{cx,cz,subs:new Map()});
+        const ch=chunks.get(ck);
+        const subY=Math.floor(wy/16);
+        if(!ch.subs.has(subY))ch.subs.set(subY,{palette:[],palKeys:new Map(),blocks:[],entities:[]});
+        const sub=ch.subs.get(subY);
+        const info=rsBedrockPaletteInfo(b);
+        const pk=info.name+'|'+JSON.stringify(info.states);
+        let pi;
+        if(sub.palKeys.has(pk))pi=sub.palKeys.get(pk);
+        else{
+            sub.palette.push({name:info.name,states:info.states,version:RS_BE_BLOCK_VERSION});
+            pi=sub.palette.length-1;
+            sub.palKeys.set(pk,pi);
+        }
+        const lx=((wx%16)+16)%16, ly=((wy%16)+16)%16, lz=((wz%16)+16)%16;
+        sub.blocks.push({x:lx,y:ly,z:lz,paletteIdx:pi});
+        if(b.t==='noteblock')sub.entities.push({kind:'noteblock',note:b.note,wx,wy,wz});
+        if(b.t==='sign')sub.entities.push({kind:'sign',text:String(b.text||''),wx,wy,wz});
+    }
+    const v2b=new Uint8Array(540);
+    for(let i=0;i<270;i++)v2b[i*2]=0x04;
+    const tag2c=new Uint8Array([0x2a]);
+    const tag36=new Uint8Array([2,0,0,0]);
+    const tag3f=new Uint8Array([0xb5,0x60,0x75,0xfd,0x69,0x2a,0x3c,0x93]);
+    const tag40=new Uint8Array([0x00,0x0a]);
+    const tag41=new Uint8Array([0x00]);
+    const tag77=new Uint8Array(0);
+    const entries=[];
+    for(const ch of chunks.values()){
+        const beBytes=[];
+        for(const[subY,sub]of ch.subs){
+            const AIRKEY='minecraft:air|[]';
+            if(!sub.palKeys.has(AIRKEY)){
+                sub.palette.unshift({name:'minecraft:air',states:[],version:RS_BE_BLOCK_VERSION});
+                for(const k of [...sub.palKeys.keys()])sub.palKeys.set(k,sub.palKeys.get(k)+1);
+                sub.palKeys.set(AIRKEY,0);
+                for(const bb of sub.blocks)bb.paletteIdx+=1;
+            }
+            const palBytes=sub.palette.map(e=>bSerializeBE([
+                {name:'name',type:8,value:e.name},
+                {name:'states',type:10,value:e.states},
+                {name:'version',type:3,value:e.version}
+            ]));
+            const sc=mcwBuildSubChunk(palBytes,sub.blocks,subY);
+            entries.push({key:rsChunkKey(ch.cx,ch.cz,0x2f,subY&0xFF),value:sc.bytes});
+            for(const en of sub.entities){
+                if(en.kind==='sign')beBytes.push(mcwBuildSignBlockEntityNbt(en.text||'',en.wx,en.wy,en.wz));
+                else beBytes.push(rsBedrockNoteBlockEntity(en.note,en.wx,en.wy,en.wz));
+            }
+        }
+        entries.push({key:rsChunkKey(ch.cx,ch.cz,0x2b),value:v2b});
+        entries.push({key:rsChunkKey(ch.cx,ch.cz,0x2c),value:tag2c});
+        if(beBytes.length){
+            let total=0;
+            for(const n of beBytes)total+=n.length;
+            const combined=new Uint8Array(total);
+            let off=0;
+            for(const n of beBytes){combined.set(n,off);off+=n.length;}
+            entries.push({key:rsChunkKey(ch.cx,ch.cz,0x31),value:combined});
+        }
+        entries.push({key:rsChunkKey(ch.cx,ch.cz,0x36),value:tag36});
+        entries.push({key:rsChunkKey(ch.cx,ch.cz,0x3f),value:tag3f});
+        entries.push({key:rsChunkKey(ch.cx,ch.cz,0x40),value:tag40});
+        entries.push({key:rsChunkKey(ch.cx,ch.cz,0x41),value:tag41});
+        entries.push({key:rsChunkKey(ch.cx,ch.cz,0x77),value:tag77});
+    }
+    return{entries,chunkCount:chunks.size};
+}
+async function rsBuildRedstoneMcWorld(layout,worldName,meta){
+    const{entries,chunkCount}=rsBuildRedstoneWorldEntries(layout);
+    const scoreboardBytes=new Uint8Array([
+        0x0a,0x00,0x00,0x09,0x08,0x00,0x43,0x72,0x69,0x74,0x65,0x72,0x69,0x61,0x00,0x00,
+        0x00,0x00,0x00,0x09,0x11,0x00,0x44,0x69,0x73,0x70,0x6c,0x61,0x79,0x4f,0x62,0x6a,
+        0x65,0x63,0x74,0x69,0x76,0x65,0x73,0x00,0x00,0x00,0x00,0x00,0x09,0x07,0x00,0x45,
+        0x6e,0x74,0x72,0x69,0x65,0x73,0x00,0x00,0x00,0x00,0x00,0x04,0x0c,0x00,0x4c,0x61,
+        0x73,0x74,0x55,0x6e,0x69,0x71,0x75,0x65,0x49,0x44,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x09,0x0a,0x00,0x4f,0x62,0x6a,0x65,0x63,0x74,0x69,0x76,0x65,0x73,0x0a,
+        0x01,0x00,0x00,0x00,0x08,0x08,0x00,0x43,0x72,0x69,0x74,0x65,0x72,0x69,0x61,0x05,
+        0x00,0x64,0x75,0x6d,0x6d,0x79,0x08,0x0b,0x00,0x44,0x69,0x73,0x70,0x6c,0x61,0x79,
+        0x4e,0x61,0x6d,0x65,0x01,0x00,0x74,0x08,0x04,0x00,0x4e,0x61,0x6d,0x65,0x01,0x00,
+        0x74,0x09,0x06,0x00,0x53,0x63,0x6f,0x72,0x65,0x73,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00
+    ]);
+    entries.push({key:NBT_ENCODER.encode('scoreboard'),value:scoreboardBytes});
+    const LDB_FILE_NUMBER=5;
+    const ldbBytes=mcwBuildSSTable(entries);
+    const sortedKeys=entries.map(e=>e.key).sort((a,b)=>{
+        const n=Math.min(a.length,b.length);
+        for(let i=0;i<n;i++)if(a[i]!==b[i])return a[i]-b[i];
+        return a.length-b.length;
+    });
+    const manifestBytes=mcwBuildManifestWithLdb(0,LDB_FILE_NUMBER,ldbBytes.length,sortedKeys[0],sortedKeys[sortedKeys.length-1]);
+    const currentBytes=NBT_ENCODER.encode('MANIFEST-000004\n');
+    const iconBytes=generateWorldIcon(worldName,meta.durationStr,meta.instrumentCount);
+    const zip=new McwZipBuilder();
+    await zip.addFile('level.dat',mcwBuildLevelDat(worldName),true);
+    await zip.addFile(`db/00000${LDB_FILE_NUMBER}.ldb`,ldbBytes,true);
+    await zip.addFile('db/CURRENT',currentBytes,true);
+    await zip.addFile('db/MANIFEST-000004',manifestBytes,true);
+    await zip.addFile('levelname.txt',NBT_ENCODER.encode(worldName),true);
+    await zip.addFile('world_behavior_packs.json',NBT_ENCODER.encode('[]'),true);
+    await zip.addFile('world_resource_packs.json',NBT_ENCODER.encode('[]'),true);
+    await zip.addFile('world_icon.jpeg',iconBytes,false);
+    return{bytes:zip.build(),chunkCount,entryCount:entries.length};
+}
+// V.7 红石导出入口
+function getRedstoneOptions(){
+    var el=document.getElementById('rsRowLen');
+    var rowSpan=el?rsNormalizeRowSpan(el.value):64;
+    var sbEl=document.getElementById('rsSupportBlock');
+    var supportBlock=rsNormalizeBlockId(sbEl?sbEl.value:'');
+    return{msPerTick:previewTimePerTick||50,rowSpan:rowSpan,supportBlock:supportBlock,signText:getRedstoneSignText()};
+}
+function getRedstoneSignText(){
+    var now=new Date();
+    var pad=function(n){return String(n).padStart(2,'0');};
+    var dateStr=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+    var timeStr=pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+    return '§l§d@ZeroRaltal\n§b导出时间:\n§r§o§7'+dateStr+'\n'+timeStr;
+}
+var RS_SIGN_COLOR_CODE={black:'0',dark_blue:'1',dark_green:'2',dark_aqua:'3',dark_red:'4',
+    dark_purple:'5',gold:'6',gray:'7',dark_gray:'8',blue:'9',green:'a',aqua:'b',red:'c',
+    light_purple:'d',yellow:'e',white:'f'};
+var RS_SIGN_CODE_COLOR=(function(){var m={};for(var k in RS_SIGN_COLOR_CODE)m[RS_SIGN_COLOR_CODE[k]]=k;return m;})();
+function rsSignLegacyToSegments(line){
+    var segs=[],buf='',color=null,bold=false,italic=false,underlined=false,struck=false,obf=false;
+    function flush(){
+        if(!buf)return;
+        var s={text:buf};
+        if(color)s.color=color;
+        if(bold)s.bold=true;
+        if(italic)s.italic=true;
+        if(underlined)s.underlined=true;
+        if(struck)s.struckthrough=true;
+        if(obf)s.obfuscated=true;
+        segs.push(s);buf='';
+    }
+    line=String(line==null?'':line);
+    for(var i=0;i<line.length;i++){
+        var ch=line[i];
+        if(ch==='§'&&i+1<line.length){
+            var code=line[i+1].toLowerCase();i++;
+            flush();
+            if(code==='r'){color=null;bold=italic=underlined=struck=obf=false;}
+            else if(code==='l')bold=true;
+            else if(code==='o')italic=true;
+            else if(code==='n')underlined=true;
+            else if(code==='m')struck=true;
+            else if(code==='k')obf=true;
+            else if(RS_SIGN_CODE_COLOR[code])color=RS_SIGN_CODE_COLOR[code];
+            continue;
+        }
+        buf+=ch;
+    }
+    flush();
+    return segs;
+}
+function rsSignTextToBedrockLines(text){
+    var parts=String(text==null?'':text).split('\n');
+    var out=[];
+    for(var i=0;i<4;i++)out.push(parts[i]||'');
+    return out;
+}
+function buildCurrentRedstoneLayout(){
+    if(!currentNotes||currentNotes.length===0)return null;
+    var opt=getRedstoneOptions();
+    var notes=currentNotes;
+    var octaveShift=parseInt(document.getElementById('octaveShift').value)||0;
+    var mode=document.querySelector('input[name="soundMode"]:checked').value;
+    if(octaveShift!==0){
+        notes=notes.map(function(n){
+            var k=n.key+octaveShift*12;
+            return{tick:n.tick,key:k,instrument:n.instrument,velocity:n.velocity};
+        });
+    }
+    if(mode==='harp'){
+        notes=notes.map(function(n){
+            var isPerc=PERCUSSION_INSTRUMENTS.indexOf(n.instrument)!==-1;
+            return{tick:n.tick,key:n.key,instrument:isPerc?n.instrument:0,velocity:n.velocity};
+        });
+    }
+    return buildRedstoneLayout(notes,opt);
+}
+function updateRedstoneInfo(){
+    var el=document.getElementById('rsInfo');
+    if(!el)return;
+    var sbEl=document.getElementById('rsSupportBlock');
+    var warnEl=document.getElementById('rsBlockWarn');
+    if(warnEl){
+        var raw=sbEl?String(sbEl.value||'').trim():'';
+        warnEl.style.display=raw?'inline':'none';
+    }
+    if(!currentNotes||currentNotes.length===0){el.textContent='';return;}
+    try{
+        var L=buildCurrentRedstoneLayout();
+        if(!L){el.textContent='无可用音符';return;}
+        var s=L.stats;
+        el.textContent='音符 '+s.noteCount+' | 中继器 '+s.steps+' | 红石粉 '+s.dustCells+
+            ' | 行数 '+s.rows+' | 尺寸 '+L.size.join('x')+
+            (s.rowWidthsOk?' | 行宽 '+s.rowSpan+'✓':' | 行宽不足 '+s.rowPadShort)+
+            ' | 方块 '+s.supportBlock+
+            (s.skipped>0?' | 超音域跳过 '+s.skipped:'')+(s.dropped>0?' | 同刻超限丢弃 '+s.dropped:'');
+    }catch(e){el.textContent='';}
+}
+function checkRedstoneFeasibility(L){
+    if(!L)return null;
+    var s=L.stats;
+    if(s.dropped>0){
+        return '有 '+s.dropped+' 个音符因「同一时刻音符过多」被丢弃。\n\n'+
+            '原因：一条红石延时线每步最多挂 '+s.slotsPerStep+' 个音符盒'+
+            '（每格红石线左右各一个，链长受红石线 15 格信号衰减限制），'+
+            '本曲最大同时发音数为 '+s.maxSim+'。\n\n'+
+            '仍可导出，但会缺少这部分音符。若需完整还原，请先用外部工具减少同时发音数。';
+    }
+    if(s.rowPadShort>0){
+        return '有 '+s.rowPadShort+' 格无法补进「每行跨度」：本曲音符太稀疏，'+
+            '即使把中继器拆到最细、红石粉加到最长，也填不满 '+s.rowSpan+' 格的行。\n\n'+
+            '这些行会比目标短一截（结构仍可用，只是边缘不齐）。\n'+
+            '如需完全对齐，请把「每行跨度」调小。';
+    }
+    if(s.skipped>0){
+        return '有 '+s.skipped+' 个音符超出音符盒音域（F#3–F#5 两个八度），已自动折进音域。';
+    }
+    return null;
+}
+document.getElementById('rsRowLen').addEventListener('change',updateRedstoneInfo);
+document.getElementById('rsSupportBlock').addEventListener('input',updateRedstoneInfo);
+function downloadBlobBytes(bytes,filename,mime){
+    var blob=new Blob([bytes],{type:mime||'application/octet-stream'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+async function doExportRedstone(kind){
+    var L=buildCurrentRedstoneLayout();
+    if(!L){alert('没有可用于红石导出的音符。');return;}
+    var base=(originalFileName||currentSongName||'redstone').trim()||'redstone';
+    var s=L.stats;
+    var warn=checkRedstoneFeasibility(L);
+    if(warn&&!confirm(warn+'\n\n是否继续导出？'))return;
+    if(kind==='java_structure'){
+        var jb=L.blocks.map(function(b){return Object.assign({},b,{x:b.x,y:b.y,z:b.z});});
+        var root=rsJavaStructureNBT(L.size,jb);
+        var gz=await gzipBytes(serializeNBTCompound(root));
+        downloadBlobBytes(gz,randomName()+'.nbt');
+    }else if(kind==='bedrock_structure'){
+        var r=rsBuildBedrockStructure(L);
+        downloadBlobBytes(r.bytes,base+'_redstone.mcstructure');
+    }else{
+        var w=await rsBuildRedstoneMcWorld(L,base,{
+            durationStr:Math.floor((s.redstoneTicks/10)/60)+':'+String(Math.floor(s.redstoneTicks/10)%60).padStart(2,'0'),
+            instrumentCount:new Set(L.blocks.filter(function(b){return b.t==='noteblock';}).map(function(b){return b.ins;})).size
+        });
+        downloadBlobBytes(w.bytes,base+'_redstone.mcworld');
+    }
+}
 // U 控制台签名
-console.warn(`\n  _____ _____  ____    ___  \n |__  /| ____||  _ \\  / _ \\ \n   / / |  _|  | |_) || | | |\n  / /_ | |___ |  _ < | |_| |\n /____||_____||_| \\_\\ \\___/ \n   ____         _  _          _ \n |  _ \\  __ _ | || |_  __ _ | |\n | |_) |/ _' || || __|/ _' || |\n |  _ < ||_| || || |_ ||_| || |\n |_| \\_\\\\__,_||_| \\__|\\__,_||_|\n\n`);
+console.warn(`\n  _____ _____  ____    ___  \n |__  /| ____||  _ \\  / _ \\ \n   / / |  _|  | |_) || | | |\n  / /_ | |___ |  _ < | |_| |\n /____||_____||_| \\_\\ \\___/ \n  ____         _  _          _ \n |  _ \\  __ _ | || |_  __ _ | |\n | |_) |/ _' || || __|/ _' || |\n |  _ < ||_| || || |_ ||_| || |\n |_| \\_\\\\__,_||_| \\__|\\__,_||_|\n\n`);
 </script>
 </html>
