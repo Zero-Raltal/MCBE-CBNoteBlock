@@ -2512,9 +2512,7 @@ function randomName(){
     return s;
 }
 const NBT_TYPE={End:0,Byte:1,Short:2,Int:3,Long:4,Float:5,Double:6,ByteArray:7,String:8,List:9,Compound:10,IntArray:11};
-// 字符串编码器复用一份（NBT 写入是热路径，每个字符串都 new 一个太浪费）
 const NBT_ENCODER=new TextEncoder();
-// Long/Float/Double 的写入复用同一组临时缓冲，避免每个值都新建 DataView
 const NBT_SCRATCH=new DataView(new ArrayBuffer(8));
 const NBT_SCRATCH_U8=new Uint8Array(NBT_SCRATCH.buffer);
 function nbPutByte(a,v){a.push(v&0xFF);}
@@ -2668,7 +2666,6 @@ async function exportJavaNBTStructure(){
     URL.revokeObjectURL(url);
 }
 // Q.2 基岩版NBT写入器
-// Long/Float/Double 同样复用临时缓冲（小端），避免逐个值新建 DataView
 const BE_SCRATCH=new DataView(new ArrayBuffer(8));
 const BE_SCRATCH_U8=new Uint8Array(BE_SCRATCH.buffer);
 function bPutU16(a,v){a.push(v&0xFF,(v>>8)&0xFF);}
@@ -3075,8 +3072,6 @@ function mcwBuildCommandBlockNbt(cmd,x,y,z,auto){
     ]);
 }
 // R.9 告示牌 BlockEntity NBT
-// 基岩版告示牌文字是**纯字符串**，所以 § 格式码在这里是有效的（Java 版无效）。
-// 拆成 tags 版本，方便 .mcstructure 直接复用（那里需要标签数组而非字节）。
 function mcwSignBlockEntityTags(frontText,x,y,z){
     const makeTextBlock=(text,ignoreLighting)=>[
         {name:'FilteredText',type:8,value:''},
@@ -3113,7 +3108,7 @@ function generateWorldIcon(songName,durationStr,instrumentCount){
     ctx.textBaseline='middle';
     ctx.fillStyle='#57b984';
     ctx.font='bold 22px sans-serif';
-    ctx.fillText('Minecraft 音乐命令方块',400,70);
+    ctx.fillText('Minecraft 音乐生成器',400,70);
     ctx.fillStyle='#FFFFFF';
     let fontSize=56;
     ctx.font=`bold ${fontSize}px sans-serif`;
@@ -3276,9 +3271,6 @@ async function exportMcWorld(){
     const pad=(n)=>String(n).padStart(2,'0');
     const dateStr=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
     const timeStr=`${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    // 告示牌文字由 getRedstoneSignLines() 统一提供（红石音乐导出用的是同一份），
-    // 这样两种导出的牌子永远一致，不会各自漂移。
-    // 基岩版牌子文字是纯字符串，§ 格式码在这里有效。
     const signText=getRedstoneSignText();
     let maxTick=0;
     for(const c of lastChainCmds){for(const t of c.ticks)if(t>maxTick)maxTick=t;}
@@ -3552,7 +3544,7 @@ document.addEventListener('pointerdown',function(e){
     window.prompt=wrap(nativePrompt);
 })();
 // T 导出下拉框与按钮
-// T.1 按目标平台在后台生成指令（不影响页面已渲染数据）
+// T.1 按目标平台在后台生成指令
 function generateChainCmdsForPlatform(targetPlatform){
     if(!currentNotes||currentNotes.length===0)return[];
     const octaveShift=parseInt(document.getElementById('octaveShift').value)||0,mode=document.querySelector('input[name="soundMode"]:checked').value,harpOnly=(mode==='harp'||mode==='custom');
@@ -3936,14 +3928,13 @@ function rsJavaBlock(b){
         default:         return{name:'minecraft:air',props:{}};
     }
 }
-// V.4 Java 版红石结构导出 (.nbt)
+// V.4 Java 版红石结构导出
 function rsJavaPaletteEntry(block){
     const j=rsJavaBlock(block);
     const props=Object.entries(j.props);
     return props.length?{Name:j.name,Properties:props}:{Name:j.name};
 }
 function rsJavaStructureNBT(size,blocks){
-    // blocks: [{x,y,z,state}]
     const palette=[];
     const palMap=new Map();
     function palIdx(block){
