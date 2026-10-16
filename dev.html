@@ -336,7 +336,7 @@
     </div>
     <div class="box">
 		<label>上传(.mid/.midi/.nbs/.cbnd)文件: </label>
-        <a href="https://zero-raltal.github.io/MCBE-CBNoteBlock/Audio2Midi.html" target="_blank" rel="noopener noreferrer" style="color:var(--text-secondary);text-decoration:underline;margin-left:8px;">点击此处将音频转换为MIDI</a>
+        <a href="https://c.zero0.asia/Audio2Midi.html" target="_blank" rel="noopener noreferrer" style="color:var(--text-secondary);text-decoration:underline;margin-left:8px;">点击此处将音频转换为MIDI</a>
         <br>
         <br>
         <input type="file" id="fileInput">
@@ -2119,7 +2119,7 @@ function getRandomSongs(arr,count){
 }
 // O.2 加载歌单
 async function loadPlaylist(){
-    const GITHUB='https://zero-raltal.github.io/MCBE-CBNoteBlock/songs/';
+    const GITHUB='https://c.zero0.asia/songs/';
     const LOCAL='./songs/';
     const isFile=window.location.protocol==='file:';
     const sources=isFile?[{url:GITHUB,label:'github.com/Zero-Raltal/MCBE-CBNoteBlock'}]:[{url:LOCAL,label:''},{url:GITHUB,label:'github.com/Zero-Raltal/MCBE-CBNoteBlock'}];
