@@ -277,6 +277,12 @@
         <h3>2.修复了上传某些体积巨大的MIDI导致解析失败的BUG</h3>
         <h3>3.解决了老版本NBS无法解析的问题</h3>
         <h3>4.解决了一些提交BUG的用户</h3>
+        <br>
+        <br>
+        <div style="text-align:center;">
+            <h3 style="text-align:center;">赞助开发者</h3>
+            <img id="sponsorQr" alt="赞助开发者" width="128" height="128" style="background:#fff;border-radius:6px;">
+        </div>
     </div>
 </div>
 <div id="playlistModal" class="modal-overlay hidden">
@@ -970,6 +976,21 @@ async function preloadAllSamples(){
 }
 async function loadSample(soundName){return sampleBuffers[soundName]||null;}
 function getSoundFileName(instrumentId,harpOnly){return(harpOnly&&!PERCUSSION_INSTRUMENTS.includes(instrumentId))?"harp":(INSTRUMENT_SOUND_MAP[instrumentId]||"harp");}
+// E.5 赞助二维码
+// 原图是 128x128、带抗锯齿灰阶的二维码。扫描器本来就会自己二值化，所以这里直接
+// 存成 1 位黑白 PNG（873 字节），再用 base91 编成文本，比保留灰阶小一个数量级。
+// 加载时解回字节、做成 Blob URL 挂到 <img> 上，省掉 base64 那一层额外的膨胀。
+const SPONSOR_QR_B91='vuk:eJs4+BAAN/<MCG4DAAAABAAAwAAAAAPr[$WCBtw(Uw{Wo)$p:P`]~nvc4_AFn+2i]Q*W,5J^KXYM|"0Ht64waGm&=c*=<G[g"@!F(Ha&J`Bf*g2<=/X3/Ex(g!^X"LTdUy|zr`CzN^3SC.JkS_e%7oQ1C*<)`~Hl9+l%gw%Zxk86Gb>M23qFO{Lv^DWWSy!=*`8);bXZq$TQZpjmu&OR5J[dXz8W",0l{e$eHnja&X>TGHYZq<|/Ld,gnGhj~kGV[UH%*X`Rp#Lx&M;~_D:<6Z#oC&=dztz>^2F>|hLv;B9JO}p>2R|jCIs}g[Z`).UP>3;(i}*qG,cAzZLj=YItjwFR#@t8AnmDR9:g{}}=zXB@tGu<$1RK^Q{Z/`$tIerz$vwh+{g{5ht&mQlXBL#Skd/n1V,jAV"Kta"o&vvdl<0|C7Mg2[*gYZY>3pVz;`t!em^TC084ASFi#7{YJH,M~YDpYr!E%ylry]~^lrTfIJYKOk3rUz:}`>EF_mDrt[eVm;(,NukaQ{uGpMg,!hB]e)ytb<e)sH}i6v`=:t?{=T#d$dxza>Yh:b&)HzbV*LP.`.Bf;~2<yfA#;]|sgHClR_`=*SW,"]5)VjifIY~&P~/I5nG|O/SBj(uM}=d{Sd2>st:p_Uh`oO>j&2C4Xl$_GqJi]"|.{]wQ"$Bcphqx#!h83p*Y=T8:@6ENM|+s<IiYb|_M]hR)%}Fl/cH`d46+v>"g&{9)|`;hem[B}T#|tyZ$x1EZIX$9xlz#@d!}I5pegL2%Ljrc<mBfWTo.o=^6j@,8&m=gK=7fRfq~@|h@`UaQhh^Yu&QUhK/*|Ki(&+ucJ$0/5pt&L^U!3S|x$&Bo^=n*^^kEmN?MgBeTY+D$t#_#=+d"p^iTrj&z?U!B{<XK4JX(9yD{Zz>JI3bUN9zt[BzeIj"3>X{UP&:~Y*XYMsY2*p4;`)]gFx{&VMTUnz#o20f5PX5^j`%iqL|p}rS?*<^/D<gg1{T}<13J~{GG{/9a^*$OF`8>75uym<6)/nsDj6Fo{_pK`|J..7XSW<kB"d^R>*pS6WAAAA_cE3Y@%LfDC';
+(function(){
+    const img=document.getElementById('sponsorQr');
+    if(!img)return;
+    try{
+        img.src=URL.createObjectURL(new Blob([base91Decode(SPONSOR_QR_B91)],{type:'image/png'}));
+    }catch(e){
+        console.warn('赞助二维码解码失败:',e);
+        img.style.display='none';
+    }
+})();
 // F 预览播放器
 // F.1 播放器状态与音频链
 let previewContext=null,previewNotes=[],previewSongLength=0,previewCurrentTick=0,previewHarpOnly=false,previewVolume=1,previewSpeed=1.0,activeSources=[],isPlaying=false,cachedOctaveShift=0;
