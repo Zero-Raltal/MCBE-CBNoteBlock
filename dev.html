@@ -102,6 +102,11 @@
         .rs-control .snap-prefix{color:var(--text-primary);font-size:13px;user-select:none}
         .rs-control .snap-suffix{color:var(--text-primary);font-size:13px;display:inline-flex;align-items:center;gap:6px;user-select:none}
         .shift-control label{color:var(--text-primary);font-size:13px;user-select:none;transition:color 0.3s ease}
+        /* 计分板 / 选择器：各占一排，窄屏时 label 不会被挤成竖排 */
+        .shift-control.sb-control{flex-direction:column;align-items:stretch;gap:8px}
+        .sb-row{display:flex;align-items:center;gap:8px;min-width:0}
+        .sb-row label{white-space:nowrap;flex:0 0 auto}
+        .sb-row input{min-width:0}
         .playlist-quick{background:var(--bg-mode);padding:12px 16px;margin:12px 0;border:0;border-radius:4px;transition:background 0.3s ease}
         .playlist-item{background:var(--bg-playlist-item);padding:6px 14px;border-radius:4px;cursor:pointer;border:1px solid var(--border-playlist);font-size:13px;color:var(--text-primary);transition:background 0.2s,border-color 0.2s;display:inline-flex;align-items:center;gap:6px}
         .playlist-item.pressed{background:var(--bg-playlist-hover);border-color:var(--border-accent)}
@@ -413,11 +418,15 @@
                 <option value="4">+4 八度</option>
             </select>
         </div>
-        <div class="shift-control">
-            <label>计分板: </label>
-            <input type="text" id="scoreboardName" value="t" maxlength="16" spellcheck="false" title="计分板目标名，只影响生成的指令，不影响 .cbnd 导出" style="width:90px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
-            <label>选择器: </label>
-            <input type="text" id="scoreboardSelector" value="@a" maxlength="80" spellcheck="false" title="实体选择器，例如 @a / @p / @a[tag=player]" style="width:180px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+        <div class="shift-control sb-control">
+            <div class="sb-row">
+                <label>计分板: </label>
+                <input type="text" id="scoreboardName" value="t" maxlength="16" spellcheck="false" title="计分板目标名，只影响生成的指令，不影响 .cbnd 导出" style="width:90px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+            </div>
+            <div class="sb-row">
+                <label>选择器: </label>
+                <input type="text" id="scoreboardSelector" value="@a" maxlength="80" spellcheck="false" title="实体选择器，例如 @a / @p / @a[tag=player]" style="width:180px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+            </div>
         </div>
         <div class="stats" id="stats">等待上传文件...</div>
     </div>
