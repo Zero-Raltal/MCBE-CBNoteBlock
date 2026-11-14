@@ -1775,22 +1775,23 @@ document.getElementById('octaveShift').addEventListener('change',function(){
     cachedOctaveShift=parseInt(this.value)||0;
     updateRenderAndRestoreState();
 });
-// 计分板设置：改动后立刻刷新示例指令，并防抖重新生成（生成较重，避免每个按键都跑一遍）
-let scoreboardRegenTimer=null;
-function onScoreboardSettingChanged(immediate){
+// 计分板设置：和自定义音色输入框一致，只在失去焦点（change）时才刷新，
+// 输入过程中完全不重算，避免逐字符重建整条指令列表造成卡顿。
+function onScoreboardSettingChanged(){
     refreshScoreboardExamples();
-    if(scoreboardRegenTimer){clearTimeout(scoreboardRegenTimer);scoreboardRegenTimer=null;}
-    if(immediate){updateRenderAndRestoreState();return;}
-    scoreboardRegenTimer=setTimeout(function(){scoreboardRegenTimer=null;updateRenderAndRestoreState();},250);
+    updateRenderAndRestoreState();
 }
-function bindScoreboardInput(id){
+function bindScoreboardInput(id,sanitize){
     const el=document.getElementById(id);
-    el.addEventListener('input',function(){onScoreboardSettingChanged(false);});
-    // change 在失焦时触发：立刻重新生成，避免紧接着导出/复制时拿到旧指令
-    el.addEventListener('change',function(){onScoreboardSettingChanged(true);});
+    if(!el)return;
+    el.addEventListener('change',function(){
+        // 失焦时把非法字符就地规整掉，让输入框显示的内容和生成的指令一致
+        this.value=sanitize(this.value);
+        onScoreboardSettingChanged();
+    });
 }
-bindScoreboardInput('scoreboardName');
-bindScoreboardInput('scoreboardSelector');
+bindScoreboardInput('scoreboardName',sanitizeScoreboardName);
+bindScoreboardInput('scoreboardSelector',sanitizeScoreboardSelector);
 document.querySelectorAll('input[name="soundMode"]').forEach(radio=>{
     radio.addEventListener('change',function(){
         const customInput=document.getElementById('customSoundInput');
