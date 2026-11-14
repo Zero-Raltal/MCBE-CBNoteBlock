@@ -166,10 +166,15 @@
 		<h2>遇到BUG及时反馈,我会在周末尽快修</h2>
         <button class="modal-close-btn" id="modalCloseBtn">确定</button>
         <br>
+        <h3>2026.11.14 更新日志:</h3>
+        <h3 style="color:#72ff30">1.新增导出为 .nbs，可直接导入NBS软件编辑</h3>
+        <h3 style="color:#72ff30">2.新增导出为 .wav，使用内置音源离线渲染，导出后可以直接播放</h3>
+        <h3>3.导出 .cbnd 时支持写入循环标记</h3>
+        <br>
         <h3>2026.11.13 更新日志:</h3>
-        <h3 style="color:#72ff30">1.八度移调下面新增计分板设置，可以自定义计分板名称和实体选择器，只影响生成的指令，不影响 .cbnd 导出</h3>
-        <h3 style="color:#72ff30">2.导入带循环标记的 .nbs 时会自动生成一条跳转指令，预览播放到结尾也会跳回循环点，不影响 .cbnd 导出</h3>
-        <h3 style="color:#72ff30">3.音源全部换成 Opus 编码，原始音频体积从 67KB 降到 28KB</h3>
+        <h3>1.新增计分板设置，可以自定义计分板名称和实体选择器</h3>
+        <h3>2.导入带循环标记的 .nbs 时会生成跳转指令，播放到结尾跳回循环点</h3>
+        <h3>3.音源全部换成 Opus 编码</h3>
         <br>
         <h3>2026.10.12 更新日志:</h3>
         <h3 style="color:#72ff30">1.新增红石音乐导出，不用命令方块，改用中继器延时线把节奏编码进红石电路，导入即可直接播放</h3>
@@ -452,7 +457,9 @@
             <option value="rs_structure_java">红石音乐-Java版结构文件(.nbt)</option>
             <option value="rs_mcworld">红石音乐-基岩版存档(.mcworld)</option>
             <option value="cbnd">CBND序列(.cbnd)</option>
-            <option value="text">文本文件(.txt)</option>
+            <option value="nbs">NBS工程文件(.nbs)</option>
+            <option value="wav">音频文件(.wav)</option>
+            <option value="text">指令文本文件(.txt)</option>
         </select>
         <button id="exportBtn" disabled>导出</button>
         <div class="rs-control" id="rsControl" style="display:none;">
@@ -497,7 +504,7 @@
 // A.1 文件与播放状态
 var currentFileArrayBuffer=null;
 var currentFileType=null;
-let originalFileName='',currentSongName='',previewTimePerTick=50,previewTimer=null,playbackStartTime=0,isDragging=false,dragTargetTick=0,isDraggingProgress=false,wasPlayingBeforeDrag=false,importSeq=0,importCopiedSet=new Set(),importCanvas=null,importCtx=null,importFlashUntil=0;
+let originalFileName='',currentSongName='',currentSongAuthor='',previewTimePerTick=50,previewTimer=null,playbackStartTime=0,isDragging=false,dragTargetTick=0,isDraggingProgress=false,wasPlayingBeforeDrag=false,importSeq=0,importCopiedSet=new Set(),importCanvas=null,importCtx=null,importFlashUntil=0;
 let elProgressFill=null,elTickDisplay=null;
 // A.2 SVG 图标常量
 const ICON_PLAY=`<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle"><polygon points="5,3 19,12 5,21"/></svg>`;
@@ -1701,6 +1708,7 @@ function handleFile(arrayBuffer,fileType){
             }
             currentNotes=result.notes;
             currentSongName=result.songName||'';
+            currentSongAuthor=result.songAuthor||'';
             currentLoop=(result.loop&&result.loop.enabled)?{enabled:true,startTick:result.loop.startTick|0,totalLoops:result.loop.totalLoops|0,songLength:result.songLength|0}:null;
             var octaveShift=parseInt(document.getElementById('octaveShift').value);
             var mode=document.querySelector('input[name="soundMode"]:checked').value;
@@ -2252,8 +2260,8 @@ function exportToCBND(chainCmds,tempo,loopOverride){
     }
     return writer.toUint8Array();
 }
-function downloadCBND(binaryData,filename='song.cbnd'){
-    const blob=new Blob([binaryData],{type:'application/octet-stream'});
+function downloadBinary(binaryData,filename,mime){
+    const blob=new Blob([binaryData],{type:mime||'application/octet-stream'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
@@ -2262,6 +2270,9 @@ function downloadCBND(binaryData,filename='song.cbnd'){
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+}
+function downloadCBND(binaryData,filename='song.cbnd'){
+    downloadBinary(binaryData,filename,'application/octet-stream');
 }
 // N.4 位读取器与解析 CBND
 class BitReader{
@@ -2507,6 +2518,7 @@ function loadAndParseBuffer(arrayBuffer,fileType,fileName){
             }
             currentNotes=result.notes;
             currentSongName=result.songName||'';
+            currentSongAuthor=result.songAuthor||'';
             currentLoop=(result.loop&&result.loop.enabled)?{enabled:true,startTick:result.loop.startTick|0,totalLoops:result.loop.totalLoops|0,songLength:result.songLength|0}:null;
             var octaveShift=parseInt(document.getElementById('octaveShift').value);
             var mode=document.querySelector('input[name="soundMode"]:checked').value;
@@ -3814,6 +3826,209 @@ function doExportText(){
     a.click();
     URL.revokeObjectURL(a.href);
 }
+// T.3.1 导出为 NBS（音符工程文件）
+// 反查表：音色名 -> NBS 乐器编号。导出时先把音符按当前设置（八度移调 / 仅竖琴）
+// 换算成“听起来的样子”，再写进文件，保证导入回来和预览听到的一致。
+const NBS_SOUND_TO_INSTRUMENT=(function(){
+    const m={};
+    for(const[id,name]of Object.entries(INSTRUMENT_SOUND_MAP))m[name]=+id;
+    return m;
+})();
+function buildNBSFile(notes,songLength,tempoValue,loopInfo,songName,songAuthor){
+    const bytes=[];
+    const u8=v=>{bytes.push(v&0xFF);};
+    const i16=v=>{v=Math.max(-32768,Math.min(32767,v|0));bytes.push(v&0xFF,(v>>8)&0xFF);};
+    const i32=v=>{v=v|0;bytes.push(v&0xFF,(v>>8)&0xFF,(v>>16)&0xFF,(v>>24)&0xFF);};
+    const str=s=>{const b=new TextEncoder().encode(s||'');i32(b.length);for(let i=0;i<b.length;i++)bytes.push(b[i]);};
+    // NBS 的每个 tick 在同一层上只能放一个音符。这里按乐器分层：每种乐器占一段连续的层，
+    // 段内按音高从高到低分配（高音在上层、低音在下层），段长 = 该乐器最大同时发声数。
+    const byTick=new Map();
+    let dropped=0;
+    for(const n of notes){
+        let key=n.key|0;
+        while(key<9)key+=12;
+        while(key>96)key-=12;
+        if(key<9||key>96){dropped++;continue;}
+        const instr=NBS_SOUND_TO_INSTRUMENT[getSoundFileName(n.instrument,previewHarpOnly)];
+        if(instr===undefined){dropped++;continue;}
+        let vel=Math.round(n.velocity===undefined?100:n.velocity);
+        vel=Math.max(0,Math.min(100,vel));
+        const t=n.tick|0;
+        let arr=byTick.get(t);
+        if(!arr){arr=[];byTick.set(t,arr);}
+        arr.push({instr:instr,keyByte:key-9,vel:vel});
+    }
+    if(byTick.size===0)throw new Error('没有可写入 NBS 的音符');
+    const ticks=[...byTick.keys()].sort((a,b)=>a-b);
+    // 乐器顺序按编号升序，保证同样输入总是产出同样的文件
+    const instrSet=new Set();
+    for(const arr of byTick.values())for(const x of arr)instrSet.add(x.instr);
+    const instrOrder=[...instrSet].sort((a,b)=>a-b);
+    const maxPoly=new Map();
+    for(const id of instrOrder)maxPoly.set(id,1);
+    for(const arr of byTick.values()){
+        const per=new Map();
+        for(const x of arr)per.set(x.instr,(per.get(x.instr)||0)+1);
+        for(const[id,c]of per)if(c>maxPoly.get(id))maxPoly.set(id,c);
+    }
+    const layerStart=new Map();
+    let layerCount=0;
+    for(const id of instrOrder){layerStart.set(id,layerCount);layerCount+=maxPoly.get(id);}
+    const songLen=Math.max(1,Math.min(32767,Math.round(songLength||1)));
+    // 速度保留两位小数：文件里存的是“每秒 tick 数 * 100”
+    const tempoField=Math.max(1,Math.min(32767,Math.round((tempoValue||20)*100)));
+    const lp=loopInfo&&loopInfo.enabled?loopInfo:null;
+    const loopOn=!!(lp&&(lp.startTick|0)>=0&&(lp.startTick|0)<songLen);
+    // ---- 文件头 ----
+    i16(0);                       // 现代格式标记
+    u8(5);                        // 版本 5
+    u8(16);                       // 原版乐器数量
+    i16(songLen);                 // 歌曲长度（v>=3）
+    i16(layerCount);
+    str(songName||'');
+    str(songAuthor||'');
+    str('');
+    str('');
+    i16(tempoField);              // 速度：每秒 tick 数 * 100
+    u8(0);u8(10);u8(4);           // 自动保存开关 / 间隔 / 拍号
+    i32(0);i32(0);i32(0);i32(0);i32(0);   // 分钟数 / 左键 / 右键 / 加块 / 删块
+    str('');
+    u8(loopOn?1:0);
+    u8(loopOn?Math.max(0,Math.min(255,lp.totalLoops|0)):0);
+    i16(loopOn?(lp.startTick|0):0);
+    // ---- 音符：按 tick 递增，写 tick 差值 ----
+    let prevTick=-1;
+    for(const t of ticks){
+        i16(t-prevTick);
+        prevTick=t;
+        const arr=byTick.get(t);
+        const byInstr=new Map();
+        for(const x of arr){
+            let a=byInstr.get(x.instr);
+            if(!a){a=[];byInstr.set(x.instr,a);}
+            a.push(x);
+        }
+        const slots=[];
+        for(const id of instrOrder){
+            const list=byInstr.get(id);
+            if(!list)continue;
+            list.sort((a,b)=>b.keyByte-a.keyByte);   // 高音在前 -> 落在更靠上的层
+            const base=layerStart.get(id);
+            for(let i=0;i<list.length;i++)slots.push({layer:base+i,note:list[i]});
+        }
+        slots.sort((a,b)=>a.layer-b.layer);
+        let prevLayer=-1;
+        for(const s of slots){
+            i16(s.layer-prevLayer);   // 层差值，恒为正
+            prevLayer=s.layer;
+            u8(s.note.instr);
+            u8(s.note.keyByte);
+            u8(s.note.vel);
+            u8(100);                  // 声像 0 -> 100
+            i16(0);                   // 音高微调
+        }
+        i16(0);                   // 本 tick 结束
+    }
+    i16(0);                       // 全曲结束
+    // ---- 层信息：每层名字就是它所属的乐器 ----
+    for(const id of instrOrder){
+        const cnt=maxPoly.get(id);
+        const nm=INSTRUMENT_SOUND_MAP[id]||('inst'+id);
+        for(let i=0;i<cnt;i++){
+            str(cnt>1?(nm+' '+(i+1)):nm);
+            u8(0);                    // 锁定/独奏标志
+            u8(100);                  // 音量
+            u8(100);                  // 声像 0 -> 100
+        }
+    }
+    u8(0);                        // 自定义乐器数量
+    return{dropped:dropped,bytes:new Uint8Array(bytes)};
+}
+function doExportNBS(){
+    if(!currentNotes||currentNotes.length===0){alert('没有可导出的数据，请先解析文件。');return;}
+    const src=(previewNotes&&previewNotes.length)?previewNotes:currentNotes;
+    const shift=isFinite(cachedOctaveShift)?(cachedOctaveShift|0):0;
+    const notes=src.map(n=>({tick:n.tick,key:(n.key|0)+shift*12,instrument:n.instrument,velocity:n.velocity}));
+    const tempoValue=previewTimePerTick>0?1000/previewTimePerTick:20;
+    const built=buildNBSFile(notes,Math.max(1,previewSongLength),tempoValue,currentLoop,currentSongName,currentSongAuthor);
+    downloadBinary(built.bytes,`${originalFileName||'song'}.nbs`,'application/octet-stream');
+}
+// T.3.2 导出为 WAV（离线渲染，用内置音源）
+// 按预览播放的同一套规则合成：音高 = 2^((key-54)/12)，音量 = 力度/100，
+// 叠加后做峰值归一（只削峰不放大）与 tanh 软限幅，与预览的 waveshaper 同一思路。
+async function renderWAVBytes(){
+    await preloadAllSamples();
+    let sampleRate=0;
+    for(const nm of SAMPLE_NAMES){const b=sampleBuffers[nm];if(b){sampleRate=b.sampleRate;break;}}
+    if(!sampleRate)throw new Error('音源样本尚未加载，无法导出 WAV');
+    const src=(previewNotes&&previewNotes.length)?previewNotes:currentNotes;
+    const secPerTick=(previewTimePerTick>0?previewTimePerTick:50)/1000;
+    const shift=isFinite(cachedOctaveShift)?(cachedOctaveShift|0):0;
+    const items=[];
+    let endSec=Math.max(1,previewSongLength)*secPerTick;
+    for(const n of src){
+        const buf=sampleBuffers[getSoundFileName(n.instrument,previewHarpOnly)];
+        if(!buf)continue;
+        const playRate=Math.pow(2,((n.key|0)+shift*12-54)/12);
+        const startSec=(n.tick|0)*secPerTick;
+        const durSec=buf.duration/playRate;
+        items.push({buf:buf,playRate:playRate,gain:Math.max(0,(n.velocity===undefined?100:n.velocity)/100),startSec:startSec});
+        if(startSec+durSec>endSec)endSec=startSec+durSec;
+    }
+    if(items.length===0)throw new Error('没有可渲染的音符');
+    const frames=Math.max(1,Math.ceil(endSec*sampleRate));
+    if(frames>40000000)throw new Error('歌曲过长，无法导出 WAV');
+    const mix=new Float32Array(frames);
+    for(let k=0;k<items.length;k++){
+        const it=items[k],srcBuf=it.buf.getChannelData(0),n=srcBuf.length;
+        const start=Math.round(it.startSec*sampleRate);
+        const end=Math.min(frames,start+Math.ceil(n/it.playRate));
+        let pos=0;
+        for(let o=start;o<end;o++){
+            const ip=pos|0;
+            if(ip>=n)break;
+            const frac=pos-ip;
+            const s0=srcBuf[ip];
+            const s1=(ip+1<n)?srcBuf[ip+1]:0;
+            mix[o]+=(s0+(s1-s0)*frac)*it.gain;
+            pos+=it.playRate;
+        }
+        if((k&63)===63)await new Promise(r=>setTimeout(r,0));
+    }
+    let peak=0;
+    for(let i=0;i<frames;i++){const a=mix[i]<0?-mix[i]:mix[i];if(a>peak)peak=a;}
+    const norm=peak>1?(1/peak):1;
+    const dataLen=frames*2;
+    const ab=new ArrayBuffer(44+dataLen);
+    const dv=new DataView(ab);
+    const ws=(off,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(off+i,s.charCodeAt(i));};
+    ws(0,'RIFF');dv.setUint32(4,36+dataLen,true);ws(8,'WAVE');
+    ws(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
+    dv.setUint32(24,sampleRate,true);dv.setUint32(28,sampleRate*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);
+    ws(36,'data');dv.setUint32(40,dataLen,true);
+    const out=new Int16Array(ab,44,frames);
+    for(let i=0;i<frames;i++){
+        let x=mix[i]*norm;
+        if(x>0.85)x=0.85+0.15*Math.tanh((x-0.85)/0.15);
+        else if(x<-0.85)x=-0.85-0.15*Math.tanh((-x-0.85)/0.15);
+        let v=Math.round(x*32767);
+        if(v>32767)v=32767;else if(v<-32768)v=-32768;
+        out[i]=v;
+    }
+    return ab;
+}
+async function doExportWAV(){
+    if(!currentNotes||currentNotes.length===0){alert('没有可导出的数据，请先解析文件。');return;}
+    const btn=document.getElementById('exportBtn');
+    const oldText=btn?btn.textContent:'导出';
+    if(btn){btn.disabled=true;btn.textContent='渲染中…';}
+    try{
+        const ab=await renderWAVBytes();
+        downloadBinary(new Uint8Array(ab),`${originalFileName||'song'}.wav`,'audio/wav');
+    }finally{
+        if(btn){btn.disabled=false;btn.textContent=oldText;}
+    }
+}
 // T.4 下拉框与导出按钮事件
 document.getElementById('exportTypeSelect').addEventListener('change',function(){
     document.getElementById('exportBtn').disabled=!this.value;
@@ -3828,6 +4043,8 @@ document.getElementById('exportBtn').addEventListener('click',async function(){
     try{
         switch(type){
             case 'cbnd':await doExportCBND();break;
+            case 'nbs':doExportNBS();break;
+            case 'wav':await doExportWAV();break;
             case 'structure_be':await doExportStructure('bedrock');break;
             case 'structure_java':await doExportStructure('java');break;
             case 'mcworld':await doExportMcWorld();break;
