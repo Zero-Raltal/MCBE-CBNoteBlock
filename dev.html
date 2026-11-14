@@ -172,7 +172,7 @@
         <h3>3.导出 .cbnd 时支持写入循环标记</h3>
         <br>
         <h3>2026.11.13 更新日志:</h3>
-        <h3>1.新增计分板设置，可以自定义计分板名称和实体选择器</h3>
+        <h3>1.新增计分板设置，可以自定义计分板名称</h3>
         <h3>2.导入带循环标记的 .nbs 时会生成跳转指令，播放到结尾跳回循环点</h3>
         <h3>3.音源全部换成 Opus 编码</h3>
         <br>
@@ -427,10 +427,6 @@
             <div class="sb-row">
                 <label>计分板: </label>
                 <input type="text" id="scoreboardName" value="t" maxlength="16" spellcheck="false" title="计分板目标名，只影响生成的指令，不影响 .cbnd 导出" style="width:90px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
-            </div>
-            <div class="sb-row">
-                <label>选择器: </label>
-                <input type="text" id="scoreboardSelector" value="@a" maxlength="80" spellcheck="false" title="实体选择器，例如 @a / @p / @a[tag=player]" style="width:180px;background:var(--bg-input);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
             </div>
         </div>
         <div class="stats" id="stats">等待上传文件...</div>
@@ -1388,45 +1384,17 @@ function sanitizeScoreboardName(value){
     const v=String(value==null?'':value).trim().replace(/[^A-Za-z0-9_.+-]/g,'').substring(0,16);
     return v||'t';
 }
-function sanitizeScoreboardSelector(value){
-    let v=String(value==null?'':value).replace(/[\s\r\n]/g,'');
-    if(!v||v.charAt(0)!=='@')return '@a';
-    v=v.replace(/[()`;|&<>\\]/g,'');
-    return v||'@a';
-}
 function getScoreboardName(){
     const el=document.getElementById('scoreboardName');
     return sanitizeScoreboardName(el?el.value:'t');
 }
-function getScoreboardSelector(){
-    const el=document.getElementById('scoreboardSelector');
-    return sanitizeScoreboardSelector(el?el.value:'@a');
-}
-// 选择器可能已经带参数（例如 @a[tag=x]），再拼一段 [scores=...] 是非法的，
-// 所以要把 scores 合并进第一个参数块里。
-function withSelectorArg(selector,arg){
-    const open=selector.indexOf('[');
-    if(open===-1)return selector+'['+arg+']';
-    let depth=0,end=-1,quote=null;
-    for(let i=open;i<selector.length;i++){
-        const ch=selector.charAt(i);
-        if(quote){if(ch===quote)quote=null;continue;}
-        if(ch==='"'||ch==="'"){quote=ch;continue;}
-        if(ch==='[')depth++;
-        else if(ch===']'){depth--;if(depth===0){end=i;break;}}
-    }
-    if(end===-1)return selector+'['+arg+']';
-    const inner=selector.slice(open+1,end);
-    const merged=inner.trim()===''?arg:inner+','+arg;
-    return selector.slice(0,open+1)+merged+selector.slice(end);
-}
 // 刷新页面上静态的计分板示例指令
 function refreshScoreboardExamples(){
-    const name=getScoreboardName(),sel=getScoreboardSelector();
+    const name=getScoreboardName();
     const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
     set('chatAddObj','/scoreboard objectives add '+name+' dummy');
-    set('chatSetZero','/scoreboard players set '+sel+' '+name+' 0');
-    set('pulseReset','scoreboard players set '+sel+' '+name+' 0');
+    set('chatSetZero','/scoreboard players set @a '+name+' 0');
+    set('pulseReset','scoreboard players set @a '+name+' 0');
 }
 // 存档里的计分板定义（scoreboard.dat）：改了目标名，导出的世界也要跟着定义。
 // 注意：基岩版 LevelDB 里的 NBT 是【小端】，不能复用上面 Java 结构用的大端写入器。
@@ -1457,7 +1425,7 @@ function buildLoopEntry(){
     if(!currentLoop||!currentLoop.enabled)return null;
     const songLength=currentLoop.songLength|0,start=currentLoop.startTick|0;
     if(!(songLength>0)||start<0||start>=songLength)return null;
-    const name=getScoreboardName(),sel=getScoreboardSelector(),threshold=songLength+1;
+    const name=getScoreboardName(),threshold=songLength+1;
     return{
         seq:0,
         noteName:'循环',
@@ -1469,7 +1437,7 @@ function buildLoopEntry(){
         sound:'',
         ticks:[],
         tickCount:0,
-        cmd:'scoreboard players set '+withSelectorArg(sel,'scores={'+name+'='+threshold+'..}')+' '+name+' '+start,
+        cmd:'scoreboard players set @a[scores={'+name+'='+threshold+'..}] '+name+' '+start,
         isLoop:true,
         loopStart:start,
         loopEnd:songLength-1,
@@ -1479,8 +1447,8 @@ function buildLoopEntry(){
 }
 // H.1 生成循环与连锁指令
 function generateCommands(groups,octaveShift,harpOnly,customSoundKey,enableVelocity){
-    const sbName=getScoreboardName(),sbSel=getScoreboardSelector(),sbTargets=v=>withSelectorArg(sbSel,'scores={'+sbName+'='+v+'}');
-    const cycleCmd=`scoreboard players add ${sbSel} ${sbName} 1`;
+    const sbName=getScoreboardName(),sbTargets=v=>'@a[scores={'+sbName+'='+v+'}]';
+    const cycleCmd=`scoreboard players add @a ${sbName} 1`;
     let chainCmds=[];
     function pushCmds(sg,sound,pitch,isCustomSound){
         const isPerc=PERCUSSION_INSTRUMENTS.includes(sg.instrument),volume=parseFloat(sg.volumeScale.toFixed(2)).toString(),pitchStr=parseFloat(pitch).toString();
@@ -1544,8 +1512,8 @@ function generateCommands(groups,octaveShift,harpOnly,customSoundKey,enableVeloc
     if(loopEntry){loopEntry.seq=chainCmds.length+1;chainCmds.push(loopEntry);}
     return{cycleCmd,chainCmds};
 }
-function buildJavaCommand(ticks,sound,pitch,volume,sbName,sbSel){
-    const sorted=ticks,sbRange=(a,b)=>withSelectorArg(sbSel,'scores={'+sbName+'='+a+(b===undefined?'':'..'+b)+'}');
+function buildJavaCommand(ticks,sound,pitch,volume,sbName){
+    const sorted=ticks,sbRange=(a,b)=>'@a[scores={'+sbName+'='+a+(b===undefined?'':'..'+b)+'}]';
     if(sorted.length===1)return `execute as ${sbRange(sorted[0])} at @s run playsound ${sound} record @s ~ ~ ~ ${volume} ${pitch}`;
     const min=sorted[0],max=sorted[sorted.length-1];
     let continuous=true;
@@ -1556,7 +1524,7 @@ function buildJavaCommand(ticks,sound,pitch,volume,sbName,sbSel){
     return `execute as ${sbRange(min,max)} at @s ${gaps.join(' ')} run playsound ${sound} record @s ~ ~ ~ ${volume} ${pitch}`;
 }
 function generateJavaCommands(groups,octaveShift,harpOnly,enableVelocity){
-    const sbName=getScoreboardName(),sbSel=getScoreboardSelector();
+    const sbName=getScoreboardName();
     const MAX_LEN=31520,intermediate=[];
     for(const g of groups){
         const isPerc=PERCUSSION_INSTRUMENTS.includes(g.instrument),effectiveInstrument=(harpOnly&&!isPerc)?0:g.instrument;
@@ -1580,11 +1548,11 @@ function generateJavaCommands(groups,octaveShift,harpOnly,enableVelocity){
         while(i<uniqueTicks.length){
             let j=i,bestJ=i;
             while(j<uniqueTicks.length){
-                const seg=uniqueTicks.slice(i,j+1),cmd=buildJavaCommand(seg,sound,pitch,volume,sbName,sbSel);
+                const seg=uniqueTicks.slice(i,j+1),cmd=buildJavaCommand(seg,sound,pitch,volume,sbName);
                 if(cmd.length>MAX_LEN&&j>i)break;
                 bestJ=j;j++;
             }
-            const segTicks=uniqueTicks.slice(i,bestJ+1),cmd=buildJavaCommand(segTicks,sound,pitch,volume,sbName,sbSel);
+            const segTicks=uniqueTicks.slice(i,bestJ+1),cmd=buildJavaCommand(segTicks,sound,pitch,volume,sbName);
             chainCmds.push({seq:0,noteName:getNoteName(data.key),shiftedNoteName:getNoteName(data.key),instrument:data.instrument,instrumentName:soundName,key:data.key,pitch:pitch,sound:sound,ticks:segTicks,tickCount:segTicks.length,cmd:cmd});
             i=bestJ+1;
         }
@@ -1599,7 +1567,7 @@ function generateJavaCommands(groups,octaveShift,harpOnly,enableVelocity){
     chainCmds.forEach((c,i)=>c.seq=i+1);
     const loopEntry=buildLoopEntry();
     if(loopEntry){loopEntry.seq=chainCmds.length+1;chainCmds.push(loopEntry);}
-    return{cycleCmd:`scoreboard players add ${sbSel} ${sbName} 1`,chainCmds};
+    return{cycleCmd:`scoreboard players add @a ${sbName} 1`,chainCmds};
 }
 // H.2 渲染结果
 let lastChainCmds=[];
@@ -1791,7 +1759,6 @@ function bindScoreboardInput(id,sanitize){
     });
 }
 bindScoreboardInput('scoreboardName',sanitizeScoreboardName);
-bindScoreboardInput('scoreboardSelector',sanitizeScoreboardSelector);
 document.querySelectorAll('input[name="soundMode"]').forEach(radio=>{
     radio.addEventListener('change',function(){
         const customInput=document.getElementById('customSoundInput');
@@ -3808,12 +3775,12 @@ function doExportText(){
     if(!lastChainCmds.length){alert('没有可导出的内容');return;}
     const platform=document.querySelector('input[name="targetPlatform"]:checked').value;
     const harpOnly=document.querySelector('input[name="soundMode"]:checked').value==='harp';
-    const sbName=getScoreboardName(),sbSel=getScoreboardSelector();
+    const sbName=getScoreboardName();
     let content;
     if(platform==='java'){
-        content=`【Java版命令导出】\n\n【导出时间: ${new Date().toLocaleString()}】\n\n【模式: ${harpOnly?'Harp Only':'乐器映射'}】\n\n【工具作者: ZeroRaltal】\n\n【Github: https://github.com/Zero-Raltal/MCBE-CBNoteBlock/】\n\n【聊天栏】\n/scoreboard objectives add ${sbName} dummy\n/scoreboard players set ${sbSel} ${sbName} 0\n\n【脉冲方块】\nscoreboard players set ${sbSel} ${sbName} 0\n\n【循环方块（无条件、保持开启）】\nscoreboard players add ${sbSel} ${sbName} 1\n\n【连锁方块（无条件、保持开启）】\n`;
+        content=`【Java版命令导出】\n\n【导出时间: ${new Date().toLocaleString()}】\n\n【模式: ${harpOnly?'Harp Only':'乐器映射'}】\n\n【工具作者: ZeroRaltal】\n\n【Github: https://github.com/Zero-Raltal/MCBE-CBNoteBlock/】\n\n【聊天栏】\n/scoreboard objectives add ${sbName} dummy\n/scoreboard players set @a ${sbName} 0\n\n【脉冲方块】\nscoreboard players set @a ${sbName} 0\n\n【循环方块（无条件、保持开启）】\nscoreboard players add @a ${sbName} 1\n\n【连锁方块（无条件、保持开启）】\n`;
     }else{
-        content=`【基岩版命令导出】\n\n【导出时间: ${new Date().toLocaleString()}】\n\n【模式: ${harpOnly?'Harp Only':'乐器映射'}】\n\n【工具作者: ZeroRaltal】\n\n【Github: https://github.com/Zero-Raltal/MCBE-CBNoteBlock/】\n\n【聊天栏】\n/scoreboard objectives add ${sbName} dummy\n/scoreboard players set ${sbSel} ${sbName} 0\n\n【循环命令方块】\nscoreboard players add ${sbSel} ${sbName} 1\n\n【连锁命令方块】\n`;
+        content=`【基岩版命令导出】\n\n【导出时间: ${new Date().toLocaleString()}】\n\n【模式: ${harpOnly?'Harp Only':'乐器映射'}】\n\n【工具作者: ZeroRaltal】\n\n【Github: https://github.com/Zero-Raltal/MCBE-CBNoteBlock/】\n\n【聊天栏】\n/scoreboard objectives add ${sbName} dummy\n/scoreboard players set @a ${sbName} 0\n\n【循环命令方块】\nscoreboard players add @a ${sbName} 1\n\n【连锁命令方块】\n`;
     }
     for(let i=0;i<lastChainCmds.length;i++){
         const c=lastChainCmds[i];
