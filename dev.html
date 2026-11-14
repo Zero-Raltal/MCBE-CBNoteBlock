@@ -2217,7 +2217,7 @@ class BitWriter{
     }
 }
 // N.3 导出 CBND
-function exportToCBND(chainCmds,tempo){
+function exportToCBND(chainCmds,tempo,loopOverride){
     const writer=new BitWriter();
     writer.writeBits(Math.min(255,Math.max(0,tempo)),8);
     writer.writeBits(0,16);
@@ -2231,6 +2231,25 @@ function exportToCBND(chainCmds,tempo){
         if(i<chainCmds.length-1)writer.writeBits(0,16);
     }
     writer.writeBits(0xFFFF,16);
+    // N.3.1 循环标记（可选）：紧跟在终止符之后【位连续】写入，绝不先补齐到字节边界。
+    //   16b  循环起始 tick+1（0x0001 = 第 0 拍；0x0000 与 0xFFFF 都留空不用）
+    //    8b  循环次数（0 = 无限，与 NBS 的 maxLoopCount 一致）
+    // 老解析器读到 0xFFFF 就 return，尾部会被完全忽略 -> 新文件在老版本里照常播放。
+    // 没有循环时不写尾部，导出的字节与旧格式完全一致。
+    const lp=(loopOverride===undefined)?currentLoop:loopOverride;
+    if(lp&&lp.enabled){
+        const startTick=lp.startTick|0;
+        let songLen=lp.songLength|0;
+        if(!(songLen>0)){
+            let maxTick=-1;
+            for(const c of chainCmds)for(const t of c.ticks)if(t>maxTick)maxTick=t;
+            songLen=maxTick+1;
+        }
+        if(startTick>=0&&startTick<songLen&&(startTick+1)<=0xFFFE){
+            writer.writeBits(startTick+1,16);
+            writer.writeBits(Math.min(255,Math.max(0,lp.totalLoops|0)),8);
+        }
+    }
     return writer.toUint8Array();
 }
 function downloadCBND(binaryData,filename='song.cbnd'){
@@ -2285,7 +2304,19 @@ function parseCBND(arrayBuffer){
         }
     }
     const songLength=maxTick+1;
-    return{notes:allNotes,songLength,tempo};
+    // N.4.1 循环标记（可选）：终止符 0xFFFF 之后若还有 ≥24 位，就是
+    //   [16b 起始tick+1][8b 循环次数]
+    // 只有 24 位全在才解析；16~23 位说明文件被截断，按"无循环"忽略，不抛错。
+    // 老文件在 0xFFFF 之后最多只剩 0~7 个填充位，永远 <24，因此判别是可靠的。
+    let loop=null;
+    if(reader.length-reader.bitIndex>=24){
+        const loopRaw=reader.readBits(16);
+        const loopCnt=reader.readBits(8);
+        if(loopRaw>=1&&loopRaw<=0xFFFE&&(loopRaw-1)<songLength){
+            loop={enabled:true,startTick:loopRaw-1,totalLoops:loopCnt,songLength:songLength};
+        }
+    }
+    return{notes:allNotes,songLength,tempo,loop};
 }
 // O 在线歌单
 // O.1 歌单状态
