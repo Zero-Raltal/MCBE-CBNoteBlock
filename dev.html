@@ -166,6 +166,10 @@
 		<h2>遇到BUG及时反馈,我会在周末尽快修</h2>
         <button class="modal-close-btn" id="modalCloseBtn">确定</button>
         <br>
+        <h3>2026.11.28 更新日志:</h3>
+        <h3 style="color:#72ff30">1.红石音乐新增「NBS经典布局」样式，还原NBS软件自带的电路排版</h3>
+        <h3>2.歌单改为多来源加载，主域名到期或某个源不通时会自动换下一个</h3>
+        <br>
         <h3>2026.11.14 更新日志:</h3>
         <h3 style="color:#72ff30">1.新增导出为 .nbs，可直接导入NBS软件编辑</h3>
         <h3 style="color:#72ff30">2.新增导出为 .wav，使用内置音源离线渲染，导出后可以直接播放</h3>
@@ -357,7 +361,7 @@
     </div>
     <div class="box">
 		<label>上传(.mid/.midi/.nbs/.cbnd)文件: </label>
-        <a href="https://c.zero0.asia/Audio2Midi.html" target="_blank" rel="noopener noreferrer" style="color:var(--text-secondary);text-decoration:underline;margin-left:8px;">点击此处将音频转换为MIDI</a>
+        <a href="https://zero-raltal.github.io/MCBE-CBNoteBlock/Audio2Midi.html" target="_blank" rel="noopener noreferrer" style="color:var(--text-secondary);text-decoration:underline;margin-left:8px;">点击此处将音频转换为MIDI</a>
         <br>
         <br>
         <input type="file" id="fileInput">
@@ -461,6 +465,27 @@
         <div class="rs-control" id="rsControl" style="display:none;">
             <span class="snap-prefix">红石设置:</span>
             <label class="snap-suffix" style="cursor:default;">
+                <span title="红石电路的布线样式。&#10;默认：按「每行跨度」把时间轴切成行，同一时刻最多 22 个音符盒。&#10;NBS 经典：移植 NBS 原版布局，同一时刻的音符按层叠放，不限制同时发声数。">电路样式</span>
+                <select id="rsStyle" style="width:110px;background:var(--bg-select);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+                    <option value="default" selected>默认</option>
+                    <option value="nbs">NBS 经典</option>
+                </select>
+            </label>
+            <label class="snap-suffix" id="rsNotesPerRowWrap" style="cursor:default;display:none;">
+                <span title="NBS 经典样式中每行并排的音符数（偶数）。数值越大，结构越宽、每行能放越多同时发声的音符。">每行音符数</span>
+                <select id="rsNotesPerRow" style="width:80px;background:var(--bg-select);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
+                    <option value="8">8</option>
+                    <option value="12">12</option>
+                    <option value="16">16</option>
+                    <option value="20" selected>20</option>
+                    <option value="24">24</option>
+                    <option value="32">32</option>
+                    <option value="40">40</option>
+                    <option value="48">48</option>
+                    <option value="64">64</option>
+                </select>
+            </label>
+            <label class="snap-suffix" id="rsRowLenWrap" style="cursor:default;">
                 <span title="每行沿 Z 方向的目标长度（格）。必须是 16 的倍数，最大 256。数值越大，结构越扁长、行数越少；越小则越方正。">每行跨度</span>
                 <select id="rsRowLen" style="width:80px;background:var(--bg-select);border:1px solid var(--border-input);color:var(--text-primary);padding:4px 8px;font-family:monospace;font-size:12px;">
                     <option value="16">16</option>
@@ -1001,9 +1026,6 @@ async function preloadAllSamples(){
 async function loadSample(soundName){return sampleBuffers[soundName]||null;}
 function getSoundFileName(instrumentId,harpOnly){return(harpOnly&&!PERCUSSION_INSTRUMENTS.includes(instrumentId))?"harp":(INSTRUMENT_SOUND_MAP[instrumentId]||"harp");}
 // E.5 赞助二维码
-// 原图是 128x128、带抗锯齿灰阶的二维码。扫描器本来就会自己二值化，所以这里直接
-// 存成 1 位黑白 PNG（873 字节），再用 base91 编成文本，比保留灰阶小一个数量级。
-// 加载时解回字节、做成 Blob URL 挂到 <img> 上，省掉 base64 那一层额外的膨胀。
 const SPONSOR_QR_B91='vuk:eJs4+BAAN/<MCG4DAAAABAAAwAAAAAPr[$WCBtw(Uw{Wo)$p:P`]~nvc4_AFn+2i]Q*W,5J^KXYM|"0Ht64waGm&=c*=<G[g"@!F(Ha&J`Bf*g2<=/X3/Ex(g!^X"LTdUy|zr`CzN^3SC.JkS_e%7oQ1C*<)`~Hl9+l%gw%Zxk86Gb>M23qFO{Lv^DWWSy!=*`8);bXZq$TQZpjmu&OR5J[dXz8W",0l{e$eHnja&X>TGHYZq<|/Ld,gnGhj~kGV[UH%*X`Rp#Lx&M;~_D:<6Z#oC&=dztz>^2F>|hLv;B9JO}p>2R|jCIs}g[Z`).UP>3;(i}*qG,cAzZLj=YItjwFR#@t8AnmDR9:g{}}=zXB@tGu<$1RK^Q{Z/`$tIerz$vwh+{g{5ht&mQlXBL#Skd/n1V,jAV"Kta"o&vvdl<0|C7Mg2[*gYZY>3pVz;`t!em^TC084ASFi#7{YJH,M~YDpYr!E%ylry]~^lrTfIJYKOk3rUz:}`>EF_mDrt[eVm;(,NukaQ{uGpMg,!hB]e)ytb<e)sH}i6v`=:t?{=T#d$dxza>Yh:b&)HzbV*LP.`.Bf;~2<yfA#;]|sgHClR_`=*SW,"]5)VjifIY~&P~/I5nG|O/SBj(uM}=d{Sd2>st:p_Uh`oO>j&2C4Xl$_GqJi]"|.{]wQ"$Bcphqx#!h83p*Y=T8:@6ENM|+s<IiYb|_M]hR)%}Fl/cH`d46+v>"g&{9)|`;hem[B}T#|tyZ$x1EZIX$9xlz#@d!}I5pegL2%Ljrc<mBfWTo.o=^6j@,8&m=gK=7fRfq~@|h@`UaQhh^Yu&QUhK/*|Ki(&+ucJ$0/5pt&L^U!3S|x$&Bo^=n*^^kEmN?MgBeTY+D$t#_#=+d"p^iTrj&z?U!B{<XK4JX(9yD{Zz>JI3bUN9zt[BzeIj"3>X{UP&:~Y*XYMsY2*p4;`)]gFx{&VMTUnz#o20f5PX5^j`%iqL|p}rS?*<^/D<gg1{T}<13J~{GG{/9a^*$OF`8>75uym<6)/nsDj6Fo{_pK`|J..7XSW<kB"d^R>*pS6WAAAA_cE3Y@%LfDC';
 (function(){
     const img=document.getElementById('sponsorQr');
@@ -1257,7 +1279,6 @@ function performTick(){
     }
     scheduleNextTick();
 }
-// 预览循环：NBS 带循环标记时，播放到末尾回到 loop start tick
 function previewLoopActive(){
     return !!(currentLoop&&currentLoop.enabled&&currentLoop.startTick>=0&&currentLoop.startTick<previewSongLength);
 }
@@ -1388,7 +1409,6 @@ function getScoreboardName(){
     const el=document.getElementById('scoreboardName');
     return sanitizeScoreboardName(el?el.value:'t');
 }
-// 刷新页面上静态的计分板示例指令
 function refreshScoreboardExamples(){
     const name=getScoreboardName();
     const set=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
@@ -1396,8 +1416,6 @@ function refreshScoreboardExamples(){
     set('chatSetZero','/scoreboard players set @a '+name+' 0');
     set('pulseReset','scoreboard players set @a '+name+' 0');
 }
-// 存档里的计分板定义（scoreboard.dat）：改了目标名，导出的世界也要跟着定义。
-// 注意：基岩版 LevelDB 里的 NBT 是【小端】，不能复用上面 Java 结构用的大端写入器。
 function buildScoreboardDat(objectiveName){
     const name=String(objectiveName||'t');
     const out=[],
@@ -1419,7 +1437,6 @@ function buildScoreboardDat(objectiveName){
     out.push(NBT_TYPE.End);
     return new Uint8Array(out);
 }
-// NBS 循环标记（只影响生成的指令与预览；.cbnd 导出会跳过它）
 let currentLoop=null;
 function buildLoopEntry(){
     if(!currentLoop||!currentLoop.enabled)return null;
@@ -1743,8 +1760,6 @@ document.getElementById('octaveShift').addEventListener('change',function(){
     cachedOctaveShift=parseInt(this.value)||0;
     updateRenderAndRestoreState();
 });
-// 计分板设置：和自定义音色输入框一致，只在失去焦点（change）时才刷新，
-// 输入过程中完全不重算，避免逐字符重建整条指令列表造成卡顿。
 function onScoreboardSettingChanged(){
     refreshScoreboardExamples();
     updateRenderAndRestoreState();
@@ -1753,7 +1768,6 @@ function bindScoreboardInput(id,sanitize){
     const el=document.getElementById(id);
     if(!el)return;
     el.addEventListener('change',function(){
-        // 失焦时把非法字符就地规整掉，让输入框显示的内容和生成的指令一致
         this.value=sanitize(this.value);
         onScoreboardSettingChanged();
     });
@@ -1971,7 +1985,6 @@ function drawWaterfall(){
     const minKey=waterfallMinKey;
     const maxKey=waterfallMaxKey;
     const keyRange=maxKey-minKey;
-    // 每帧复用同一个 Map，避免逐个 tick 反复新建（瀑布图每帧要跑上百个 tick）
     const byKey=new Map();
     ctx.strokeStyle=gridColor;
     ctx.lineWidth=0.5;
@@ -2208,10 +2221,6 @@ function exportToCBND(chainCmds,tempo,loopOverride){
     }
     writer.writeBits(0xFFFF,16);
     // N.3.1 循环标记（可选）：紧跟在终止符之后【位连续】写入，绝不先补齐到字节边界。
-    //   16b  循环起始 tick+1（0x0001 = 第 0 拍；0x0000 与 0xFFFF 都留空不用）
-    //    8b  循环次数（0 = 无限，与 NBS 的 maxLoopCount 一致）
-    // 老解析器读到 0xFFFF 就 return，尾部会被完全忽略 -> 新文件在老版本里照常播放。
-    // 没有循环时不写尾部，导出的字节与旧格式完全一致。
     const lp=(loopOverride===undefined)?currentLoop:loopOverride;
     if(lp&&lp.enabled){
         const startTick=lp.startTick|0;
@@ -2284,9 +2293,6 @@ function parseCBND(arrayBuffer){
     }
     const songLength=maxTick+1;
     // N.4.1 循环标记（可选）：终止符 0xFFFF 之后若还有 ≥24 位，就是
-    //   [16b 起始tick+1][8b 循环次数]
-    // 只有 24 位全在才解析；16~23 位说明文件被截断，按"无循环"忽略，不抛错。
-    // 老文件在 0xFFFF 之后最多只剩 0~7 个填充位，永远 <24，因此判别是可靠的。
     let loop=null;
     if(reader.length-reader.bitIndex>=24){
         const loopRaw=reader.readBits(16);
@@ -2310,15 +2316,24 @@ function getRandomSongs(arr,count){
 }
 // O.2 加载歌单
 async function loadPlaylist(){
-    const GITHUB='https://c.zero0.asia/songs/';
+    const JSDELIVR='https://cdn.jsdelivr.net/gh/Zero-Raltal/MCBE-CBNoteBlock@main/songs/';
+    const MIRROR='https://c.zero0.asia/songs/';
+    const GITHUB_IO='https://zero-raltal.github.io/MCBE-CBNoteBlock/songs/';
     const LOCAL='./songs/';
+    const LABEL='github.com/Zero-Raltal/MCBE-CBNoteBlock';
     const isFile=window.location.protocol==='file:';
-    const sources=isFile?[{url:GITHUB,label:'github.com/Zero-Raltal/MCBE-CBNoteBlock'}]:[{url:LOCAL,label:''},{url:GITHUB,label:'github.com/Zero-Raltal/MCBE-CBNoteBlock'}];
+    const netSources=[
+        {url:JSDELIVR,label:LABEL},
+        {url:MIRROR,label:LABEL},
+        {url:GITHUB_IO,label:LABEL}
+    ];
+    const sources=isFile?netSources:[{url:LOCAL,label:''},...netSources];
     for(const src of sources){
         try{
             const resp=await fetch(src.url+'songs.list');
             if(!resp.ok)throw new Error('HTTP '+resp.status);
             const text=await resp.text();
+            if(/^\s*</.test(text))throw new Error('返回的是网页而非歌单');
             const lines=text.split('\n').map(s=>s.trim()).filter(s=>s.length>0);
             if(lines.length===0)throw new Error('歌单为空');
             playlistData=lines.map((line,idx)=>{
@@ -3795,8 +3810,6 @@ function doExportText(){
     URL.revokeObjectURL(a.href);
 }
 // T.3.1 导出为 NBS（音符工程文件）
-// 反查表：音色名 -> NBS 乐器编号。导出时先把音符按当前设置（八度移调 / 仅竖琴）
-// 换算成“听起来的样子”，再写进文件，保证导入回来和预览听到的一致。
 const NBS_SOUND_TO_INSTRUMENT=(function(){
     const m={};
     for(const[id,name]of Object.entries(INSTRUMENT_SOUND_MAP))m[name]=+id;
@@ -3808,8 +3821,6 @@ function buildNBSFile(notes,songLength,tempoValue,loopInfo,songName,songAuthor){
     const i16=v=>{v=Math.max(-32768,Math.min(32767,v|0));bytes.push(v&0xFF,(v>>8)&0xFF);};
     const i32=v=>{v=v|0;bytes.push(v&0xFF,(v>>8)&0xFF,(v>>16)&0xFF,(v>>24)&0xFF);};
     const str=s=>{const b=new TextEncoder().encode(s||'');i32(b.length);for(let i=0;i<b.length;i++)bytes.push(b[i]);};
-    // NBS 的每个 tick 在同一层上只能放一个音符。这里按乐器分层：每种乐器占一段连续的层，
-    // 段内按音高从高到低分配（高音在上层、低音在下层），段长 = 该乐器最大同时发声数。
     const byTick=new Map();
     let dropped=0;
     for(const n of notes){
@@ -3828,7 +3839,6 @@ function buildNBSFile(notes,songLength,tempoValue,loopInfo,songName,songAuthor){
     }
     if(byTick.size===0)throw new Error('没有可写入 NBS 的音符');
     const ticks=[...byTick.keys()].sort((a,b)=>a-b);
-    // 乐器顺序按编号升序，保证同样输入总是产出同样的文件
     const instrSet=new Set();
     for(const arr of byTick.values())for(const x of arr)instrSet.add(x.instr);
     const instrOrder=[...instrSet].sort((a,b)=>a-b);
@@ -3843,7 +3853,6 @@ function buildNBSFile(notes,songLength,tempoValue,loopInfo,songName,songAuthor){
     let layerCount=0;
     for(const id of instrOrder){layerStart.set(id,layerCount);layerCount+=maxPoly.get(id);}
     const songLen=Math.max(1,Math.min(32767,Math.round(songLength||1)));
-    // 速度保留两位小数：文件里存的是“每秒 tick 数 * 100”
     const tempoField=Math.max(1,Math.min(32767,Math.round((tempoValue||20)*100)));
     const lp=loopInfo&&loopInfo.enabled?loopInfo:null;
     const loopOn=!!(lp&&(lp.startTick|0)>=0&&(lp.startTick|0)<songLen);
@@ -3922,8 +3931,6 @@ function doExportNBS(){
     downloadBinary(built.bytes,`${originalFileName||'song'}.nbs`,'application/octet-stream');
 }
 // T.3.2 导出为 WAV（离线渲染，用内置音源）
-// 按预览播放的同一套规则合成：音高 = 2^((key-54)/12)，音量 = 力度/100，
-// 叠加后做峰值归一（只削峰不放大）与 tanh 软限幅，与预览的 waveshaper 同一思路。
 async function renderWAVBytes(){
     await preloadAllSamples();
     let sampleRate=0;
@@ -4077,9 +4084,329 @@ function rsNormalizeRowSpan(v){
     if(n>RS_ROW_SPAN_MAX)n=RS_ROW_SPAN_MAX;
     return n;
 }
+// ---- 电路样式 ----
+const RS_NBS_NOTES_PER_ROW_MIN=2,RS_NBS_NOTES_PER_ROW_MAX=64,RS_NBS_NOTES_PER_ROW_DEFAULT=20;
+function rsNormalizeNotesPerRow(v){
+    var n=parseInt(v,10);
+    if(!isFinite(n)||n<=0)n=RS_NBS_NOTES_PER_ROW_DEFAULT;
+    n=Math.round(n/2)*2;
+    if(n<RS_NBS_NOTES_PER_ROW_MIN)n=RS_NBS_NOTES_PER_ROW_MIN;
+    if(n>RS_NBS_NOTES_PER_ROW_MAX)n=RS_NBS_NOTES_PER_ROW_MAX;
+    return n;
+}
+const RS_STYLE_DEFAULT='default',RS_STYLE_NBS='nbs';
+function rsNormalizeStyle(v){
+    return String(v)==='nbs'?RS_STYLE_NBS:RS_STYLE_DEFAULT;
+}
+
+// ---- NBS 经典布局（严格移植 schematic.js 的 layout>=2 分支） ----
+const RS_NBS_LAYER_H=3;
+const RS_NBS_BASE_H=4;
+const RS_NBS_REPEATER_DIR=['south','west','north','east'];
+const RS_NBS_TORCH_ATTACH=['west','east','north','south','top'];
+const RS_FD_NUM={north:2,south:3,west:4,east:5};
+const RS_NBS_FD_NAME={2:'north',3:'south',4:'west',5:'east'};
+function buildNbsClassicLayout(notes,opt){
+    const msPerTick=opt.msPerTick||50;
+    const supportBlock=rsNormalizeBlockId(opt.supportBlock);
+    const notesPerRow=rsNormalizeNotesPerRow(opt.notesPerRow);
+    // ---- 1) 音高折进两个八度 ----
+    const folded=[];
+    for(const n of notes){
+        let k=n.key|0;
+        while(k<RS_KEY_MIN)k+=12;
+        while(k>RS_KEY_MAX)k-=12;
+        if(k<RS_KEY_MIN||k>RS_KEY_MAX)continue;
+        folded.push({ins:Math.max(0,Math.min(15,n.instrument|0)),note:k-RS_KEY_MIN,tick:n.tick|0});
+    }
+    if(folded.length===0)return null;
+    // ---- 2) 按红石 tick 归并 ----
+    const rsPerTick=msPerTick/100;
+    const byTick=new Map();
+    for(const n of folded){
+        const t=Math.max(0,Math.round(n.tick*rsPerTick));
+        let a=byTick.get(t);
+        if(!a){a=[];byTick.set(t,a);}
+        a.push(n);
+    }
+    const targets=[...byTick.keys()].sort((a,b)=>a-b);
+    const lastTick=targets[targets.length-1];
+    // ---- 3) 时间轴：照搬源码的 rep 计数（rep===4 或该列有音符就出一列）----
+    const cols=[];
+    let rep=0;
+    for(let t=0;t<=lastTick;t++){
+        const group=byTick.get(t)||null;
+        rep+=1;
+        if((group&&group.length)||rep===4){cols.push({list:group||[],rep});rep=0;}
+    }
+    if(cols.length===0)return null;
+    // ---- 4) 分层 ----
+    const SLOTS_PER_LAYER=4;
+    let maxSim=1;
+    for(const c of cols)maxSim=Math.max(maxSim,c.list.length);
+    const GRAVITY_INS=new Set(['snare']);   // 音色表里唯一的重力方块是 snare(sand)
+    const isGravityNote=(n)=>n&&GRAVITY_INS.has(RS_INS_JAVA_NAMES[n.ins|0]);
+    let layers=Math.max(1,Math.ceil(maxSim/SLOTS_PER_LAYER));
+    {
+        let needLayers=1;
+        for(const c of cols){
+            const gs=(c.list||[]).filter(isGravityNote).length;
+            if(gs>0)needLayers=Math.max(needLayers,Math.ceil(gs/2));
+        }
+        if(needLayers>layers)layers=needLayers;
+    }
+    const perCol=[];
+    let carry=[];
+    for(let i=0;i<cols.length;i++){
+        let list=carry.concat(cols[i].list);
+        carry=[];
+        const cap=layers*SLOTS_PER_LAYER;
+        if(list.length>cap){list=list.slice(0,cap);carry=[];}
+        perCol.push({list,rep:cols[i].rep});
+    }
+    // ---- 4.5) 沙音挪进安全槽位 ----
+    {
+        const slots=[];
+        for(let ci=0;ci<perCol.length;ci++){
+            const list=perCol[ci].list;
+            for(let L=0;L<layers;L++)for(let k=0;k<SLOTS_PER_LAYER;k++){
+                slots.push({ci,L,k,note:list[L*SLOTS_PER_LAYER+k]||null});
+            }
+        }
+        const isSand=(n)=>n&&GRAVITY_INS.has(RS_INS_JAVA_NAMES[n.ins|0]);
+        const safe=(s)=>s.k<2;
+        const bad=slots.filter((s)=>isSand(s.note)&&!safe(s));
+        if(bad.length){
+            const free=slots.filter((s)=>safe(s)&&!isSand(s.note));
+            for(const bs of bad){
+                const tgt=free.find((f)=>!f.note)||free.find((f)=>f.L===bs.L)||free[0];
+                if(!tgt)break;
+                const tmp=tgt.note;tgt.note=bs.note;bs.note=tmp;
+                free.splice(free.indexOf(tgt),1);
+            }
+            for(const s of slots)perCol[s.ci].list[s.L*SLOTS_PER_LAYER+s.k]=s.note;
+        }
+    }
+    // ---- 5) 尺寸（照搬 schematicLength/Width/Height 的 layout>=2 分支）----
+    const wid=notesPerRow*2+3;
+    const hei=RS_NBS_BASE_H+layers*RS_NBS_LAYER_H;
+    const len=Math.max(6,Math.ceil((perCol.length+2)/notesPerRow)*RS_NBS_LAYER_H+1);
+    // ---- 6) 铺设 ----
+    const blocks=[];
+    const put=(x,y,z,t,extra)=>blocks.push(Object.assign({x,y,z,t,row:0,part:'body'},extra||{}));
+    const nb=(a,b,c,t,extra)=>put(wid-1-b,c,a,t,extra);
+    const walk=(a,b,c)=>nb(a,b,c,'solid',{block:supportBlock});
+    const circ=(a,b,c)=>walk(a,b,c);
+    const glass=(opt.glass!==false);
+    for(let a=0;a<len;a++){
+        for(let b=0;b<wid-1;b++){
+            if(a>0&&b>0&&a<len-1&&b<wid-2&&glass)nb(a,b,hei-3,'glass');
+            else walk(a,b,hei-3);
+        }
+    }
+    walk(2,wid-2,hei-2); walk(3,wid-2,hei-2);
+    nb(2,wid-2,hei-1,'wool',{color:'red'});
+    nb(3,wid-2,hei-1,'wool',{color:'red'});
+    nb(2,wid-3,hei-1,'sign',{text:String(opt.signText||''),wallFacing:'east'});
+    nb(3,wid-3,hei-1,'button');
+    nb(3,wid-1,hei-1,'wire');
+    circ(3,wid-1,hei-2);
+    nb(2,wid-1,hei-2,'wire');
+    circ(2,wid-1,hei-3);
+    nb(1,wid-1,hei-3,'torch',{att:'south',lit:true});
+    let c1=1;
+    for(let a=layers-1;a>=0;a--){
+        let d=a*2;
+        for(let b=wid-2-c1;b>wid-8;b--){
+            circ(1,b,a*RS_NBS_LAYER_H+1);
+            if(d>0&&b<wid-2-c1){
+                nb(1,b,a*RS_NBS_LAYER_H+2,'repeater',
+                   {facing:'west',delay:Math.min(4,d)});
+                d-=4;
+            }else nb(1,b,a*RS_NBS_LAYER_H+2,'wire');
+        }
+        if(a>0)nb(1,wid-1-c1,a*RS_NBS_LAYER_H+1,'torch',{att:'east',lit:true});
+        circ(1,wid-1,a*RS_NBS_LAYER_H+3-c1);
+        nb(1,wid-1,a*RS_NBS_LAYER_H+4-c1,'wire');
+        nb(1,wid-2,a*RS_NBS_LAYER_H+3-c1,'torch',{att:'west',lit:false});
+        c1=c1?0:1;
+    }
+    for(let cc=1;cc<hei-2;cc++){
+        walk(0,wid-2,cc);
+        nb(0,wid-1,cc,'ladder',{facing:'west'});
+    }
+    // ---- 7) 主循环（照搬源码 layout>=2 分支）----
+    let xx=1, yy=wid-7, dir=-1;
+    let noteCount=0;
+    const stepTime=[];
+    for(let a=0;a<perCol.length;a++){
+        const col=perCol[a];
+        const list=col.list;
+        const y1=yy+dir;
+        const dirData=3*(dir===1?1:0)+(dir===-1?1:0);
+        const rf=RS_NBS_REPEATER_DIR[dirData&3];
+        for(let b=0;b<layers;b++){
+            const L0=b*RS_NBS_LAYER_H;
+            nb(xx,y1,L0+2,'repeater',{facing:rf,delay:Math.max(1,Math.min(4,col.rep||1))});
+            circ(xx,y1,L0+1);
+            circ(xx,y1+dir,L0+2);
+            if(b>0){circ(xx,y1,L0);circ(xx,y1+dir,L0);}
+            circ(xx,y1+dir*2,L0+1);
+            nb(xx,y1+dir,L0+1,'wire');
+            const pos=[
+                {a:xx-1,b:y1+dir*2,c:L0+1},
+                {a:xx+1,b:y1+dir*2,c:L0+1},
+                {a:xx-1,b:y1+dir,  c:L0+2},
+                {a:xx+1,b:y1+dir,  c:L0+2}
+            ];
+            for(let k=0;k<SLOTS_PER_LAYER;k++){
+                const n=list[b*SLOTS_PER_LAYER+k];
+                if(!n)continue;
+                const p=pos[k];
+                nb(p.a,p.b,p.c,'noteblock',{ins:n.ins,note:n.note,step:a});
+                nb(p.a,p.b,p.c-1,'instrument',{ins:n.ins,step:a});
+                noteCount++;
+            }
+        }
+        stepTime.push(a);
+        yy+=2*dir;
+        let turn=0;
+        if(dir===1)turn=(yy>=wid-4)?1:0;
+        if(dir===-1)turn=(yy<=2)?1:0;
+        if(a===perCol.length-1)turn=0;
+        if(turn){
+            for(let b=0;b<layers;b++){
+                nb(xx,yy,b*RS_NBS_LAYER_H+1,'wire');
+                if(b>0)circ(xx,yy,b*RS_NBS_LAYER_H+3);
+                nb(xx,yy+dir,b*RS_NBS_LAYER_H+2,'wire');
+                circ(xx,yy+dir,b*RS_NBS_LAYER_H+1);
+                for(let cc2=0;cc2<4;cc2++){
+                    nb(xx+cc2,yy+dir*2,b*RS_NBS_LAYER_H+2,'wire');
+                    circ(xx+cc2,yy+dir*2,b*RS_NBS_LAYER_H+1);
+                }
+            }
+            yy+=dir*2;
+            dir=-dir;
+            xx+=RS_NBS_LAYER_H;
+        }
+    }
+    // ---- 7.5) 按钮附着面 ----
+    {
+        const cell=new Map();
+        for(const b of blocks)cell.set(b.x+','+b.y+','+b.z,b);
+        const solidAt=(x,y,z)=>{
+            const t=cell.get(x+','+y+','+z);
+            if(!t)return false;
+            return t.t==='solid'||t.t==='noteblock'||t.t==='instrument'||t.t==='glass'||t.t==='wool';
+        };
+        const WALLS=[
+            ['east',-1,0,0],['west',1,0,0],
+            ['south',0,0,-1],['north',0,0,1]
+        ];
+        for(const b of blocks){
+            if(b.t!=='button')continue;
+            if(b.face)continue;          // 已显式指定就不动（默认布局不带 face，走这里）
+            let done=false;
+            for(const [f,dx,dy,dz] of WALLS){
+                if(solidAt(b.x+dx,b.y+dy,b.z+dz)){b.face='wall';b.facing=f;done=true;break;}
+            }
+            if(!done&&solidAt(b.x,b.y-1,b.z)){b.face='floor';b.facing='north';done=true;}
+            if(!done&&solidAt(b.x,b.y+1,b.z)){b.face='ceiling';b.facing='north';done=true;}
+        }
+    }
+    // ---- 7.6) 给悬空的红石粉补支撑 ----
+    {
+        const cell=new Map();
+        for(const b of blocks)cell.set(b.x+','+b.y+','+b.z,b);
+        const add=[];
+        for(const b of blocks){
+            if(b.t!=='wire')continue;
+            const k=b.x+','+(b.y-1)+','+b.z;
+            if(cell.has(k)||b.y-1<0)continue;
+            add.push({x:b.x,y:b.y-1,z:b.z});
+        }
+        for(const p of add){
+            const rec={x:p.x,y:p.y,z:p.z,t:'solid',row:0,part:'body',block:supportBlock};
+            blocks.push(rec);
+            cell.set(p.x+','+p.y+','+p.z,rec);
+        }
+    }
+    // ---- 7.5) 按钮附着面 ----
+    {
+        const cell=new Map();
+        for(const b of blocks)cell.set(b.x+','+b.y+','+b.z,b);
+        const solidAt=(x,y,z)=>{
+            const t=cell.get(x+','+y+','+z);
+            if(!t)return false;
+            return t.t==='solid'||t.t==='noteblock'||t.t==='instrument'||t.t==='glass'||t.t==='wool';
+        };
+        const WALLS=[
+            ['east',-1,0,0],['west',1,0,0],
+            ['south',0,0,-1],['north',0,0,1]
+        ];
+        for(const b of blocks){
+            if(b.t!=='button')continue;
+            if(b.face)continue;          // 已显式指定就不动（默认布局不带 face，走这里）
+            let done=false;
+            for(const [f,dx,dy,dz] of WALLS){
+                if(solidAt(b.x+dx,b.y+dy,b.z+dz)){b.face='wall';b.facing=f;done=true;break;}
+            }
+            if(!done&&solidAt(b.x,b.y-1,b.z)){b.face='floor';b.facing='north';done=true;}
+            if(!done&&solidAt(b.x,b.y+1,b.z)){b.face='ceiling';b.facing='north';done=true;}
+        }
+    }
+    // ---- 7.7) 最底层整层填充 ----
+    {
+        const cell=new Map();
+        for(const b of blocks)cell.set(b.x+','+b.y+','+b.z,b);
+        let mx=0,mz=0;
+        for(const b of blocks){
+            if(b.x>mx)mx=b.x;
+            if(b.z>mz)mz=b.z;
+        }
+        for(let x=0;x<=mx;x++)for(let z=0;z<=mz;z++){
+            const k=x+',0,'+z;
+            if(cell.has(k))continue;
+            const rec={x,y:0,z,t:'solid',row:0,part:'body',block:supportBlock};
+            blocks.push(rec);
+            cell.set(k,rec);
+        }
+    }
+    // ---- 8) 去重（后写覆盖先写，等同源码 Map 语义）----
+    {
+        const byCell=new Map();
+        for(const b of blocks)byCell.set(b.x+','+b.y+','+b.z,b);
+        blocks.length=0;
+        for(const b of byCell.values())blocks.push(b);
+    }
+    // ---- 9) 归一 ----
+    let minX=1e9,minY=1e9,minZ=1e9,maxX=-1e9,maxY=-1e9,maxZ=-1e9;
+    for(const b of blocks){
+        if(b.x<minX)minX=b.x;if(b.x>maxX)maxX=b.x;
+        if(b.y<minY)minY=b.y;if(b.y>maxY)maxY=b.y;
+        if(b.z<minZ)minZ=b.z;if(b.z>maxZ)maxZ=b.z;
+    }
+    noteCount=blocks.reduce((n,b)=>n+(b.t==='noteblock'?1:0),0);
+    for(const b of blocks){b.x-=minX;b.y-=minY;b.z-=minZ;}
+    const size=[maxX-minX+1,maxY-minY+1,maxZ-minZ+1];
+    let dustCells=0;for(const b of blocks)if(b.t==='wire')dustCells++;
+    let repeaters=0;for(const b of blocks)if(b.t==='repeater')repeaters++;
+    const btnPos={x:2-minX,y:(hei-1)-minY,z:3-minZ};
+    return{
+        blocks,size,button:btnPos,style:RS_STYLE_NBS,
+        stats:{supportBlock,maxChain:RS_MAX_CHAIN,slotsPerStep:layers*SLOTS_PER_LAYER,
+               maxSim,rows:1,steps:perCol.length,redstoneTicks:perCol.length,
+               noteCount,dropped:0,skipped:notes.length-folded.length,
+               rowSpan:notesPerRow,dustCells,repeaters,
+               rowPadded:0,rowPadShort:0,rowSplitAdded:0,rowWidthExact:true,
+               rowWidths:[],rowWidthsOk:true,stepTime,
+               nbsClassic:true,notesPerRow,layers,length:len,width:wid,height:hei}
+    };
+}
 // V.2 主入口
 function buildRedstoneLayout(notes,options){
     const opt=Object.assign({msPerTick:50,rowSpan:64},options||{});
+    if(rsNormalizeStyle(opt.style)===RS_STYLE_NBS)return buildNbsClassicLayout(notes,opt);
     const rowSpanTarget=rsNormalizeRowSpan(opt.rowSpan);
     const supportBlock=rsNormalizeBlockId(opt.supportBlock);
     // V.2.1 音高折进两个八度
@@ -4314,8 +4641,19 @@ function rsJavaBlock(b){
         case 'repeater': return{name:'minecraft:repeater',props:{facing:b.facing,delay:String(b.delay),locked:'false',powered:'false'}};
         case 'noteblock':return{name:'minecraft:note_block',props:{instrument:RS_INS_JAVA_NAMES[b.ins]||'harp',note:String(b.note),powered:'false'}};
         case 'instrument':return{name:RS_INS_BLOCKS[b.ins].java,props:{}};
-        case 'button':   return{name:'minecraft:stone_button',props:{face:'floor',facing:'north',powered:'false'}};
-        case 'sign':     return{name:'minecraft:oak_sign',props:{rotation:String(b.rot||0),waterlogged:'false'}};
+        case 'sign':     return b.wallFacing
+                            ?{name:'minecraft:oak_wall_sign',props:{facing:b.wallFacing,waterlogged:'false'}}
+                            :{name:'minecraft:oak_sign',props:{rotation:String(b.rot||0),waterlogged:'false'}};
+        case 'glass':    return{name:'minecraft:glass',props:{}};
+        case 'wool':     return{name:'minecraft:'+(b.color||'white')+'_wool',props:{}};
+        case 'torch':    return (b.att==='top'||!b.att)
+                            ?{name:'minecraft:redstone_torch',props:{lit:String(b.lit!==false)}}
+                            :{name:'minecraft:redstone_wall_torch',
+                              props:{facing:b.att,lit:String(b.lit!==false)}};
+        case 'ladder':   return{name:'minecraft:ladder',props:{facing:b.facing||'west',waterlogged:'false'}};
+        case 'button':   return{name:'minecraft:stone_button',props:{
+                            face:b.face||'floor',facing:b.facing||'north',powered:'false'}};
+        case 'solid':    return{name:b.block||'minecraft:stone',props:{}};
         default:         return{name:'minecraft:air',props:{}};
     }
 }
@@ -4346,7 +4684,7 @@ function rsJavaStructureNBT(size,blocks){
         return c;
     });
     const root=[];
-    root.push({name:'DataVersion',type:NBT_TYPE.Int,value:4325});
+    root.push({name:'DataVersion',type:NBT_TYPE.Int,value:1519});
     root.push({name:'author',type:NBT_TYPE.String,value:'CBND Redstone Exporter'});
     root.push({name:'size',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Int,items:size}});
     root.push({name:'palette',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:palette.map(e=>{
@@ -4358,48 +4696,56 @@ function rsJavaStructureNBT(size,blocks){
     root.push({name:'entities',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:[]}});
     return root;
 }
-function rsJavaTextComponent(seg){
-    const c=[];
-    c.push({name:'text',type:NBT_TYPE.String,value:String(seg.text==null?'':seg.text)});
-    if(seg.color)c.push({name:'color',type:NBT_TYPE.String,value:seg.color});
-    if(seg.bold)c.push({name:'bold',type:NBT_TYPE.Byte,value:1});
-    if(seg.italic)c.push({name:'italic',type:NBT_TYPE.Byte,value:1});
-    if(seg.underlined)c.push({name:'underlined',type:NBT_TYPE.Byte,value:1});
-    if(seg.struckthrough)c.push({name:'strikethrough',type:NBT_TYPE.Byte,value:1});
-    if(seg.obfuscated)c.push({name:'obfuscated',type:NBT_TYPE.Byte,value:1});
-    return c;
-}
-function rsJavaLineComponent(lineText){
+function rsJavaSignLineJson(lineText){
     const segs=rsSignLegacyToSegments(lineText);
     const real=segs.filter(s=>s&&s.text!=null&&String(s.text).length>0);
-    if(real.length===0)return rsJavaTextComponent({text:''});
-    if(real.length===1)return rsJavaTextComponent(real[0]);
-    return[
-        {name:'text',type:NBT_TYPE.String,value:''},
-        {name:'extra',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,
-            items:real.map(rsJavaTextComponent)}}
-    ];
+    const segToJson=(s)=>{
+        const o={text:String(s.text==null?'':s.text)};
+        if(s.color)o.color=s.color;
+        if(s.bold)o.bold=true;
+        if(s.italic)o.italic=true;
+        if(s.underlined)o.underlined=true;
+        if(s.struckthrough)o.strikethrough=true;
+        if(s.obfuscated)o.obfuscated=true;
+        return o;
+    };
+    if(real.length===0)return JSON.stringify({text:''});
+    if(real.length===1)return JSON.stringify(segToJson(real[0]));
+    const root=segToJson(real[0]);
+    root.extra=real.slice(1).map(segToJson);
+    return JSON.stringify(root);
 }
 function rsJavaBlockNbt(b){
     if(b.t!=='sign')return[];
     const lines=rsSignTextToBedrockLines(b.text);
-    const mk=(arr)=>[
-        {name:'has_glowing_text',type:NBT_TYPE.Byte,value:0},
-        {name:'color',type:NBT_TYPE.String,value:'black'},
-        {name:'messages',type:NBT_TYPE.List,value:{itemType:NBT_TYPE.Compound,items:(()=>{
-            const out=[];
-            for(let i=0;i<4;i++)out.push(rsJavaLineComponent(arr[i]));
-            return out;
-        })()}}
-    ];
-    return[
+    const out=[
         {name:'id',type:NBT_TYPE.String,value:'minecraft:sign'},
-        {name:'front_text',type:NBT_TYPE.Compound,value:mk(lines)},
-        {name:'back_text',type:NBT_TYPE.Compound,value:mk([])},
-        {name:'is_waxed',type:NBT_TYPE.Byte,value:1}
+        {name:'Color',type:NBT_TYPE.String,value:'black'}
     ];
+    for(let i=0;i<4;i++)out.push({name:'Text'+(i+1),type:NBT_TYPE.String,value:rsJavaSignLineJson(lines[i])});
+    return out;
 }
-// V.5 基岩版导出
+function rsTileLayout(layout,tileSize){
+    const T=tileSize||RS_JAVA_TILE;
+    const [sx,sy,sz]=layout.size;
+    const nx=Math.ceil(sx/T),ny=Math.ceil(sy/T),nz=Math.ceil(sz/T);
+    const tiles=[];
+    for(let ix=0;ix<nx;ix++)for(let iy=0;iy<ny;iy++)for(let iz=0;iz<nz;iz++){
+        const ox=ix*T,oy=iy*T,oz=iz*T;
+        const w=Math.min(T,sx-ox),h=Math.min(T,sy-oy),d=Math.min(T,sz-oz);
+        const list=[];
+        for(const b of layout.blocks){
+            if(b.x>=ox&&b.x<ox+w&&b.y>=oy&&b.y<oy+h&&b.z>=oz&&b.z<oz+d){
+                list.push({x:b.x-ox,y:b.y-oy,z:b.z-oz,src:b});
+            }
+        }
+        if(list.length===0)continue;
+        tiles.push({size:[w,h,d],blocks:list,offset:[ox,oy,oz],index:[ix,iy,iz]});
+    }
+    return{tiles,nx,ny,nz};
+}
+
+// V.6 基岩版导出
 const RS_BE_BLOCK_VERSION=17825808;
 function rsBedrockPaletteInfo(b){
     switch(b.t){
@@ -4410,11 +4756,26 @@ function rsBedrockPaletteInfo(b){
                             {name:'repeater_delay',type:3,value:Math.max(0,Math.min(3,b.delay-1))}]};
         case 'noteblock':return{name:'minecraft:noteblock',states:[],be:{id:'Music',note:b.note}};
         case 'instrument':return{name:RS_INS_BLOCKS[b.ins].be,states:RS_INS_BLOCKS[b.ins].beStates?Object.entries(RS_INS_BLOCKS[b.ins].beStates).map(([k,v])=>({name:k,type:8,value:v})):[]};
+        case 'sign':     return b.wallFacing
+                            ?{name:'minecraft:wall_sign',states:[
+                                {name:'facing_direction',type:3,value:(RS_FD_NUM[b.wallFacing]||5)}],
+                              sign:rsSignTextToBedrockLines(b.text)}
+                            :{name:'minecraft:standing_sign',states:[
+                                {name:'ground_sign_direction',type:3,value:b.rot||0}],
+                              sign:rsSignTextToBedrockLines(b.text)};
+        case 'glass':    return{name:'minecraft:glass',states:[]};
+        case 'wool':     return{name:'minecraft:'+(b.color||'white')+'_wool',states:[]};
+        case 'torch':    return{name:(b.lit===false?'minecraft:unlit_redstone_torch'
+                                                  :'minecraft:redstone_torch'),states:[
+                            {name:'torch_facing_direction',type:8,
+                             value:(b.att==='top'||!b.att)?'top':b.att}]};
+        case 'ladder':   return{name:'minecraft:ladder',states:[
+                            {name:'facing_direction',type:3,value:(RS_FD_NUM[b.facing||'west']||4)}]};
         case 'button':   return{name:'minecraft:stone_button',states:[
                             {name:'button_pressed_bit',type:1,value:0},
-                            {name:'facing_direction',type:3,value:1}]};
-        case 'sign':     return{name:'minecraft:standing_sign',states:[
-                            {name:'ground_sign_direction',type:3,value:b.rot||0}],sign:rsSignTextToBedrockLines(b.text)};
+                            {name:'facing_direction',type:3,
+                             value:((!b.face||b.face==='floor')?1:(RS_FD_NUM[b.facing||'north']||2))}]};
+        case 'solid':    return{name:b.block||'minecraft:stone',states:[]};
         default:         return{name:'minecraft:air',states:[]};
     }
 }
@@ -4642,7 +5003,12 @@ function getRedstoneOptions(){
     var rowSpan=el?rsNormalizeRowSpan(el.value):64;
     var sbEl=document.getElementById('rsSupportBlock');
     var supportBlock=rsNormalizeBlockId(sbEl?sbEl.value:'');
-    return{msPerTick:previewTimePerTick||50,rowSpan:rowSpan,supportBlock:supportBlock,signText:getRedstoneSignText()};
+    var stEl=document.getElementById('rsStyle');
+    var style=rsNormalizeStyle(stEl?stEl.value:'');
+    var npEl=document.getElementById('rsNotesPerRow');
+    var notesPerRow=rsNormalizeNotesPerRow(npEl?npEl.value:'');
+    return{msPerTick:previewTimePerTick||50,rowSpan:rowSpan,supportBlock:supportBlock,
+           signText:getRedstoneSignText(),style:style,notesPerRow:notesPerRow};
 }
 function getRedstoneSignText(){
     var now=new Date();
@@ -4728,6 +5094,14 @@ function updateRedstoneInfo(){
         var L=buildCurrentRedstoneLayout();
         if(!L){el.textContent='无可用音符';return;}
         var s=L.stats;
+        if(s.nbsClassic){
+            el.textContent='音符 '+s.noteCount+' | 中继器 '+s.repeaters+' | 红石粉 '+s.dustCells+
+                ' | 层数 '+s.layers+' | 尺寸 '+L.size.join('x')+
+                ' | 同刻最大 '+s.maxSim+'（容量 '+s.slotsPerStep+'）'+
+                ' | 方块 '+s.supportBlock+
+                (s.skipped>0?' | 超音域跳过 '+s.skipped:'');
+            return;
+        }
         el.textContent='音符 '+s.noteCount+' | 中继器 '+s.steps+' | 红石粉 '+s.dustCells+
             ' | 行数 '+s.rows+' | 尺寸 '+L.size.join('x')+
             (s.rowWidthsOk?' | 行宽 '+s.rowSpan+'✓':' | 行宽不足 '+s.rowPadShort)+
@@ -4738,14 +5112,14 @@ function updateRedstoneInfo(){
 function checkRedstoneFeasibility(L){
     if(!L)return null;
     var s=L.stats;
-    if(s.dropped>0){
+    if(!s.nbsClassic&&s.dropped>0){
         return '有 '+s.dropped+' 个音符因「同一时刻音符过多」被丢弃。\n\n'+
             '原因：一条红石延时线每步最多挂 '+s.slotsPerStep+' 个音符盒'+
             '（每格红石线左右各一个，链长受红石线 15 格信号衰减限制），'+
             '本曲最大同时发音数为 '+s.maxSim+'。\n\n'+
-            '仍可导出，但会缺少这部分音符。若需完整还原，请先用外部工具减少同时发音数。';
+            '仍可导出，但会缺少这部分音符。若需完整还原，请把「电路样式」切换为 NBS 经典（不限制同时发声数）。';
     }
-    if(s.rowPadShort>0){
+    if(!s.nbsClassic&&s.rowPadShort>0){
         return '有 '+s.rowPadShort+' 格无法补进「每行跨度」：本曲音符太稀疏，'+
             '即使把中继器拆到最细、红石粉加到最长，也填不满 '+s.rowSpan+' 格的行。\n\n'+
             '这些行会比目标短一截（结构仍可用，只是边缘不齐）。\n'+
@@ -4758,6 +5132,22 @@ function checkRedstoneFeasibility(L){
 }
 document.getElementById('rsRowLen').addEventListener('change',updateRedstoneInfo);
 document.getElementById('rsSupportBlock').addEventListener('input',updateRedstoneInfo);
+function syncRedstoneStyleUI(){
+    var stEl=document.getElementById('rsStyle');
+    var isNbs=rsNormalizeStyle(stEl?stEl.value:'')===RS_STYLE_NBS;
+    var npWrap=document.getElementById('rsNotesPerRowWrap');
+    if(npWrap)npWrap.style.display=isNbs?'inline-flex':'none';
+    var rowWrap=document.getElementById('rsRowLenWrap');
+    if(rowWrap)rowWrap.style.display=isNbs?'none':'inline-flex';
+    updateRedstoneInfo();
+}
+{
+    var stEl=document.getElementById('rsStyle');
+    if(stEl)stEl.addEventListener('change',syncRedstoneStyleUI);
+    var npEl=document.getElementById('rsNotesPerRow');
+    if(npEl)npEl.addEventListener('change',updateRedstoneInfo);
+    syncRedstoneStyleUI();
+}
 function downloadBlobBytes(bytes,filename,mime){
     var blob=new Blob([bytes],{type:mime||'application/octet-stream'});
     var url=URL.createObjectURL(blob);
